@@ -1,0 +1,915 @@
+{
+  "days": {
+    "JUEVES": [
+      {
+        "id": "pos_001_JUE",
+        "nombre": "BELISARIO PACOMPIA FAUSTINA",
+        "direccion": "CA BEETHOVEN 303",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0987876,
+        "lon": -76.9967696,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_002_JUE",
+        "nombre": "ELIAS REJAS VICTOR EDUARDO",
+        "direccion": "AV PASEO EL BOSQUE MZA B LTE 16",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.10643755390606,
+        "lon": -76.99103951454163,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_003_JUE",
+        "nombre": "ESTACION SERVICIO AVIACION",
+        "direccion": "AV AVIACION 2680",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0940342160888,
+        "lon": -77.0030658692122,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_004_JUE",
+        "nombre": "GPO. ABJ CEMAR S.A.C.",
+        "direccion": "CALLE MONTE GRANDE 187 URB CHACARILLA DEL ESTANQUE",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1126181908264,
+        "lon": -76.9905661046504,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_005_JUE",
+        "nombre": "HUAYTAN VASQUEZ TEODORO W.",
+        "direccion": "CL ENGELS 190 LA CALERA",
+        "distrito": "SURQUILLO",
+        "provincia": "Lima",
+        "lat": -12.1157995862699,
+        "lon": -77.0028033480048,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_006_JUE",
+        "nombre": "HYM OJEDA MARKET S.A.C",
+        "direccion": "CALLE 24 160 SAN BORJA MARISCAL CASTILLA",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.095390136939011,
+        "lon": -76.98217783123255,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_007_JUE",
+        "nombre": "JLF ASOCIADOS S.A.C",
+        "direccion": "AV SAN BORJA NORTE 1415",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.096089,
+        "lon": -76.988326,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_008_JUE",
+        "nombre": "LUZMER S.A.C.",
+        "direccion": "AV SAN BORJA NORTE 1361",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.095737,
+        "lon": -76.989412,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_009_JUE",
+        "nombre": "MARKET NORMITA E. I. R. L.",
+        "direccion": "CALLE 24 NRO 194",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0950029658502,
+        "lon": -76.9822961837053,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_010_JUE",
+        "nombre": "MERLUZ SAC",
+        "direccion": "AV CAMINOS DEL INCA 1337",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1233378,
+        "lon": -76.9850605,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_011_JUE",
+        "nombre": "OJEDA BAUTISTA OSCAR JAVIER",
+        "direccion": "AV LAS ARTES 1540",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.090662415019812,
+        "lon": -76.98744334280491,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_012_JUE",
+        "nombre": "OJEDA BAUTISTA OSCAR JAVIER",
+        "direccion": "AV LAS ARTES NRO 1540",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0907532263592,
+        "lon": -76.9873213022947,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_013_JUE",
+        "nombre": "OJEDA CANO LILIANA",
+        "direccion": "AV DE LAS ARTES NORTE NRO 1570",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0908994423859,
+        "lon": -76.9870822504163,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_014_JUE",
+        "nombre": "OJEDA CANO RAMON NICANOR",
+        "direccion": "CALLE 24 NRO 224 - URB MARISCAL CASTILLA",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0947711874619,
+        "lon": -76.9823675975204,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_015_JUE",
+        "nombre": "OJEDA CANO RUBEN OSCAR",
+        "direccion": "JR POUSSIN NRO 199 URB JACARANDA",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.0879337985556,
+        "lon": -76.9858048483729,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_016_JUE",
+        "nombre": "OJEDA CANO RUBEN OSCAR",
+        "direccion": "JR POUSSIN 199 URB JACARANDA - SAN BORJA",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.087983,
+        "lon": -76.985706,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_017_JUE",
+        "nombre": "OJEDA MARKET L & F E.I.R.L.",
+        "direccion": "JR LOMA REDONDA 184",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1367315993892,
+        "lon": -76.9882309064269,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_018_JUE",
+        "nombre": "OJEDA MARKET QHATU S.A.C",
+        "direccion": "MZE1 LT 43 AV ALEJANDRO VELASCO ASTETE SANTIAGO DE SURCO",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.12896403012448,
+        "lon": -76.98790334165095,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_019_JUE",
+        "nombre": "PASTOR RUA RAQUEL",
+        "direccion": "CL LUIS MONTERO 194",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.1088335,
+        "lon": -77.0013042,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_020_JUE",
+        "nombre": "REYES FLORES MIGUEL ANGEL",
+        "direccion": "AV AVIACION N 3459",
+        "distrito": "SAN BORJA",
+        "provincia": "Lima",
+        "lat": -12.10642870278,
+        "lon": -77.0007363706827,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_021_JUE",
+        "nombre": "RIOS OJEDA SEBASTIAN",
+        "direccion": "AV ALEJANDRO VELASCO ASTETE 2083",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.12747060647,
+        "lon": -76.9872120022774,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_022_JUE",
+        "nombre": "ADAN ARANDA MIRIAN",
+        "direccion": "JR  JUAN SOTO BERMEO 120 URB LA VIRREYNA",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1421606015313,
+        "lon": -76.9921318441629,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_023_JUE",
+        "nombre": "NUÑEZ BENITES MONICA LAURA",
+        "direccion": "AV  JUAN SOTO BERMEO 302 URB LA VIRREYNA SURCO",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.144006627158536,
+        "lon": -76.99329257011415,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_024_JUE",
+        "nombre": "OJEDA YARANGA PERCY",
+        "direccion": "AV SURCO 650",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1408219627277,
+        "lon": -76.9947071000934,
+        "frecuencia": "SEMANAL"
+      }
+    ],
+    "LUNES": [
+      {
+        "id": "pos_001_LUN",
+        "nombre": "AQUINO PEREZ MARILU",
+        "direccion": "AV LIMA 478",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.0893726939697,
+        "lon": -77.0787742361426,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_002_LUN",
+        "nombre": "COMERCIALIZADORA AYKILU SOCIEDAD ANONIMA CERRADA",
+        "direccion": "CALLE JOSE OLAYA 163",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.0798195818304,
+        "lon": -77.1041868254542,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_003_LUN",
+        "nombre": "CONSORCIO AQUINO SAC",
+        "direccion": "PROLONGACION AYACUCHO 277",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.0852395780384,
+        "lon": -77.075503282249,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_004_LUN",
+        "nombre": "CONSORCIO BRISOL S.A.C.",
+        "direccion": "AV BRIGIDA SILVA 240",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.081702429876174,
+        "lon": -77.08856530487537,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_005_LUN",
+        "nombre": "GRIFO JUAN PABLO II EIRL",
+        "direccion": "AV LA MARINA 3805  LA PERLA ALTA",
+        "distrito": "LA PERLA",
+        "provincia": "Lima",
+        "lat": -12.0702543256972,
+        "lon": -77.1100628748536,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_006_LUN",
+        "nombre": "LIKOW S.A.C.",
+        "direccion": "JR JOSE GALVEZ 633",
+        "distrito": "MAGDALENA DEL MAR",
+        "provincia": "Lima",
+        "lat": -12.0901116452254,
+        "lon": -77.0740998163819,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_007_LUN",
+        "nombre": "MARTEL JIMENEZ JORGE ALBERTO",
+        "direccion": "CL MARIANA ECHEVARRIA 289",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.084249,
+        "lon": -77.084931,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_008_LUN",
+        "nombre": "NEGOCIACIONES CAZU S.A.C.",
+        "direccion": "AV DE LOS PATRIOTAS  532 SAN MIGUEL",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.0756902526649,
+        "lon": -77.1004796773195,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_009_LUN",
+        "nombre": "OBRADOVICH RIOFRIO HELEN SOLANGE",
+        "direccion": "AV  LA PAZ 1195",
+        "distrito": "LA PERLA",
+        "provincia": "Lima",
+        "lat": -12.0721474046999,
+        "lon": -77.1242219209671,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_010_LUN",
+        "nombre": "PETROCENTRO YULIA S.A.C.",
+        "direccion": "AV LA MARINA 2789 URB MARANGA",
+        "distrito": "SAN MIGUEL",
+        "provincia": "Lima",
+        "lat": -12.0777026323877,
+        "lon": -77.0932846516371,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_011_LUN",
+        "nombre": "TENORIO NUÑEZ JOSE EDWIN",
+        "direccion": "MARISCAL CASTILLA MZ F1 LT 1 LA PERLA ALTA CALLAO",
+        "distrito": "LA PERLA",
+        "provincia": "Lima",
+        "lat": -12.0697579394154,
+        "lon": -77.1164233982563,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_012_LUN",
+        "nombre": "EMPRESA COMERCIALIZADORA Y DE SERVICIOS JULIA SAC",
+        "direccion": "AV UNIVERSITARIA 1789 CERCADO DE LIMA",
+        "distrito": "LIMA",
+        "provincia": "Lima",
+        "lat": -12.0680845141581,
+        "lon": -77.0775223150849,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_013_LUN",
+        "nombre": "OPERACIONES Y SERVICIOS GENERALES",
+        "direccion": "AV CAMINOS DEL INCA MZ N LT 19 URB SAN JUAN BAUTISTA",
+        "distrito": "CHORRILLOS",
+        "provincia": "Lima",
+        "lat": -12.1041926366876,
+        "lon": -77.0640502497554,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_014_LUN",
+        "nombre": "ESTACION DE SERVICIOS LA MARINA S.A.C.",
+        "direccion": "AV LA MARINA NRO 405 URB DOIG LOSSIO LA PERLA CALLAO",
+        "distrito": "LA PERLA",
+        "provincia": "Lima",
+        "lat": -12.0672507484182,
+        "lon": -77.1154423803091,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_015_LUN",
+        "nombre": "QUISPE QUINTANA MELCHORA",
+        "direccion": "AV HIPOLITO UNANUE 114 URB COLONIAL",
+        "distrito": "CALLAO",
+        "provincia": "Lima",
+        "lat": -12.0521864532339,
+        "lon": -77.0929443463683,
+        "frecuencia": "SEMANAL"
+      }
+    ],
+    "MARTES": [
+      {
+        "id": "pos_001_MAR",
+        "nombre": "COMERCIAL AMECAR  S.A.C",
+        "direccion": "JR INCA 640  SURQUILLO",
+        "distrito": "SURQUILLO",
+        "provincia": "Lima",
+        "lat": -12.1146445,
+        "lon": -77.0209908,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_002_MAR",
+        "nombre": "MARLO NUNEZ SEGUNDO SIMEON",
+        "direccion": "AV PETIT THOUARS 4536",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1079,
+        "lon": -77.0298,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_003_MAR",
+        "nombre": "MINI MARKET DAYLU S.A.C.",
+        "direccion": "CALLE FRANCISCO MORENO 1099 SURQUILLO",
+        "distrito": "SURQUILLO",
+        "provincia": "Lima",
+        "lat": -12.1104123355005,
+        "lon": -77.0246656984091,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_004_MAR",
+        "nombre": "INVERSIONES & NEGOCIACIONES DAMI S.A.C.",
+        "direccion": "JR CENTENARIO 1198",
+        "distrito": "BRE¥A",
+        "provincia": "Lima",
+        "lat": -12.0595224723205,
+        "lon": -77.0566081255674,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_005_MAR",
+        "nombre": "TIENDAS AQUINOMAS E.I.R.L.",
+        "direccion": "AV JOSE GALVEZ NRO 501",
+        "distrito": "LA VICTORIA",
+        "provincia": "Lima",
+        "lat": -12.064963,
+        "lon": -77.032057,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_006_MAR",
+        "nombre": "YARANGA ASCA KATHERINE  MAURA",
+        "direccion": "JR MARISCAL DE LAS HERAS 264",
+        "distrito": "LINCE",
+        "provincia": "Lima",
+        "lat": -12.0863247443473,
+        "lon": -77.033405341208,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_007_MAR",
+        "nombre": "YARANGA ASCA VALERY DANITZA",
+        "direccion": "CALLE MARISCAL LAS HERAS NRO 268",
+        "distrito": "LINCE",
+        "provincia": "Lima",
+        "lat": -12.086339,
+        "lon": -77.0334314927459,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_008_MAR",
+        "nombre": "BODEGA ALCAS E. I. R. L",
+        "direccion": "JR MARISCAL MILLER 1098,",
+        "distrito": "JESUS MARIA",
+        "provincia": "Lima",
+        "lat": -12.0758633611925,
+        "lon": -77.0383231714368,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_009_MAR",
+        "nombre": "BODEGA ALE & JOAO E.I.R.L",
+        "direccion": "JR PUMACAHUA 2400 LINCE",
+        "distrito": "LINCE",
+        "provincia": "Lima",
+        "lat": -12.085902808604455,
+        "lon": -77.04314108937979,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_010_MAR",
+        "nombre": "HOME MARKET PERUMAS E.I.R.L",
+        "direccion": "JR BRIGADIER MATEO PUMACAHUA 1698",
+        "distrito": "JESUS MARIA",
+        "provincia": "Lima",
+        "lat": -12.0789822462323,
+        "lon": -77.04340595752,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_011_MAR",
+        "nombre": "INVERSIONES MARK LIZ S. A. C",
+        "direccion": "AV. ARENALES 1913",
+        "distrito": "LINCE",
+        "provincia": "Lima",
+        "lat": -12.083930487870504,
+        "lon": -77.03560810536146,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_012_MAR",
+        "nombre": "INVERSIONES Y SERVICIOS ROMY E.I.R.L",
+        "direccion": "CA GENERAL TRINIDAD MORAN 1123",
+        "distrito": "SAN ISIDRO",
+        "provincia": "Lima",
+        "lat": -12.0903852,
+        "lon": -77.0425894,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_013_MAR",
+        "nombre": "MARKET JUANITO S.A.C",
+        "direccion": "AV HORACIO URTEAGA 1519",
+        "distrito": "JESUS MARIA",
+        "provincia": "Lima",
+        "lat": -12.0765561220401,
+        "lon": -77.05042161047461,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_014_MAR",
+        "nombre": "NOVO MARKET VF SOCIEDAD ANONIMA CERRADA",
+        "direccion": "AV JULIO C TELLO 301 LINCE",
+        "distrito": "LINCE",
+        "provincia": "Lima",
+        "lat": -12.08618606623946,
+        "lon": -77.0371389761567,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_015_MAR",
+        "nombre": "ROQUE GUTIERREZ EFRAIN",
+        "direccion": "AV VENEZUELA 703",
+        "distrito": "BRE¥A",
+        "provincia": "Lima",
+        "lat": -12.054766,
+        "lon": -77.043892,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_016_MAR",
+        "nombre": "QUINTANA CARBAJAL DIEGO ENRIQUE",
+        "direccion": "AV SERGIO BERNALES 537",
+        "distrito": "SURQUILLO",
+        "provincia": "Lima",
+        "lat": -12.1173704375064,
+        "lon": -77.0139395445585,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_017_MAR",
+        "nombre": "TINTOS INDELEBLES E.I.R.L.",
+        "direccion": "AV REPUBLICA DE PANAMA 5454",
+        "distrito": "SURQUILLO",
+        "provincia": "Lima",
+        "lat": -12.1183463143464,
+        "lon": -77.0184526965022,
+        "frecuencia": "SEMANAL"
+      }
+    ],
+    "MIERCOLES": [
+      {
+        "id": "pos_001_MIE",
+        "nombre": "ARAKAKI S.A.",
+        "direccion": "JR ENRIQUE PALACIOS 915",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1172075178475,
+        "lon": -77.0384304597974,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_002_MIE",
+        "nombre": "BONCALCORP S.A.C.",
+        "direccion": "AV DEFENSORES DEL MORRO 1499",
+        "distrito": "CHORRILLOS",
+        "provincia": "Lima",
+        "lat": -12.176290338229045,
+        "lon": -77.01680950820446,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_003_MIE",
+        "nombre": "BRISAS MARKET E.I.R.L.",
+        "direccion": "ALAMEDA EL TRIANGULO MZ E LT 3 URB LAS BRISAS  DE VILLA",
+        "distrito": "CHORRILLOS",
+        "provincia": "Lima",
+        "lat": -12.219034158098,
+        "lon": -76.9939218834043,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_004_MIE",
+        "nombre": "CHRISMARKET EIRL",
+        "direccion": "AV MEXICO 372",
+        "distrito": "CHORRILLOS",
+        "provincia": "Lima",
+        "lat": -12.17453892459325,
+        "lon": -77.02195029705763,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_005_MIE",
+        "nombre": "CORPORACION DIAS BUENOS SAC",
+        "direccion": "AV BERLIN 390",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.120397381446,
+        "lon": -77.0335736498237,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_006_MIE",
+        "nombre": "CUBAS MARLO INDALESIO",
+        "direccion": "AV ARICA 406",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1157087834429,
+        "lon": -77.0357368513942,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_007_MIE",
+        "nombre": "GOMEZ CAJAS SONIA",
+        "direccion": "JR JUAN FANNING 401",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.129014182266204,
+        "lon": -77.03127332031727,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_008_MIE",
+        "nombre": "NEGOCIACIONES JIREH & MAJAZ EIRL",
+        "direccion": "CALLE BERLIN 375",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.120866466176302,
+        "lon": -77.03335035592316,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_009_MIE",
+        "nombre": "PIZARRO BARRIENTOS WALTER",
+        "direccion": "AV ENRIQUE PALACIOS 1188",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1170160789261,
+        "lon": -77.0409279316664,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_010_MIE",
+        "nombre": "RB CORPORACION RAMIREZ SAC",
+        "direccion": "AV REPUBLICA DE ARGENTINA 3093",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.115505214538,
+        "lon": -77.0450012013316,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_011_MIE",
+        "nombre": "VEGA VEGA MARIA LUZ",
+        "direccion": "ABRAHAM BALLENA 195",
+        "distrito": "CHORRILLOS",
+        "provincia": "Lima",
+        "lat": -12.1670998762297,
+        "lon": -77.0206182450056,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_012_MIE",
+        "nombre": "ARROYO COCHACHI MIGUEL ANGEL",
+        "direccion": "AV LA PAZ 472",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1221239107626,
+        "lon": -77.0269033312798,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_013_MIE",
+        "nombre": "DYUSPA MAKIN S.A.C.",
+        "direccion": "CALLE PERCY PHILIPS CUBA 328",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.126265962111276,
+        "lon": -77.00750358402729,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_014_MIE",
+        "nombre": "DYUSPA MAKIN S.A.C.",
+        "direccion": "CALLE SAN FERNANDO 405 URB LEURO MIRAFLORES",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.1324782629215,
+        "lon": -77.0266069471836,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_015_MIE",
+        "nombre": "HERRERA IRIGOIN CARLOS ALBERTO",
+        "direccion": "CALLE COMANDANTE ARISTIDES ALJOVIN NRO 137",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.130938640655748,
+        "lon": -77.02952485531569,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_016_MIE",
+        "nombre": "IRRIZABAL HUAMAN DIANA FLOR",
+        "direccion": "AV LA PAZ NRO 1101 URB ALMENDARIZ",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.129109897438614,
+        "lon": -77.02638264745474,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_017_MIE",
+        "nombre": "LAGOS SOTO MARISOL",
+        "direccion": "JR PEA RIVERA MZ A LOTE 15",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1422684396729,
+        "lon": -77.0110977441072,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_018_MIE",
+        "nombre": "MINIMARKET-LICORERIA VICTORIA S.R.L.",
+        "direccion": "AV ALMIRANTE MIGUEL GRAU 384",
+        "distrito": "BARRANCO",
+        "provincia": "Lima",
+        "lat": -12.14781860335268,
+        "lon": -77.02122777700424,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_019_MIE",
+        "nombre": "NAVEROS VARGAS MARISOL",
+        "direccion": "AV GRAU 202A",
+        "distrito": "BARRANCO",
+        "provincia": "Lima",
+        "lat": -12.1503427374274,
+        "lon": -77.0204351842403,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_020_MIE",
+        "nombre": "ORCAP SAC",
+        "direccion": "AV BALTA 281A",
+        "distrito": "BARRANCO",
+        "provincia": "Lima",
+        "lat": -12.143073454936896,
+        "lon": -77.01623182743788,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_021_MIE",
+        "nombre": "RODRIGO SOTO BENJAMIN",
+        "direccion": "AVENIDA GRAU 1175",
+        "distrito": "BARRANCO",
+        "provincia": "Lima",
+        "lat": -12.1397935,
+        "lon": -77.022401,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_022_MIE",
+        "nombre": "SIRIUS IMPORT S.A.C.",
+        "direccion": "A V ALFREDO BENAVIDES 540",
+        "distrito": "MIRAFLORES",
+        "provincia": "Lima",
+        "lat": -12.12511375976216,
+        "lon": -77.02751185745002,
+        "frecuencia": "SEMANAL"
+      }
+    ],
+    "VIERNES": [
+      {
+        "id": "pos_001_VIE",
+        "nombre": "BARATUS SAC",
+        "direccion": "AV LAS LOMAS MZ A1 LOTE 2",
+        "distrito": "LA MOLINA",
+        "provincia": "Lima",
+        "lat": -12.1011678038228,
+        "lon": -76.93842597305769,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_002_VIE",
+        "nombre": "CORPORACION MILLA E  HIJOS E.I.R.L.",
+        "direccion": "JR EL POLO 493 URBANIZACION MONTERRICO",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.1036350104875,
+        "lon": -76.9726740941405,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_003_VIE",
+        "nombre": "DETALLES VICTORIANA S.A.C.",
+        "direccion": "AV FLORA TRISTAN 637",
+        "distrito": "LA MOLINA",
+        "provincia": "Lima",
+        "lat": -12.068243529350733,
+        "lon": -76.94335386157036,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_004_VIE",
+        "nombre": "DIAZ EVELYN MILAGROS",
+        "direccion": "AV JR LOS CONQUISTADORES LAS LOMAS 196",
+        "distrito": "LA MOLINA",
+        "provincia": "Lima",
+        "lat": -12.0995312916996,
+        "lon": -76.9393811747432,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_005_VIE",
+        "nombre": "GAMARRA HUAMAN DE LOPEZ ANA ISABEL",
+        "direccion": "CALLE BUGANVILLAS MZ 2 LT 16 2DA ETAPA URB MUSA",
+        "distrito": "LA MOLINA",
+        "provincia": "Lima",
+        "lat": -12.086362774265,
+        "lon": -76.8881157785654,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_006_VIE",
+        "nombre": "MAX MARKET OJEDA E.I.R.L.",
+        "direccion": "JR  PIO XII NRO 277",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.096421825493916,
+        "lon": -76.96541838347912,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_007_VIE",
+        "nombre": "MAX MARKET OJEDA EIRL",
+        "direccion": "AV PIO XXII 385 URB HUERTOS DE SANTA ROSA",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.098231778541,
+        "lon": -76.9652185589075,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_008_VIE",
+        "nombre": "OJEDA MARKET INVERSIONES E.I.R.L.",
+        "direccion": "AVENIDA CENTRAL 987 SURCO",
+        "distrito": "SANTIAGO DE SURCO",
+        "provincia": "Lima",
+        "lat": -12.106697514625631,
+        "lon": -76.95824950933456,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_009_VIE",
+        "nombre": "MARKET PERCY E.I.R.L",
+        "direccion": "AV 26 DE JULIO 211",
+        "distrito": "SAN LUIS",
+        "provincia": "Lima",
+        "lat": -12.062740237355236,
+        "lon": -76.99835523962975,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_010_VIE",
+        "nombre": "ASTORAYME MANSILLA GUIDO DARIO",
+        "direccion": "AVENIDA CANADA 3678 URB VILLA JARDIN",
+        "distrito": "SAN LUIS",
+        "provincia": "Lima",
+        "lat": -12.080444139371206,
+        "lon": -76.9923323392868,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_011_VIE",
+        "nombre": "BODEBAZAR ANITAHS EIRL",
+        "direccion": "JR MANUEL BEINGOLEA 301",
+        "distrito": "SAN LUIS",
+        "provincia": "Lima",
+        "lat": -12.071575613629625,
+        "lon": -76.99613370001317,
+        "frecuencia": "SEMANAL"
+      },
+      {
+        "id": "pos_012_VIE",
+        "nombre": "FAMLAI SAC",
+        "direccion": "AV BENJAMIN FRANKLIN 331",
+        "distrito": "ATE",
+        "provincia": "Lima",
+        "lat": -12.065659602747605,
+        "lon": -76.97621595114468,
+        "frecuencia": "SEMANAL"
+      }
+    ]
+  },
+  "total": 90
+}
