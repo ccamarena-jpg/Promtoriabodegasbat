@@ -160,7 +160,6 @@ function setup() {
   ].join('\n');
 
   Logger.log(msg);
-  Browser.msgBox(msg);
 }
 
 // ───────────────────────────────────────────────────────────────
