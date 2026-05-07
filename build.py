@@ -87,16 +87,10 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);height:100vh;o
 
 /* HEADER */
 header{background:var(--navy);color:#fff;padding:0 12px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:100;border-bottom:3px solid var(--accent)}
-.hdr-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hdr-logo{display:flex;align-items:center;gap:8px;flex-shrink:0;background:#fff;border-radius:8px;padding:4px 10px}
 .hdr-divider{width:1px;height:26px;background:rgba(255,255,255,.2);flex-shrink:0}
 .hdr-title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;line-height:1.2;flex-shrink:0}
 .hdr-title small{display:block;font-size:9px;font-weight:400;opacity:.7;letter-spacing:.3px}
-.hdr-stats{display:flex;gap:10px;flex:1;justify-content:center}
-.hstat{text-align:center;line-height:1.1}
-.hstat .val{font-size:15px;font-weight:700}
-.hstat .lbl{font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.3px}
-.hstat.ok .val{color:#4ade80}
-.hstat.ng .val{color:#f87171}
 .hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .hdr-progress{display:flex;align-items:center;gap:5px;font-size:11px;white-space:nowrap}
 .hdr-progress .bar{width:60px;height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
@@ -267,11 +261,6 @@ html_parts.append(f'''
     <div class="hdr-logo">{LOGO_SM}</div>
     <div class="hdr-divider"></div>
     <div class="hdr-title">Promotoría Bodegas Audit<small id="hdr-day-label">—</small></div>
-    <div class="hdr-stats">
-      <div class="hstat"><div class="val" id="h-total">90</div><div class="lbl">Total</div></div>
-      <div class="hstat ok"><div class="val" id="h-visit">0</div><div class="lbl">Visitados</div></div>
-      <div class="hstat ng"><div class="val" id="h-nogo">0</div><div class="lbl">No Pudo</div></div>
-    </div>
     <div class="hdr-right">
       <div class="hdr-progress">
         <div class="bar"><div class="fill" id="h-bar" style="width:0%"></div></div>
@@ -489,6 +478,7 @@ function doLogin(){{
   if(currentRole==='admin') document.getElementById('btn-dash').style.display='';
   visits=JSON.parse(localStorage.getItem('bat_v2_'+email)||'{{}}');
   initApp();
+  setTimeout(()=>{{ if(map) map.invalidateSize(); }},150);
 }}
 function doLogout(){{
   currentUser=null; currentRole=null;
@@ -547,7 +537,7 @@ function renderPosList(){{
 // ─── MAP ───
 function initMap(){{
   map=L.map('map',{{zoomControl:true}}).setView([-12.08,-77.02],12);
-  L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png',{{attribution:'© OpenStreetMap contributors'}}).addTo(map);
+  L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}}).addTo(map);
 }}
 function makeNumberedIcon(num,status){{
   const c={{pending:'#1A2E6A',visitado:'#22c55e',nogo:'#ef4444'}}[status]||'#1A2E6A';
@@ -700,11 +690,11 @@ function updateHeader(){{
   const v=Object.values(visits).filter(r=>r.estado==='visitado').length;
   const n=Object.values(visits).filter(r=>r.estado==='nogo').length;
   const total=getAllPos().length;
-  document.getElementById('h-visit').textContent=v;
-  document.getElementById('h-nogo').textContent=n;
   const pct=total>0?Math.round((v+n)/total*100):0;
-  document.getElementById('h-bar').style.width=pct+'%';
-  document.getElementById('h-pct').textContent=pct+'%';
+  const bar=document.getElementById('h-bar');
+  const pctEl=document.getElementById('h-pct');
+  if(bar) bar.style.width=pct+'%';
+  if(pctEl) pctEl.textContent=pct+'%';
   updateSyncBtn();
 }}
 
