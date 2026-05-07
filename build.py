@@ -452,7 +452,7 @@ const DAY_LABELS = {{LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Miércoles',JUEVES
 
 // ─── CONFIG ───
 // Reemplaza con la URL de tu Apps Script Web App desplegado
-const APPS_SCRIPT_URL = 'TU_APPS_SCRIPT_URL_AQUI';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjm2DOxDlONCId0OKYjw3X1pYGKp04SLGRIU1b1GwDZ6A4blJCOqYqjSp11wLZqn831Q/exec';
 
 const USERS = {{
   'auditor1@ttaudit.com': {{pass:'123456', role:'auditor'}},
