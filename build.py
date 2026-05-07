@@ -254,7 +254,7 @@ html_parts.append(f'''
     <div class="lc-badge">BAT · PROMOTORÍA BODEGAS</div>
     <div class="lc-title">Promotoría Bodegas Audit</div>
     <div class="lc-sub">Ingresa tus credenciales para continuar</div>
-    <input class="lc-input" id="l-email" type="email" placeholder="correo@ttaudit.com" autocomplete="email"/>
+    <input class="lc-input" id="l-email" type="text" placeholder="correo@ttaudit.com" autocomplete="username" inputmode="email"/>
     <input class="lc-input" id="l-pass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"/>
     <button class="lc-btn" onclick="doLogin()">Ingresar</button>
     <div class="lc-err" id="login-err">Credenciales incorrectas</div>
@@ -479,7 +479,7 @@ let fotosData={{}}, currentPosId=null;
 // ─── LOGIN ───
 function doLogin(){{
   const email=(document.getElementById('l-email').value||'').trim().toLowerCase();
-  const pass=document.getElementById('l-pass').value||'';
+  const pass=(document.getElementById('l-pass').value||'').trim();
   const u=USERS[email];
   if(!u||u.pass!==pass){{document.getElementById('login-err').style.display='block';return;}}
   document.getElementById('login-err').style.display='none';
