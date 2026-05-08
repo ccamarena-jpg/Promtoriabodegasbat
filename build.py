@@ -148,12 +148,12 @@ header{background:var(--navy);color:#fff;padding:0 12px;height:52px;display:flex
 #map{flex:1;z-index:0}
 
 /* MODAL */
-#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center}
+#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:0}
 #modal-bg.active{display:flex}
-@media(min-width:600px){#modal-bg{align-items:center;padding:16px}}
-#modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
-@media(min-width:600px){#modal{border-radius:16px;max-height:88vh}}
-.modal-hdr{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:20px 20px 0 0}
+@media(min-width:600px){#modal-bg{padding:16px}}
+#modal{background:#fff;border-radius:0;width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:600px){#modal{border-radius:16px;max-width:560px;height:auto;max-height:90vh}}
+.modal-hdr{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:0}
 @media(min-width:600px){.modal-hdr{border-radius:16px 16px 0 0}}
 .modal-hdr h2{font-size:13px;font-weight:700;color:#fff}
 .modal-hdr p{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px}
@@ -336,7 +336,7 @@ html_parts.append('''
         <label class="field-label">📷 Foto Fachada Principal</label>
         <div class="foto-named" style="max-width:190px">
           <div class="fn-label">Fachada</div>
-          <div class="fn-preview" id="fp-fachada"><span style="font-size:20px">🏪</span><span>Tomar foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('fachada',this)"></div>
+          <div class="fn-preview" id="fp-fachada"><span style="font-size:20px">🏪</span><span>Tomar foto</span><input type="file" accept="image/*" onchange="setFoto('fachada',this)"></div>
         </div>
       </div>
       <div id="seccion-abierto" style="display:none">
@@ -361,10 +361,10 @@ html_parts.append('''
         <div class="field-group">
           <label class="field-label">Fotos de Materiales POP</label>
           <div class="fotos-grid-named">
-            <div class="foto-named"><div class="fn-label">📌 Placa</div><div class="fn-preview" id="fp-placa"><span style="font-size:16px">📌</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('placa',this)"></div></div>
-            <div class="foto-named"><div class="fn-label">🔖 Jalavista Vuse</div><div class="fn-preview" id="fp-vuse"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('vuse',this)"></div></div>
-            <div class="foto-named"><div class="fn-label">🔖 Lucky Strike <span class="req">*</span></div><div class="fn-preview" id="fp-lucky"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('lucky',this)"></div></div>
-            <div class="foto-named"><div class="fn-label">🔖 Jalavista Velo <span class="req">*</span></div><div class="fn-preview" id="fp-velo"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('velo',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">📌 Placa</div><div class="fn-preview" id="fp-placa"><span style="font-size:16px">📌</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('placa',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">🔖 Jalavista Vuse</div><div class="fn-preview" id="fp-vuse"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('vuse',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">🔖 Lucky Strike <span class="req">*</span></div><div class="fn-preview" id="fp-lucky"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('lucky',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">🔖 Jalavista Velo <span class="req">*</span></div><div class="fn-preview" id="fp-velo"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('velo',this)"></div></div>
           </div>
         </div>
         <div class="field-group"><label class="field-label">Comentarios – Placa</label><textarea id="obs-placa" rows="2" placeholder="Observaciones..."></textarea></div>
@@ -378,7 +378,7 @@ html_parts.append('''
           <div class="radio-group"><button class="rbtn" id="rb-cig-si" onclick="selCigarrera('Si')">Sí</button><button class="rbtn" id="rb-cig-no" onclick="selCigarrera('No')">No</button></div>
         </div>
         <div id="seccion-cigarrera" style="display:none">
-          <div class="field-group"><label class="field-label">📷 Fotografía de la Cigarrera <span class="req">*</span></label><div class="foto-named" style="max-width:190px"><div class="fn-label">Cigarrera <span class="req">*</span></div><div class="fn-preview" id="fp-cigarrera"><span style="font-size:18px">🗄️</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('cigarrera',this)"></div></div></div>
+          <div class="field-group"><label class="field-label">📷 Fotografía de la Cigarrera <span class="req">*</span></label><div class="foto-named" style="max-width:190px"><div class="fn-label">Cigarrera <span class="req">*</span></div><div class="fn-preview" id="fp-cigarrera"><span style="font-size:18px">🗄️</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('cigarrera',this)"></div></div></div>
           <div class="field-group">
             <label class="field-label">¿Comunicación en Cigarrera Actualizada? <span class="req">*</span></label>
             <div class="radio-group" style="flex-direction:column;align-items:flex-start;gap:4px">
@@ -396,7 +396,7 @@ html_parts.append('''
           <div class="radio-group"><button class="rbtn" id="rb-disp-si" onclick="selDispenser('Si')">Sí</button><button class="rbtn" id="rb-disp-no" onclick="selDispenser('No')">No</button></div>
         </div>
         <div id="seccion-dispenser" style="display:none">
-          <div class="field-group"><div class="foto-named" style="max-width:190px"><div class="fn-label">📷 Dispenser</div><div class="fn-preview" id="fp-dispenser"><span style="font-size:18px">📦</span><span>Foto</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('dispenser',this)"></div></div></div>
+          <div class="field-group"><div class="foto-named" style="max-width:190px"><div class="fn-label">📷 Dispenser</div><div class="fn-preview" id="fp-dispenser"><span style="font-size:18px">📦</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('dispenser',this)"></div></div></div>
         </div>
         <div class="field-group"><label class="field-label">Comentarios adicionales – Dispenser</label><textarea id="obs-dispenser" rows="2" placeholder="Observaciones..."></textarea></div>
         <hr class="section-divider">
@@ -421,12 +421,12 @@ html_parts.append('''
           <div class="radio-group"><button class="rbtn" id="rb-cont-si" onclick="selContrabando('Si')">Sí</button><button class="rbtn" id="rb-cont-no" onclick="selContrabando('No')">No</button></div>
         </div>
         <div id="seccion-contrabando" style="display:none">
-          <div class="field-group"><div class="foto-named" style="max-width:190px"><div class="fn-label">⚠️ Foto Contrabando</div><div class="fn-preview" id="fp-contrabando"><span style="font-size:18px">⚠️</span><span>Evidencia</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('contrabando',this)"></div></div></div>
+          <div class="field-group"><div class="foto-named" style="max-width:190px"><div class="fn-label">⚠️ Foto Contrabando</div><div class="fn-preview" id="fp-contrabando"><span style="font-size:18px">⚠️</span><span>Evidencia</span><input type="file" accept="image/*" onchange="setFoto('contrabando',this)"></div></div></div>
           <div class="field-group"><label class="field-label">¿Qué marcas de contrabando ofrece?</label><textarea id="m-marcas-contrabando" rows="2" placeholder="Ej: Marlboro Paraguayo..."></textarea></div>
         </div>
         <div class="field-group">
           <label class="field-label">📷 Foto Panorámica Interior</label>
-          <div class="foto-named" style="max-width:190px"><div class="fn-label">Vista interior</div><div class="fn-preview" id="fp-panoramica"><span style="font-size:18px">🏬</span><span>Foto panorámica</span><input type="file" accept="image/*" capture="environment" onchange="setFoto('panoramica',this)"></div></div>
+          <div class="foto-named" style="max-width:190px"><div class="fn-label">Vista interior</div><div class="fn-preview" id="fp-panoramica"><span style="font-size:18px">🏬</span><span>Foto panorámica</span><input type="file" accept="image/*" onchange="setFoto('panoramica',this)"></div></div>
         </div>
       </div><!-- /seccion-abierto -->
     </div><!-- /modal-body -->
