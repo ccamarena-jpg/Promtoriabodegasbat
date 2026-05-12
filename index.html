@@ -734,59 +734,106 @@ function handleBgClick(e){ if(e.target===document.getElementById('modal-bg')) cl
 
 // ─── SAVE ───
 async function saveVisit(){
-  if(!mAbierto){ toast('Indica si el local está abierto'); return; }
-  const btn=document.getElementById('btn-save'); btn.disabled=true; btn.textContent='Guardando...';
-  const pos=getAllPos().find(p=>p.id===currentPosId);
-  const popData={};
-  ['placa','vuse','lucky','velo'].forEach(k=>{ popData[k]={enc:document.getElementById(`pop-${k}-enc`).checked,opt:document.getElementById(`pop-${k}-opt`).checked,rep:document.getElementById(`pop-${k}-rep`).checked}; });
-  const record={
-    id:currentPosId, timestamp:new Date().toISOString(),
-    fecha:new Date().toLocaleDateString('es-PE'), hora:new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
-    auditor:currentUser, dia:currentDay, nombre:pos.nombre, direccion:pos.direccion, distrito:pos.distrito,
-    abierto:mAbierto, estado:mAbierto==='Si'?'visitado':'nogo',
-    staff:document.getElementById('m-staff').value.trim(),
-    pop:mAbierto==='Si'?popData:{},
-    obsPlaca:document.getElementById('obs-placa').value.trim(),
-    obsVuse:document.getElementById('obs-vuse').value.trim(),
-    obsLucky:document.getElementById('obs-lucky').value.trim(),
-    obsVelo:document.getElementById('obs-velo').value.trim(),
-    cigarrera:mAbierto==='Si'?mCigarrera:'',
-    cigCom:mAbierto==='Si'&&mCigarrera==='Si'?mCigCom:'',
-    permiteCambio:document.getElementById('m-permite-cambio').value.trim(),
-    dispenser:mAbierto==='Si'?mDispenser:'',
-    obsDispenser:document.getElementById('obs-dispenser').value.trim(),
-    stock:mAbierto==='Si'?mStock:null,
-    skusFaltantes:document.getElementById('m-skus-faltantes').value.trim(),
-    contrabando:mAbierto==='Si'?mContrabando:'',
-    marcasContrabando:document.getElementById('m-marcas-contrabando').value.trim(),
-    fotos:{...fotosData}, synced:false
-  };
-  visits[currentPosId]=record;
-  localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
-  updateMarker(currentPosId); renderPosList(); updateHeader();
-  closeModal(); btn.disabled=false; btn.textContent='💾 Guardar visita';
-  toast('✓ Visita guardada localmente');
-  trySync(record);
+  if(!mAbierto){ toast('⚠️ Indica si el local está abierto'); return; }
+  if(!currentPosId){ toast('⚠️ Error: sin POS seleccionado'); return; }
+  const btn=document.getElementById('btn-save');
+  btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    const pos=getAllPos().find(p=>p.id===currentPosId);
+    if(!pos) throw new Error('POS no encontrado: '+currentPosId);
+    const popData={};
+    ['placa','vuse','lucky','velo'].forEach(k=>{
+      popData[k]={
+        enc:!!document.getElementById(`pop-${k}-enc`)?.checked,
+        opt:!!document.getElementById(`pop-${k}-opt`)?.checked,
+        rep:!!document.getElementById(`pop-${k}-rep`)?.checked
+      };
+    });
+    const gv=id=>document.getElementById(id)?.value?.trim()||'';
+    const record={
+      id:currentPosId, timestamp:new Date().toISOString(),
+      fecha:new Date().toLocaleDateString('es-PE'),
+      hora:new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
+      auditor:currentUser, dia:currentDay,
+      nombre:pos.nombre, direccion:pos.direccion, distrito:pos.distrito,
+      abierto:mAbierto, estado:mAbierto==='Si'?'visitado':'nogo',
+      staff:gv('m-staff'),
+      pop:mAbierto==='Si'?popData:{},
+      obsPlaca:gv('obs-placa'), obsVuse:gv('obs-vuse'),
+      obsLucky:gv('obs-lucky'), obsVelo:gv('obs-velo'),
+      cigarrera:mAbierto==='Si'?mCigarrera:'',
+      cigCom:mAbierto==='Si'&&mCigarrera==='Si'?mCigCom:'',
+      permiteCambio:gv('m-permite-cambio'),
+      dispenser:mAbierto==='Si'?mDispenser:'',
+      obsDispenser:gv('obs-dispenser'),
+      stock:mAbierto==='Si'?mStock:null,
+      skusFaltantes:gv('m-skus-faltantes'),
+      contrabando:mAbierto==='Si'?mContrabando:'',
+      marcasContrabando:gv('m-marcas-contrabando'),
+      fotos:{...fotosData}, synced:false
+    };
+    visits[currentPosId]=record;
+    try{ localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits)); }
+    catch(storageErr){
+      // localStorage lleno: guardar sin fotos
+      const slim={...record,fotos:{}};
+      visits[currentPosId]=slim;
+      localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
+      toast('⚠️ Fotos no guardadas (almacenamiento lleno)');
+    }
+    updateMarker(currentPosId); renderPosList(); updateHeader();
+    closeModal();
+    toast('✓ Visita guardada');
+    trySync(record);
+  } catch(err){
+    console.error('saveVisit error:', err);
+    toast('❌ Error al guardar: '+err.message);
+  } finally{
+    btn.disabled=false; btn.textContent='💾 Guardar visita';
+  }
 }
 
 // ─── SYNC ───
+async function postToSheet(record){
+  // Enviar como text/plain para evitar CORS preflight con Apps Script
+  const r=await fetch(APPS_SCRIPT_URL,{
+    method:'POST',
+    body:JSON.stringify(record),
+    headers:{'Content-Type':'text/plain;charset=UTF-8'}
+  });
+  const j=await r.json();
+  return j;
+}
 async function trySync(record){
-  if(APPS_SCRIPT_URL==='TU_APPS_SCRIPT_URL_AQUI') return;
-  try{ const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(record)}); const j=await r.json(); if(j.ok){ record.synced=true; visits[record.id]=record; localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits)); updateSyncBtn(); toast('✓ Sincronizado con Sheets'); } } catch(e){}
+  if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL.includes('TU_APPS')) return;
+  try{
+    const j=await postToSheet(record);
+    if(j&&j.ok){
+      record.synced=true; visits[record.id]=record;
+      localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
+      updateSyncBtn(); toast('☁️ Sincronizado con Sheets');
+    }
+  } catch(e){ console.log('Sync error:',e.message); }
 }
 async function syncPending(){
-  if(APPS_SCRIPT_URL==='TU_APPS_SCRIPT_URL_AQUI'){ toast('Configura APPS_SCRIPT_URL primero'); return; }
   const pending=Object.values(visits).filter(v=>!v.synced);
-  if(!pending.length){ toast('Todo sincronizado ✓'); return; }
-  toast(`Sincronizando ${pending.length} registro(s)...`);
+  if(!pending.length){ toast('✓ Todo sincronizado'); return; }
+  toast(`Sincronizando ${pending.length} visita(s)...`);
   let ok=0;
-  for(const rec of pending){ try{ const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(rec)}); const j=await r.json(); if(j.ok){rec.synced=true;visits[rec.id]=rec;ok++;} } catch(e){} }
+  for(const rec of pending){
+    try{
+      const j=await postToSheet(rec);
+      if(j&&j.ok){rec.synced=true;visits[rec.id]=rec;ok++;}
+    } catch(e){ console.log('Sync err:',e.message); }
+  }
   localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
-  updateSyncBtn(); toast(`${ok}/${pending.length} sincronizados`);
+  updateSyncBtn();
+  toast(ok===pending.length?`✓ ${ok} sincronizados`:`⚠️ ${ok}/${pending.length} sincronizados`);
 }
 function updateSyncBtn(){
   const p=Object.values(visits).filter(v=>!v.synced).length;
   const btn=document.getElementById('sync-btn');
+  if(!btn) return;
   btn.disabled=p===0; btn.textContent=p>0?`⬆ Sincronizar (${p} pend.)`:'✓ Todo sincronizado';
 }
 function updateHeader(){
