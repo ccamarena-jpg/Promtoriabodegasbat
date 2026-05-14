@@ -620,10 +620,31 @@ function selDispenser(v){{ mDispenser=v; document.getElementById('rb-disp-si').c
 function selContrabando(v){{ mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }}
 function selStock(n){{ mStock=n; for(let i=1;i<=5;i++) document.getElementById(`stk-${{i}}`).className='stock-btn'+(i===n?' sel':''); }}
 
-function setFoto(key,input){{ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,900,.78,b64=>{{ fotosData[key]=b64; refreshFotoSlot(key); }}); r.readAsDataURL(file); }}
+function setFoto(key,input){{ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,480,.50,b64=>{{ fotosData[key]=b64; refreshFotoSlot(key); }}); r.readAsDataURL(file); }}
 function refreshFotoSlot(key){{ const p=document.getElementById(`fp-${{key}}`); if(!p) return; p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); if(fotosData[key]){{ const img=document.createElement('img'); img.src=fotosData[key]; const del=document.createElement('button'); del.className='fn-del'; del.textContent='×'; del.onclick=e=>{{ e.stopPropagation(); fotosData[key]=null; clearFotoSlot(key); }}; p.appendChild(img); p.appendChild(del); }} }}
 function clearFotoSlot(key){{ const p=document.getElementById(`fp-${{key}}`); if(p) p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); }}
 function compressImage(src,maxW,q,cb){{ const img=new Image(); img.onload=()=>{{ const c=document.createElement('canvas'); let w=img.width,h=img.height; if(w>maxW){{h=Math.round(h*maxW/w);w=maxW;}} c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',q)); }}; img.src=src; }}
+function setLocalVisits(data){{
+  const key='bat_v2_'+currentUser;
+  // Intentar guardar; si falla por cuota, liberar espacio primero
+  function trySet(d){{
+    try{{ localStorage.setItem(key,JSON.stringify(d)); return true; }} catch(e){{ return false; }}
+  }}
+  if(trySet(data)) return 'ok';
+  // 1er intento: quitar fotos de visitas ya sincronizadas
+  const cleaned={{}};
+  Object.entries(data).forEach(([k,v])=>{{ cleaned[k]=v.synced?{{...v,fotos:{{}}}}:v; }});
+  if(trySet(cleaned)){{ visits=cleaned; return 'fotos_sync_removidas'; }}
+  // 2do intento: quitar fotos de TODAS las visitas
+  const noFotos={{}};
+  Object.entries(data).forEach(([k,v])=>{{ noFotos[k]={{...v,fotos:{{}}}}; }});
+  if(trySet(noFotos)){{ visits=noFotos; return 'todas_fotos_removidas'; }}
+  // 3er intento: guardar solo visita actual sin fotos
+  const soloActual={{}};
+  soloActual[currentPosId]={{...data[currentPosId],fotos:{{}}}};
+  if(trySet(soloActual)){{ visits=soloActual; return 'solo_actual'; }}
+  throw new Error('Almacenamiento lleno. Libera espacio en el dispositivo.');
+}}
 
 function openMaps(lat,lon,e){{ e.stopPropagation(); window.open(`https://www.google.com/maps/dir/?api=1&destination=${{lat}},${{lon}}`,'_blank','noopener'); }}
 function closeModal(){{ document.getElementById('modal-bg').classList.remove('active'); currentPosId=null; }}
@@ -670,14 +691,8 @@ async function saveVisit(){{
       fotos:{{...fotosData}}, synced:false
     }};
     visits[currentPosId]=record;
-    try{{ localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits)); }}
-    catch(storageErr){{
-      // localStorage lleno: guardar sin fotos
-      const slim={{...record,fotos:{{}}}};
-      visits[currentPosId]=slim;
-      localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
-      toast('⚠️ Fotos no guardadas (almacenamiento lleno)');
-    }}
+    const storageResult=setLocalVisits(visits);
+    if(storageResult!=='ok') toast('⚠️ Espacio limitado: fotos no guardadas localmente (se sincronizarán igual)');
     updateMarker(currentPosId); renderPosList(); updateHeader();
     closeModal();
     toast('✓ Visita guardada');
