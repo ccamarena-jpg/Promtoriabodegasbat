@@ -691,7 +691,7 @@ function selDispenser(v){{ mDispenser=v; document.getElementById('rb-disp-si').c
 function selContrabando(v){{ mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }}
 function selStock(n){{ mStock=n; for(let i=1;i<=5;i++) document.getElementById(`stk-${{i}}`).className='stock-btn'+(i===n?' sel':''); }}
 
-function setFoto(key,input){{ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,480,.50,b64=>{{ fotosData[key]=b64; refreshFotoSlot(key); }}); r.readAsDataURL(file); }}
+function setFoto(key,input){{ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,800,.72,b64=>{{ fotosData[key]=b64; refreshFotoSlot(key); }}); r.readAsDataURL(file); }}
 function refreshFotoSlot(key){{ const p=document.getElementById(`fp-${{key}}`); if(!p) return; p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); if(fotosData[key]){{ const img=document.createElement('img'); img.src=fotosData[key]; const del=document.createElement('button'); del.className='fn-del'; del.textContent='×'; del.onclick=e=>{{ e.stopPropagation(); fotosData[key]=null; clearFotoSlot(key); }}; p.appendChild(img); p.appendChild(del); }} }}
 function clearFotoSlot(key){{ const p=document.getElementById(`fp-${{key}}`); if(p) p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); }}
 function compressImage(src,maxW,q,cb){{ const img=new Image(); img.onload=()=>{{ const c=document.createElement('canvas'); let w=img.width,h=img.height; if(w>maxW){{h=Math.round(h*maxW/w);w=maxW;}} c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',q)); }}; img.src=src; }}
@@ -792,7 +792,10 @@ async function trySync(record){{
   try{{
     const j=await postToSheet(record);
     if(j&&j.ok){{
-      record.synced=true; visits[record.id]=record;
+      record.synced=true;
+      // Reemplazar base64 pesado por URLs de Drive livianas → libera localStorage
+      record.fotos=(j.fotos&&Object.keys(j.fotos).length>0)?{{...j.fotos}}:{{}};
+      visits[record.id]=record;
       localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
       updateSyncBtn(); toast('☁️ Sincronizado con Sheets');
     }}
@@ -806,7 +809,7 @@ async function syncPending(){{
   for(const rec of pending){{
     try{{
       const j=await postToSheet(rec);
-      if(j&&j.ok){{rec.synced=true;visits[rec.id]=rec;ok++;}}
+      if(j&&j.ok){{rec.synced=true;rec.fotos=(j.fotos&&Object.keys(j.fotos).length>0)?{{...j.fotos}}:{{}};visits[rec.id]=rec;ok++;}}
     }} catch(e){{ console.log('Sync err:',e.message); }}
   }}
   localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));

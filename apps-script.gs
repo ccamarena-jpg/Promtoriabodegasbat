@@ -340,8 +340,9 @@ function setup() {
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    processVisit(data);
-    return jsonOut({ok: true});
+    const driveUrls = processVisit(data);
+    // Devolver las URLs de Drive para que el frontend libere el base64 del localStorage
+    return jsonOut({ok: true, fotos: driveUrls});
   } catch(err) {
     return jsonOut({ok: false, error: err.message});
   }
@@ -450,9 +451,20 @@ function processVisit(d) {
   const folder = getOrCreateDriveFolder();
   const sub    = getOrCreateSubfolder(folder, d.fecha || 'sin-fecha');
 
+  // Colecciona las URLs de Drive de cada foto para devolverlas al frontend
+  const driveUrls = {};
   function foto(key) {
     if (!d.fotos || !d.fotos[key]) return '';
-    try { return saveBase64Image(d.fotos[key], d.id + '_' + key, sub); }
+    // Si ya es una URL de Drive (foto ya sincronizada antes), usarla directamente
+    if (typeof d.fotos[key] === 'string' && d.fotos[key].startsWith('http')) {
+      driveUrls[key] = d.fotos[key];
+      return d.fotos[key];
+    }
+    try {
+      const url = saveBase64Image(d.fotos[key], d.id + '_' + key, sub);
+      driveUrls[key] = url;
+      return url;
+    }
     catch(e) { return 'Error al subir'; }
   }
 
@@ -507,6 +519,8 @@ function processVisit(d) {
   sheet.getRange(lastRow, 10)
        .setFontColor(isAbierto ? '#15803d' : '#b91c1c')
        .setFontWeight('bold');
+
+  return driveUrls; // URLs de Drive para que el frontend libere el base64
 }
 
 // ───────────────────────────────────────────────────────────────
