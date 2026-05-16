@@ -1002,12 +1002,25 @@ async function renderDash(){
   switchGal('fachada','Fachada');
 }
 
+// Convierte URL de Drive viewer a URL directa embebible en <img>
+function driveToImg(url){
+  if(!url) return '';
+  if(url.startsWith('data:')) return url; // ya es base64, ok
+  // /file/d/ID/view  →  /uc?export=view&id=ID
+  const m=url.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
+  if(m) return 'https://drive.google.com/uc?export=view&id='+m[1];
+  return url;
+}
+
 window.switchGal=function(key,label){
   document.querySelectorAll('.gal-tab').forEach(t=>t.classList.toggle('active',t.textContent===label));
   const grid=document.getElementById('gal-grid');
   const photos=(window._gRec||[]).filter(r=>r.fotos&&r.fotos[key]);
   grid.innerHTML=photos.length
-    ? photos.map(r=>`<div class="gal-item"><img src="${r.fotos[key]}" loading="lazy"><div class="gal-lbl">${r.nombre.substring(0,18)}</div></div>`).join('')
+    ? photos.map(r=>{
+        const src=driveToImg(r.fotos[key]);
+        return `<div class="gal-item"><img src="${src}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="gal-err" style="display:none;align-items:center;justify-content:center;position:absolute;inset:0;font-size:10px;color:var(--muted);flex-direction:column;gap:2px"><span style="font-size:20px">🔒</span><span>Sin acceso</span></div><div class="gal-lbl">${r.nombre.substring(0,18)}</div></div>`;
+      }).join('')
     : '<p style="color:var(--muted);font-size:11px;grid-column:1/-1;padding:10px">Sin fotos para esta pregunta</p>';
 };
 

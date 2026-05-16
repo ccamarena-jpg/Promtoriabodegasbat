@@ -529,5 +529,6 @@ function saveBase64Image(b64, filename, folder) {
   );
   const file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return file.getUrl();
+  // Devuelve URL directa de imagen (no el viewer de Drive) para poder mostrarla en <img>
+  return 'https://drive.google.com/uc?export=view&id=' + file.getId();
 }
