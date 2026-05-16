@@ -254,6 +254,7 @@ textarea{resize:vertical;min-height:52px}
       </div>
       <button class="btn-icon" onclick="syncPending()">⬆ Sync</button>
       <button class="btn-icon accent" id="btn-dash" style="display:none" onclick="openDash()">📊 Dashboard</button>
+      <button class="btn-icon" id="btn-padron" style="display:none" onclick="refreshPadron()" title="Recargar POS desde Google Sheets">🔄 Padrón</button>
       <button class="btn-icon" onclick="doLogout()">↩</button>
     </div>
   </header>
@@ -443,11 +444,23 @@ textarea{resize:vertical;min-height:52px}
 
 <div id="toast"></div>
 
+<!-- LOADING SCREEN -->
+<div id="loading-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1A2E6A 0%,#0f1d47 100%);display:none;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:14px">
+  <div class="ls-spinner"></div>
+  <div style="color:#fff;font-size:15px;font-weight:700">Cargando puntos de ruta...</div>
+  <div style="color:rgba(255,255,255,.6);font-size:11px">Conectando con Google Sheets</div>
+</div>
+<style>
+.ls-spinner{width:42px;height:42px;border:4px solid rgba(255,255,255,.25);border-top-color:#F5A123;border-radius:50%;animation:ls-spin .75s linear infinite}
+@keyframes ls-spin{to{transform:rotate(360deg)}}
+</style>
+
 <script>
-// ═══════════════════════════════
-// POS DATA — 90 registros reales
-// ═══════════════════════════════
-const POS_DATA = {
+// ═══════════════════════════════════════════════════════════
+// FALLBACK POS DATA — 90 registros (respaldo offline)
+// Se reemplaza con datos del Sheet "Padrón Rutas" al hacer login
+// ═══════════════════════════════════════════════════════════
+const FALLBACK_POS_DATA = {
   "LUNES": [
     {"id":"pos_LUN_01","nombre":"AQUINO PEREZ MARILU","direccion":"AV LIMA 478","distrito":"SAN MIGUEL","lat":-12.0893726939697,"lon":-77.0787742361426},
     {"id":"pos_LUN_02","nombre":"COMERCIALIZADORA AYKILU SOCIEDAD ANONIMA CERRADA","direccion":"CALLE JOSE OLAYA 163","distrito":"SAN MIGUEL","lat":-12.0798195818304,"lon":-77.1041868254542},
@@ -549,6 +562,7 @@ const POS_DATA = {
     {"id":"pos_VIE_12","nombre":"FAMLAI SAC","direccion":"AV BENJAMIN FRANKLIN 331","distrito":"ATE","lat":-12.065659602747605,"lon":-76.97621595114468}
   ]
 };
+let POS_DATA = FALLBACK_POS_DATA; // actualizado dinámicamente desde Google Sheets
 
 const DAYS_ORDER = ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES'];
 const DAY_LABELS = {LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Miércoles',JUEVES:'Jueves',VIERNES:'Viernes'};
@@ -568,24 +582,81 @@ let selectedPosId=null, map=null, markers={}, visits={};
 let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null, mStock=null;
 let fotosData={}, currentPosId=null;
 
+// ─── POS DATA LOADER ───
+async function loadPOSData(force){
+  // 1) Caché de sesión (saltar si force=true)
+  if(!force){
+    try{
+      const cached=sessionStorage.getItem('bat_pos_data');
+      if(cached){ POS_DATA=JSON.parse(cached); console.log('POS: desde caché sesión'); return 'cache'; }
+    }catch(e){}
+  }
+  // 2) Intentar cargar desde Google Sheets (Padrón Rutas)
+  try{
+    console.log('POS: consultando Sheet...');
+    const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache'});
+    const json=await resp.json();
+    console.log('POS Sheet response:', JSON.stringify(json).substring(0,200));
+    if(json.ok&&json.data&&Object.keys(json.data).length>0){
+      POS_DATA=json.data;
+      const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
+      try{sessionStorage.setItem('bat_pos_data',JSON.stringify(POS_DATA));}catch(e){}
+      console.log('POS: '+total+' puntos cargados desde Sheet');
+      return 'sheet';
+    } else {
+      console.log('POS Sheet: respuesta vacía o error:', json);
+    }
+  }catch(e){console.warn('POS fetch error:',e.message);}
+  // 3) Fallback: datos hardcodeados en la app
+  POS_DATA=FALLBACK_POS_DATA;
+  console.log('POS: usando fallback hardcodeado');
+  return 'fallback';
+}
+
+async function refreshPadron(){
+  const btn=document.getElementById('btn-padron');
+  btn.disabled=true; btn.textContent='⏳ Cargando...';
+  try{
+    sessionStorage.removeItem('bat_pos_data');
+    const src=await loadPOSData(true);
+    const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
+    try{ buildDayTabs(); selectDay(currentDay); }catch(err){ console.error('refresh render error:',err); }
+    if(src==='sheet'){ toast('✓ Padrón actualizado: '+total+' POS desde Sheets'); }
+    else{ toast('⚠️ No se pudo conectar con Sheets — usando datos locales'); }
+  }catch(e){
+    toast('❌ Error al actualizar padrón: '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='🔄 Padrón';
+  }
+}
+
 // ─── LOGIN ───
-function doLogin(){
+async function doLogin(){
   const email=(document.getElementById('l-email').value||'').trim().toLowerCase();
   const pass=(document.getElementById('l-pass').value||'').trim();
   const u=USERS[email];
   if(!u||u.pass!==pass){document.getElementById('login-err').style.display='block';return;}
   document.getElementById('login-err').style.display='none';
   currentUser=email; currentRole=u.role;
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').classList.add('active');
-  if(currentRole==='admin') document.getElementById('btn-dash').style.display='';
   visits=JSON.parse(localStorage.getItem('bat_v2_'+email)||'{}');
-  initApp();
+  // Mostrar pantalla de carga mientras se obtienen los POS del Sheet
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('loading-screen').style.display='flex';
+  await loadPOSData();
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('app').classList.add('active');
+  if(currentRole==='admin'){
+    document.getElementById('btn-dash').style.display='';
+    document.getElementById('btn-padron').style.display='';
+  }
+  try{ initApp(); }catch(err){ console.error('initApp error:',err); }
   setTimeout(()=>{ if(map) map.invalidateSize(); },150);
 }
 function doLogout(){
   currentUser=null; currentRole=null;
   document.getElementById('app').classList.remove('active');
+  document.getElementById('btn-dash').style.display='none';
+  document.getElementById('btn-padron').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('l-pass').value='';
 }
@@ -927,7 +998,7 @@ async function renderDash(){
   const GK=['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'];
   const GL={fachada:'Fachada',placa:'Placa',vuse:'Vuse',lucky:'Lucky',velo:'Velo',cigarrera:'Cigarrera',dispenser:'Dispenser',contrabando:'Contrabando',panoramica:'Panorámica'};
   window._gRec=records; window._gL=GL;
-  document.getElementById('gal-tabs').innerHTML=GK.map(k=>`<button class="gal-tab${k==='fachada'?' active':''}" onclick="switchGal('${k}',${JSON.stringify(GL[k])})">${GL[k]}</button>`).join('');
+  document.getElementById('gal-tabs').innerHTML=GK.map(k=>`<button class="gal-tab${k==='fachada'?' active':''}" onclick="switchGal('${k}','${GL[k].replace(/'/g,'\x27')}')">${GL[k]}</button>`).join('');
   switchGal('fachada','Fachada');
 }
 
