@@ -129,12 +129,6 @@ textarea{resize:vertical;min-height:52px}
 .pop-table td:first-child{text-align:left;font-weight:600;font-size:10px;color:var(--text);width:100px}
 .pop-cb{width:15px;height:15px;cursor:pointer;accent-color:var(--navy)}
 
-.stock-scale{display:flex;gap:5px;align-items:center;margin-top:3px}
-.stock-scale .lbl-ext{font-size:10px;color:var(--muted);white-space:nowrap}
-.stock-btns{display:flex;gap:3px}
-.stock-btn{width:32px;height:32px;border:1.5px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;color:var(--text)}
-.stock-btn:hover{border-color:var(--navy)}
-.stock-btn.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
 
 .fotos-grid-named{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .foto-named{border:1.5px dashed var(--border);border-radius:8px;overflow:hidden;background:#f8fafc;display:flex;flex-direction:column}
@@ -405,22 +399,19 @@ textarea{resize:vertical;min-height:52px}
         </div>
         <div class="field-group"><label class="field-label">Comentarios adicionales – Dispenser</label><textarea id="obs-dispenser" rows="2" placeholder="Observaciones..."></textarea></div>
         <hr class="section-divider">
-        <div class="section-title">▸ Stock y Control</div>
+        <div class="section-title">▸ Stock Velo</div>
         <div class="field-group">
-          <label class="field-label">¿El Local tiene Stock Suficiente?</label>
-          <div class="stock-scale">
-            <span class="lbl-ext">Muy bajo</span>
-            <div class="stock-btns">
-              <button class="stock-btn" id="stk-1" onclick="selStock(1)">1</button>
-              <button class="stock-btn" id="stk-2" onclick="selStock(2)">2</button>
-              <button class="stock-btn" id="stk-3" onclick="selStock(3)">3</button>
-              <button class="stock-btn" id="stk-4" onclick="selStock(4)">4</button>
-              <button class="stock-btn" id="stk-5" onclick="selStock(5)">5</button>
-            </div>
-            <span class="lbl-ext">Óptimo</span>
-          </div>
+          <label class="field-label">¿La tienda tiene stock de Velo Menta Fresca? Detalla las cantidades.</label>
+          <textarea id="m-stock-menta" rows="2" placeholder="Ej: 2 unidades, media caja, sin stock..."></textarea>
         </div>
-        <div class="field-group"><label class="field-label">¿Qué SKUs no tiene disponible?</label><textarea id="m-skus-faltantes" rows="2" placeholder="Ej: Lucky Strike Box 10s, Vuse Pod Menta..."></textarea></div>
+        <div class="field-group">
+          <label class="field-label">¿La tienda tiene stock de Velo Uva? Detalla las cantidades.</label>
+          <textarea id="m-stock-uva" rows="2" placeholder="Ej: 3 unidades, stock completo..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">¿La tienda tiene stock de Velo Sandía? Detalla las cantidades.</label>
+          <textarea id="m-stock-sandia" rows="2" placeholder="Ej: sin stock, 1 caja..."></textarea>
+        </div>
         <div class="field-group">
           <label class="field-label">¿Se identificaron Productos de Contrabando? <span class="req">*</span></label>
           <div class="radio-group"><button class="rbtn" id="rb-cont-si" onclick="selContrabando('Si')">Sí</button><button class="rbtn" id="rb-cont-no" onclick="selContrabando('No')">No</button></div>
@@ -579,7 +570,7 @@ const USERS = {
 // ─── STATE ───
 let currentUser=null, currentRole=null, currentDay=null;
 let selectedPosId=null, map=null, markers={}, visits={};
-let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null, mStock=null;
+let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null;
 let fotosData={}, currentPosId=null;
 
 // ─── POS DATA LOADER ───
@@ -751,8 +742,6 @@ function openModal(posId){
   const ex=visits[posId];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
-    ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-skus-faltantes','m-marcas-contrabando']
-      .forEach(id=>{ if(ex[id.replace('m-','').replace('-','')]) document.getElementById(id).value=ex[id.replace('m-','').replace('-','')]||''; });
     if(ex.staff) document.getElementById('m-staff').value=ex.staff;
     if(ex.obsPlaca) document.getElementById('obs-placa').value=ex.obsPlaca;
     if(ex.obsVuse) document.getElementById('obs-vuse').value=ex.obsVuse;
@@ -760,13 +749,14 @@ function openModal(posId){
     if(ex.obsVelo) document.getElementById('obs-velo').value=ex.obsVelo;
     if(ex.permiteCambio) document.getElementById('m-permite-cambio').value=ex.permiteCambio;
     if(ex.obsDispenser) document.getElementById('obs-dispenser').value=ex.obsDispenser;
-    if(ex.skusFaltantes) document.getElementById('m-skus-faltantes').value=ex.skusFaltantes;
+    if(ex.stockMenta) document.getElementById('m-stock-menta').value=ex.stockMenta;
+    if(ex.stockUva) document.getElementById('m-stock-uva').value=ex.stockUva;
+    if(ex.stockSandia) document.getElementById('m-stock-sandia').value=ex.stockSandia;
     if(ex.marcasContrabando) document.getElementById('m-marcas-contrabando').value=ex.marcasContrabando;
     if(ex.pop) ['placa','vuse','lucky','velo'].forEach(k=>{if(ex.pop[k]) ['enc','opt','rep'].forEach(s=>{if(ex.pop[k][s]) document.getElementById(`pop-${k}-${s}`).checked=true;});});
     if(ex.cigarrera) selCigarrera(ex.cigarrera,true);
     if(ex.cigCom) selCigCom(ex.cigCom,true);
     if(ex.dispenser) selDispenser(ex.dispenser,true);
-    if(ex.stock) selStock(ex.stock,true);
     if(ex.contrabando) selContrabando(ex.contrabando,true);
     if(ex.fotos){ fotosData={...ex.fotos}; Object.keys(fotosData).forEach(k=>refreshFotoSlot(k)); }
   }
@@ -776,12 +766,11 @@ function openModal(posId){
 }
 
 function resetModal(){
-  mAbierto=null;mCigarrera=null;mCigCom=null;mDispenser=null;mContrabando=null;mStock=null;fotosData={};
+  mAbierto=null;mCigarrera=null;mCigCom=null;mDispenser=null;mContrabando=null;fotosData={};
   ['rb-abierto-si','rb-abierto-no','rb-cig-si','rb-cig-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-cigcom-vigente','rb-cigcom-antigua','rb-cigcom-na']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
-  for(let i=1;i<=5;i++) document.getElementById(`stk-${i}`).className='stock-btn';
   ['placa','vuse','lucky','velo'].forEach(k=>['enc','opt','rep'].forEach(s=>{ const el=document.getElementById(`pop-${k}-${s}`); if(el) el.checked=false; }));
-  ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-skus-faltantes','m-marcas-contrabando']
+  ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-stock-menta','m-stock-uva','m-stock-sandia','m-marcas-contrabando']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   ['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'].forEach(k=>clearFotoSlot(k));
   ['seccion-abierto','seccion-cigarrera','seccion-dispenser','seccion-contrabando'].forEach(id=>document.getElementById(id).style.display='none');
@@ -792,7 +781,6 @@ function selCigarrera(v){ mCigarrera=v; document.getElementById('rb-cig-si').cla
 function selCigCom(v){ mCigCom=v; const m={'Sí, comunicación vigente':'rb-cigcom-vigente','No, tiene comunicación antigua':'rb-cigcom-antigua','No aplica':'rb-cigcom-na'}; Object.keys(m).forEach(k=>document.getElementById(m[k]).className='rbtn'+(k===v?' sel':'')); }
 function selDispenser(v){ mDispenser=v; document.getElementById('rb-disp-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-disp-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-dispenser').style.display=v==='Si'?'block':'none'; }
 function selContrabando(v){ mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }
-function selStock(n){ mStock=n; for(let i=1;i<=5;i++) document.getElementById(`stk-${i}`).className='stock-btn'+(i===n?' sel':''); }
 
 function setFoto(key,input){ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,800,.72,b64=>{ fotosData[key]=b64; refreshFotoSlot(key); }); r.readAsDataURL(file); }
 function refreshFotoSlot(key){ const p=document.getElementById(`fp-${key}`); if(!p) return; p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); if(fotosData[key]){ const img=document.createElement('img'); img.src=fotosData[key]; const del=document.createElement('button'); del.className='fn-del'; del.textContent='×'; del.onclick=e=>{ e.stopPropagation(); fotosData[key]=null; clearFotoSlot(key); }; p.appendChild(img); p.appendChild(del); } }
@@ -858,8 +846,9 @@ async function saveVisit(){
       permiteCambio:gv('m-permite-cambio'),
       dispenser:mAbierto==='Si'?mDispenser:'',
       obsDispenser:gv('obs-dispenser'),
-      stock:mAbierto==='Si'?mStock:null,
-      skusFaltantes:gv('m-skus-faltantes'),
+      stockMenta:gv('m-stock-menta'),
+      stockUva:gv('m-stock-uva'),
+      stockSandia:gv('m-stock-sandia'),
       contrabando:mAbierto==='Si'?mContrabando:'',
       marcasContrabando:gv('m-marcas-contrabando'),
       fotos:{...fotosData}, synced:false
@@ -965,8 +954,10 @@ async function renderDash(){
   const cigSi=records.filter(r=>r.cigarrera==='Si').length;
   const dispSi=records.filter(r=>r.dispenser==='Si').length;
   const contSi=records.filter(r=>r.contrabando==='Si').length;
-  const stocks=records.filter(r=>r.stock).map(r=>r.stock);
-  const sAvg=stocks.length?(stocks.reduce((a,b)=>a+b,0)/stocks.length).toFixed(1):'—';
+  const conMenta=records.filter(r=>String(r.stockMenta||'').trim()).length;
+  const conUva=records.filter(r=>String(r.stockUva||'').trim()).length;
+  const conSandia=records.filter(r=>String(r.stockSandia||'').trim()).length;
+  const conVelo=records.filter(r=>String(r.stockMenta||'').trim()||String(r.stockUva||'').trim()||String(r.stockSandia||'').trim()).length;
 
   body.innerHTML=`
   <div class="dash-grid">
@@ -977,13 +968,13 @@ async function renderDash(){
     <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${cigSi}</div><div class="kpi-label">🗄️ Con Cigarrera</div></div>
     <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${dispSi}</div><div class="kpi-label">📦 Con Dispenser</div></div>
     <div class="kpi-card"><div class="kpi-val warn">${contSi}</div><div class="kpi-label">⚠️ Contrabando</div></div>
-    <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${sAvg}</div><div class="kpi-label">📦 Stock Prom.</div></div>
+    <div class="kpi-card"><div class="kpi-val ok" style="font-size:26px">${conVelo}</div><div class="kpi-label">🟢 PDVs con Stock Velo</div></div>
   </div>
   <div class="dash-row">
     <div class="chart-card"><h3>Estado de Visitas</h3><canvas id="ch-est"></canvas></div>
     <div class="chart-card"><h3>Materiales POP Encontrados</h3><canvas id="ch-pop"></canvas></div>
     <div class="chart-card"><h3>Cigarrera y Dispenser</h3><canvas id="ch-act"></canvas></div>
-    <div class="chart-card"><h3>Stock (1-5)</h3><canvas id="ch-stk"></canvas></div>
+    <div class="chart-card"><h3>Stock Velo por Variedad</h3><canvas id="ch-stk"></canvas></div>
   </div>
   <div class="chart-card" style="margin-bottom:14px">
     <h3>Galería de Fotos por Pregunta</h3>
@@ -996,7 +987,7 @@ async function renderDash(){
   const pk=['placa','vuse','lucky','velo'], pl=['Placa','Vuse','Lucky','Velo'];
   _charts.push(new Chart(document.getElementById('ch-pop'),{type:'bar',data:{labels:pl,datasets:[{label:'Encontrado',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].enc).length),backgroundColor:'#1A2E6A'},{label:'Óptimo',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].opt).length),backgroundColor:'#F5A123'}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
   _charts.push(new Chart(document.getElementById('ch-act'),{type:'bar',data:{labels:['Cigarrera','Dispenser'],datasets:[{label:'Sí',data:[cigSi,dispSi],backgroundColor:'#22c55e'},{label:'No',data:[records.filter(r=>r.cigarrera==='No').length,records.filter(r=>r.dispenser==='No').length],backgroundColor:'#ef4444'}]},options:{...opt,scales:{y:{beginAtZero:true,stacked:true},x:{stacked:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-stk'),{type:'bar',data:{labels:['1','2','3','4','5'],datasets:[{label:'PDVs',data:[1,2,3,4,5].map(n=>stocks.filter(s=>s===n).length),backgroundColor:['#ef4444','#f97316','#eab308','#84cc16','#22c55e']}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-stk'),{type:'bar',data:{labels:['Menta Fresca','Uva','Sandía'],datasets:[{label:'PDVs con stock',data:[conMenta,conUva,conSandia],backgroundColor:['#22c55e','#a855f7','#f97316']}]},options:{...opt,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
 
   const GK=['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'];
   const GL={fachada:'Fachada',placa:'Placa',vuse:'Vuse',lucky:'Lucky',velo:'Velo',cigarrera:'Cigarrera',dispenser:'Dispenser',contrabando:'Contrabando',panoramica:'Panorámica'};

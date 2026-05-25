@@ -26,7 +26,7 @@ const HEADERS = [
   '¿Tiene Cigarrera?', 'Foto Cigarrera',
   'Comunicación Cigarrera Actualizada', '¿Cliente Permite el Cambio?',
   '¿Tiene Dispenser?', 'Foto Dispenser', 'Comentarios Dispenser',
-  'Stock de Productos (1-5)', 'SKUs Sin Disponibilidad',
+  'Stock Velo Menta Fresca', 'Stock Velo Uva', 'Stock Velo Sandía',
   '¿Productos Contrabando/Falsificados?', 'Marcas de Contrabando', 'Foto Contrabando',
   'Foto Fachada', 'Foto Panorámica Interior'
 ];
@@ -125,7 +125,7 @@ function getOrCreateSheet() {
       160, 200,   160, 200,   160, 200,   160, 200,        // fotos + comentarios POP
       90, 160, 200, 150,                          // cigarrera
       90, 160, 200,                               // dispenser
-      80, 200,                                    // stock
+      200, 200, 200,                               // stock Velo (3 variantes)
       90, 200, 160,                               // contrabando
       160, 160                                    // fachada + panorámica
     ];
@@ -299,6 +299,48 @@ function populatePadronIfEmpty(sheet) {
 }
 
 // ───────────────────────────────────────────────────────────────
+// MIGRACIÓN DE HEADERS — ejecutar 1 vez si el Sheet ya existe
+// Reemplaza "Stock de Productos (1-5)" y "SKUs Sin Disponibilidad"
+// por las 3 nuevas columnas de stock Velo.
+// ───────────────────────────────────────────────────────────────
+function migrateStockHeaders() {
+  const sheet = getOrCreateSheet();
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  const idxStock = headerRow.indexOf('Stock de Productos (1-5)');
+  const idxSku   = headerRow.indexOf('SKUs Sin Disponibilidad');
+
+  if (idxStock === -1 && idxSku === -1) {
+    Logger.log('ℹ️  No se encontraron columnas antiguas — nada que migrar.');
+    return;
+  }
+
+  // Reemplazar encabezados en su lugar (las celdas de datos existentes quedan intactas)
+  if (idxStock !== -1) sheet.getRange(1, idxStock + 1).setValue('Stock Velo Menta Fresca');
+  if (idxSku   !== -1) sheet.getRange(1, idxSku   + 1).setValue('Stock Velo Uva');
+
+  // Insertar la columna de Sandía justo después de Uva (si la de Uva fue Sku)
+  if (idxSku !== -1) {
+    sheet.insertColumnAfter(idxSku + 1);
+    sheet.getRange(1, idxSku + 2).setValue('Stock Velo Sandía');
+    sheet.getRange(1, idxSku + 2)
+         .setBackground('#1C2B4A').setFontColor('#ffffff')
+         .setFontWeight('bold').setFontSize(10);
+    sheet.setColumnWidth(idxSku + 2, 200);
+  }
+
+  // Re-aplicar formato a las celdas de encabezado modificadas
+  [idxStock, idxSku].filter(i => i !== -1).forEach(i => {
+    sheet.getRange(1, i + 1)
+         .setBackground('#1C2B4A').setFontColor('#ffffff')
+         .setFontWeight('bold').setFontSize(10);
+    sheet.setColumnWidth(i + 1, 200);
+  });
+
+  Logger.log('✅ Migración de headers completada.');
+}
+
+// ───────────────────────────────────────────────────────────────
 // FUNCIÓN DE SETUP MANUAL (ejecutar 1 vez desde el editor)
 // Crea el Sheet + carpeta y muestra los IDs y la URL del Sheet
 // ───────────────────────────────────────────────────────────────
@@ -405,7 +447,9 @@ function doGet(e) {
           staff:       obj['Staff que Atiende'] || '',
           cigarrera:   obj['¿Tiene Cigarrera?'] === 'Sí' ? 'Si' : 'No',
           dispenser:   obj['¿Tiene Dispenser?'] === 'Sí' ? 'Si' : 'No',
-          stock:       obj['Stock de Productos (1-5)'] || null,
+          stockMenta:  obj['Stock Velo Menta Fresca']  || '',
+          stockUva:    obj['Stock Velo Uva']           || '',
+          stockSandia: obj['Stock Velo Sandía']        || '',
           contrabando: obj['¿Productos Contrabando/Falsificados?'] === 'Sí' ? 'Si' : 'No',
           pop: {
             placa: { enc: obj['Placa – Encontrada']==='Sí',                      opt: obj['Placa – Estado Óptimo']==='Sí',                      rep: obj['Placa – Requiere Reemplazo']==='Sí' },
@@ -501,8 +545,8 @@ function processVisit(d) {
     d.cigCom || '', d.permiteCambio || '',
     // Dispenser
     yn(d.dispenser), foto('dispenser'), d.obsDispenser || '',
-    // Stock
-    d.stock || '', d.skusFaltantes || '',
+    // Stock Velo (3 variantes)
+    d.stockMenta || '', d.stockUva || '', d.stockSandia || '',
     // Contrabando
     yn(d.contrabando), d.marcasContrabando || '', foto('contrabando'),
     // Fachada + panorámica
