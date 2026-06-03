@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Promotoría Bodegas Audit — TT Audit</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<!-- Scripts moved to bottom of body for faster login -->
 <style>
 :root{
   --navy:#1A2E6A;--navy2:#243d8a;--accent:#F5A123;--accent2:#e09215;
@@ -1368,9 +1367,12 @@ window.switchGal=function(key,label){
 function toast(msg,dur=2600){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),dur); }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  initMap();
+  // initMap se llama cuando Leaflet ya cargó (ver script al final del body)
   document.getElementById('l-email').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('l-pass').focus(); });
 });
 </script>
+<!-- CDN scripts al FINAL del body: la página carga rápido y el login es inmediato -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" onload="try{initMap();}catch(e){console.warn('Leaflet load error:',e);}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>
 </html>
