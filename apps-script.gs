@@ -27,6 +27,13 @@ const HEADERS = [
   'Comunicación Cigarrera Actualizada', '¿Cliente Permite el Cambio?',
   '¿Tiene Dispenser?', 'Foto Dispenser', 'Comentarios Dispenser',
   'Stock Velo Menta Fresca', 'Stock Velo Uva', 'Stock Velo Sandía',
+  'Stock Velo Menta Fresca 4mg', 'Stock Velo Uva 4mg', 'Stock Velo Sandía 4mg',
+  'Stock Velo Menta Fresca 6mg', 'Stock Velo Uva 6mg', 'Stock Velo Sandía 6mg',
+  'Stock Lucky Strike Eclipse',
+  'Vuse 1K – Uva fresca', 'Vuse 1K – Sandía fresca', 'Vuse 1K – Manzana', 'Vuse 1K – Menta',
+  'Vuse 3K – Uva fresca', 'Vuse 3K – Arándanos',
+  'Vuse 5K disponible', 'Vuse 8K disponible',
+  'Levantamiento Competencia', 'Semana',
   '¿Productos Contrabando/Falsificados?', 'Marcas de Contrabando', 'Foto Contrabando',
   'Foto Fachada', 'Foto Panorámica Interior'
 ];
@@ -125,7 +132,13 @@ function getOrCreateSheet() {
       160, 200,   160, 200,   160, 200,   160, 200,        // fotos + comentarios POP
       90, 160, 200, 150,                          // cigarrera
       90, 160, 200,                               // dispenser
-      200, 200, 200,                               // stock Velo (3 variantes)
+      200, 200, 200,                               // stock Velo texto (legacy)
+      110, 110, 110,  110, 110, 110,              // stock Velo 4mg y 6mg (numérico)
+      130,                                         // stock LS Eclipse
+      110, 110, 110, 110,                         // Vuse 1K sabores
+      110, 110,                                   // Vuse 3K sabores
+      110, 110,                                   // Vuse 5K / 8K
+      260, 110,                                   // levantamiento competencia / semana
       90, 200, 160,                               // contrabando
       160, 160                                    // fachada + panorámica
     ];
@@ -341,6 +354,52 @@ function migrateStockHeaders() {
 }
 
 // ───────────────────────────────────────────────────────────────
+// MIGRACIÓN: agrega las nuevas columnas al Sheet existente
+// Ejecutar 1 vez desde el editor de Apps Script después de actualizar el código
+// ───────────────────────────────────────────────────────────────
+
+function addNewColumns() {
+  const sheet = getOrCreateSheet();
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  const newCols = [
+    'Stock Velo Menta Fresca 4mg', 'Stock Velo Uva 4mg', 'Stock Velo Sandía 4mg',
+    'Stock Velo Menta Fresca 6mg', 'Stock Velo Uva 6mg', 'Stock Velo Sandía 6mg',
+    'Stock Lucky Strike Eclipse',
+    'Vuse 1K – Uva fresca', 'Vuse 1K – Sandía fresca', 'Vuse 1K – Manzana', 'Vuse 1K – Menta',
+    'Vuse 3K – Uva fresca', 'Vuse 3K – Arándanos',
+    'Vuse 5K disponible', 'Vuse 8K disponible',
+    'Levantamiento Competencia', 'Semana'
+  ];
+
+  // Insertar antes de "¿Productos Contrabando..." (o al final si no existe)
+  let insertBefore = headerRow.indexOf('¿Productos Contrabando/Falsificados?');
+  if (insertBefore === -1) insertBefore = headerRow.length; // al final
+
+  let added = 0;
+  newCols.forEach((col, i) => {
+    if (!headerRow.includes(col)) {
+      const colIdx = insertBefore + added + 1; // 1-based
+      sheet.insertColumnBefore(colIdx);
+      const cell = sheet.getRange(1, colIdx);
+      cell.setValue(col)
+          .setBackground('#1C2B4A')
+          .setFontColor('#ffffff')
+          .setFontWeight('bold')
+          .setFontSize(10)
+          .setWrap(true);
+      sheet.setColumnWidth(colIdx, col.startsWith('Vuse') ? 110 : col.startsWith('Levant') ? 260 : col === 'Semana' ? 110 : 130);
+      added++;
+      Logger.log('✅ Columna agregada: ' + col + ' en posición ' + colIdx);
+    } else {
+      Logger.log('ℹ️ Ya existe: ' + col);
+    }
+  });
+
+  Logger.log('Migración completada. ' + added + ' columnas nuevas agregadas.');
+}
+
+// ───────────────────────────────────────────────────────────────
 // FUNCIÓN DE SETUP MANUAL (ejecutar 1 vez desde el editor)
 // Crea el Sheet + carpeta y muestra los IDs y la URL del Sheet
 // ───────────────────────────────────────────────────────────────
@@ -451,6 +510,25 @@ function doGet(e) {
           stockUva:    obj['Stock Velo Uva']           || '',
           stockSandia: obj['Stock Velo Sandía']        || '',
           contrabando: obj['¿Productos Contrabando/Falsificados?'] === 'Sí' ? 'Si' : 'No',
+          veloMf4:  obj['Stock Velo Menta Fresca 4mg'] !== '' ? Number(obj['Stock Velo Menta Fresca 4mg']) : null,
+          veloUv4:  obj['Stock Velo Uva 4mg']          !== '' ? Number(obj['Stock Velo Uva 4mg'])          : null,
+          veloSd4:  obj['Stock Velo Sandía 4mg']       !== '' ? Number(obj['Stock Velo Sandía 4mg'])       : null,
+          veloMf6:  obj['Stock Velo Menta Fresca 6mg'] !== '' ? Number(obj['Stock Velo Menta Fresca 6mg']) : null,
+          veloUv6:  obj['Stock Velo Uva 6mg']          !== '' ? Number(obj['Stock Velo Uva 6mg'])          : null,
+          veloSd6:  obj['Stock Velo Sandía 6mg']       !== '' ? Number(obj['Stock Velo Sandía 6mg'])       : null,
+          stockLS:  obj['Stock Lucky Strike Eclipse']   !== '' ? Number(obj['Stock Lucky Strike Eclipse'])  : null,
+          vuse: {
+            'vuse1k-uva': obj['Vuse 1K – Uva fresca']    === 'Sí',
+            'vuse1k-sd':  obj['Vuse 1K – Sandía fresca'] === 'Sí',
+            'vuse1k-ma':  obj['Vuse 1K – Manzana']       === 'Sí',
+            'vuse1k-me':  obj['Vuse 1K – Menta']         === 'Sí',
+            'vuse3k-uva': obj['Vuse 3K – Uva fresca']    === 'Sí',
+            'vuse3k-ar':  obj['Vuse 3K – Arándanos']     === 'Sí'
+          },
+          vuse5k: obj['Vuse 5K disponible'] === 'Sí' ? 'Si' : (obj['Vuse 5K disponible'] === 'No' ? 'No' : null),
+          vuse8k: obj['Vuse 8K disponible'] === 'Sí' ? 'Si' : (obj['Vuse 8K disponible'] === 'No' ? 'No' : null),
+          competencia: obj['Levantamiento Competencia'] || '',
+          semana: obj['Semana'] || '',
           pop: {
             placa: { enc: obj['Placa – Encontrada']==='Sí',                      opt: obj['Placa – Estado Óptimo']==='Sí',                      rep: obj['Placa – Requiere Reemplazo']==='Sí' },
             vuse:  { enc: obj['Jalavista Vuse – Encontrada']==='Sí',             opt: obj['Jalavista Vuse – Estado Óptimo']==='Sí',             rep: obj['Jalavista Vuse – Requiere Reemplazo']==='Sí' },
@@ -545,8 +623,30 @@ function processVisit(d) {
     d.cigCom || '', d.permiteCambio || '',
     // Dispenser
     yn(d.dispenser), foto('dispenser'), d.obsDispenser || '',
-    // Stock Velo (3 variantes)
+    // Stock Velo legacy (texto)
     d.stockMenta || '', d.stockUva || '', d.stockSandia || '',
+    // Stock Velo 4mg (numérico)
+    d.veloMf4 !== null && d.veloMf4 !== undefined ? d.veloMf4 : '',
+    d.veloUv4 !== null && d.veloUv4 !== undefined ? d.veloUv4 : '',
+    d.veloSd4 !== null && d.veloSd4 !== undefined ? d.veloSd4 : '',
+    // Stock Velo 6mg (numérico)
+    d.veloMf6 !== null && d.veloMf6 !== undefined ? d.veloMf6 : '',
+    d.veloUv6 !== null && d.veloUv6 !== undefined ? d.veloUv6 : '',
+    d.veloSd6 !== null && d.veloSd6 !== undefined ? d.veloSd6 : '',
+    // Stock Lucky Strike Eclipse
+    d.stockLS !== null && d.stockLS !== undefined ? d.stockLS : '',
+    // Disponibilidad Vuse 1K
+    (d.vuse && d.vuse['vuse1k-uva']) ? 'Sí' : 'No',
+    (d.vuse && d.vuse['vuse1k-sd'])  ? 'Sí' : 'No',
+    (d.vuse && d.vuse['vuse1k-ma'])  ? 'Sí' : 'No',
+    (d.vuse && d.vuse['vuse1k-me'])  ? 'Sí' : 'No',
+    // Disponibilidad Vuse 3K
+    (d.vuse && d.vuse['vuse3k-uva']) ? 'Sí' : 'No',
+    (d.vuse && d.vuse['vuse3k-ar'])  ? 'Sí' : 'No',
+    // Vuse 5K / 8K
+    yn(d.vuse5k), yn(d.vuse8k),
+    // Levantamiento competencia + semana
+    d.competencia || '', d.semana || '',
     // Contrabando
     yn(d.contrabando), d.marcasContrabando || '', foto('contrabando'),
     // Fachada + panorámica
