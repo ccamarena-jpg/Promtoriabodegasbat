@@ -194,7 +194,8 @@ function getOrCreatePadronSheet() {
 }
 
 function populatePadronIfEmpty(sheet) {
-  if (sheet.getLastRow() > 1) {
+  const forced = getScriptProps().getProperty('PADRON_RESET') === 'true';
+  if (!forced && sheet.getLastRow() > 1) {
     Logger.log('ℹ️ Padrón Rutas ya tiene datos, no se sobreescribe.');
     return;
   }
@@ -405,6 +406,46 @@ function addNewColumns() {
   });
 
   Logger.log('Migración completada. ' + added + ' columnas nuevas agregadas.');
+}
+
+// ───────────────────────────────────────────────────────────────
+// RESET PADRÓN — borra y repuebla con los 83 PDVs actualizados
+// Ejecutar 1 vez para sincronizar el Sheet con el nuevo padrón
+// ───────────────────────────────────────────────────────────────
+
+function resetPadron() {
+  const sheet = getOrCreatePadronSheet();
+
+  // Verificar/agregar columnas nuevas si faltan
+  const hdrs = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const extraCols = ['Cigarrera (fijo)', 'Dispenser Velo (fijo)', 'Comunicación Cigarrera'];
+  extraCols.forEach((col, i) => {
+    if (!hdrs.includes(col)) {
+      const colIdx = 9 + i;
+      sheet.getRange(1, colIdx).setValue(col)
+           .setBackground('#1C2B4A').setFontColor('#ffffff')
+           .setFontWeight('bold').setFontSize(10);
+      sheet.setColumnWidth(colIdx, [130, 145, 180][i]);
+    }
+  });
+
+  // Borrar datos existentes (preservar encabezado)
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+  }
+
+  // Repoblar con los 83 PDVs actualizados
+  populatePadronIfEmpty._force = true;
+  const ss = sheet.getParent();
+  // Usar el mismo arreglo de defaults pero forzar la escritura
+  const props = getScriptProps();
+  props.setProperty('PADRON_RESET', 'true');
+  populatePadronIfEmpty(sheet);
+  props.deleteProperty('PADRON_RESET');
+
+  Logger.log('✅ Padrón Rutas reseteado con 83 PDVs actualizados.');
+  Logger.log('   Total filas: ' + (sheet.getLastRow() - 1));
 }
 
 // ───────────────────────────────────────────────────────────────
