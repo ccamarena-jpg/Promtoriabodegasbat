@@ -641,10 +641,13 @@ async function loadPOSData(force){
       if(cached){ POS_DATA=JSON.parse(cached); console.log('POS: desde caché sesión'); return 'cache'; }
     }catch(e){}
   }
-  // 2) Intentar cargar desde Google Sheets (Padrón Rutas)
+  // 2) Intentar cargar desde Google Sheets (Padrón Rutas) — con timeout de 6s
   try{
     console.log('POS: consultando Sheet...');
-    const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache'});
+    const ctrl=new AbortController();
+    const tId=setTimeout(()=>ctrl.abort(),6000);
+    const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache',signal:ctrl.signal});
+    clearTimeout(tId);
     const json=await resp.json();
     console.log('POS Sheet response:', JSON.stringify(json).substring(0,200));
     if(json.ok&&json.data&&Object.keys(json.data).length>0){
@@ -692,7 +695,8 @@ async function doLogin(){
   // Mostrar pantalla de carga mientras se obtienen los POS del Sheet
   document.getElementById('login-screen').style.display='none';
   document.getElementById('loading-screen').style.display='flex';
-  await loadPOSData();
+  try{ await Promise.race([loadPOSData(), new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),8000))]); }
+  catch(e){ POS_DATA=FALLBACK_POS_DATA; console.warn('Login POS load failed, using fallback:', e.message); }
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('app').classList.add('active');
   document.getElementById('semana-badge').textContent=getSemanaLabel();
