@@ -692,12 +692,12 @@ async function doLogin(){
   document.getElementById('login-err').style.display='none';
   currentUser=email; currentRole=u.role;
   visits=JSON.parse(localStorage.getItem('bat_v2_'+email)||'{}');
-  // Mostrar pantalla de carga mientras se obtienen los POS del Sheet
+
+  // Mostrar app INMEDIATAMENTE — sin pantalla de carga
+  POS_DATA=FALLBACK_POS_DATA;
+  try{ const c=sessionStorage.getItem('bat_pos_data'); if(c) POS_DATA=JSON.parse(c); }catch(e){}
+
   document.getElementById('login-screen').style.display='none';
-  document.getElementById('loading-screen').style.display='flex';
-  try{ await Promise.race([loadPOSData(), new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),8000))]); }
-  catch(e){ POS_DATA=FALLBACK_POS_DATA; console.warn('Login POS load failed, using fallback:', e.message); }
-  document.getElementById('loading-screen').style.display='none';
   document.getElementById('app').classList.add('active');
   document.getElementById('semana-badge').textContent=getSemanaLabel();
   if(currentRole==='admin'){
@@ -706,7 +706,15 @@ async function doLogin(){
     document.getElementById('btn-nueva-sem').style.display='';
   }
   try{ initApp(); }catch(err){ console.error('initApp error:',err); }
-  setTimeout(()=>{ if(map) map.invalidateSize(); },150);
+  setTimeout(()=>{ if(map) map.invalidateSize(); },200);
+
+  // Actualizar desde Sheets EN BACKGROUND (no bloquea la UI)
+  loadPOSData(true).then(src=>{
+    if(src==='sheet'){
+      try{ buildDayTabs(); if(currentDay) selectDay(currentDay); }catch(e){}
+      toast('✓ Ruta actualizada desde Google Sheets');
+    }
+  }).catch(()=>{});
 }
 function doLogout(){
   currentUser=null; currentRole=null;
