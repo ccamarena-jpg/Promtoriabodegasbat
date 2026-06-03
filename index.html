@@ -177,6 +177,8 @@ textarea{resize:vertical;min-height:52px}
 /* TOAST */
 #toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:rgba(26,46,106,.95);color:#fff;padding:9px 18px;border-radius:28px;font-size:12px;font-weight:600;z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;border-left:3px solid var(--accent)}
 #toast.show{opacity:1}
+.dash-tab-btn.active{color:#F5A123!important;border-bottom-color:#F5A123!important;background:rgba(255,255,255,.05)!important}
+.dash-tab-btn:hover:not(.active){color:#fff!important;background:rgba(255,255,255,.08)!important}
 </style>
 </head>
 <body>
@@ -301,15 +303,17 @@ textarea{resize:vertical;min-height:52px}
   <text x="66" y="50" font-family="Arial,sans-serif" font-size="7.5" fill="#8A96B3" letter-spacing="1.8">TRADE MARKETING SOLUTIONS</text>
 </svg></div>
     <h1>Dashboard — Promotoría Bodegas Audit</h1>
-    <select id="dash-day-filter" onchange="renderDash()" style="width:auto;padding:6px 10px;font-size:11px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer">
-      <option value="ALL">Todos los días</option>
-      <option value="LUNES">Lunes (15)</option>
-      <option value="MARTES">Martes (17)</option>
-      <option value="MIERCOLES">Miércoles (22)</option>
-      <option value="JUEVES">Jueves (24)</option>
-      <option value="VIERNES">Viernes (12)</option>
-    </select>
-    <button class="btn-icon" onclick="closeDash()" style="margin-left:6px">✕ Cerrar</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <select id="dash-sem-filter" onchange="renderDashContent()" style="width:auto;padding:6px 10px;font-size:11px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:none">
+        <option value="ALL">Todas las semanas</option>
+      </select>
+      <button class="btn-icon" onclick="closeDash()" style="margin-left:6px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:0;background:rgba(0,0,0,.15);flex-shrink:0">
+    <button class="dash-tab-btn active" onclick="switchDashTab('general',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📋 Vista General</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('materiales',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📌 Materiales</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('stock',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📦 Stock &amp; Vuse</button>
   </div>
   <div class="dash-body" id="dash-body"></div>
 </div>
@@ -492,109 +496,102 @@ textarea{resize:vertical;min-height:52px}
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// FALLBACK POS DATA — 90 registros (respaldo offline)
+// FALLBACK POS DATA — 83 registros (respaldo offline)
 // Se reemplaza con datos del Sheet "Padrón Rutas" al hacer login
 // ═══════════════════════════════════════════════════════════
 const FALLBACK_POS_DATA = {
   "LUNES": [
-    {"id":"pos_LUN_01","nombre":"AQUINO PEREZ MARILU","direccion":"AV LIMA 478","distrito":"SAN MIGUEL","lat":-12.0893726939697,"lon":-77.0787742361426},
-    {"id":"pos_LUN_02","nombre":"COMERCIALIZADORA AYKILU SOCIEDAD ANONIMA CERRADA","direccion":"CALLE JOSE OLAYA 163","distrito":"SAN MIGUEL","lat":-12.0798195818304,"lon":-77.1041868254542},
-    {"id":"pos_LUN_03","nombre":"CONSORCIO AQUINO SAC","direccion":"PROLONGACION AYACUCHO 277","distrito":"SAN MIGUEL","lat":-12.0852395780384,"lon":-77.075503282249},
-    {"id":"pos_LUN_04","nombre":"CONSORCIO BRISOL S.A.C.","direccion":"AV BRIGIDA SILVA 240","distrito":"SAN MIGUEL","lat":-12.081702429876174,"lon":-77.08856530487537},
-    {"id":"pos_LUN_05","nombre":"GRIFO JUAN PABLO II EIRL","direccion":"AV LA MARINA 3805  LA PERLA ALTA","distrito":"LA PERLA","lat":-12.0702543256972,"lon":-77.1100628748536},
-    {"id":"pos_LUN_06","nombre":"LIKOW S.A.C.","direccion":"JR JOSE GALVEZ 633","distrito":"MAGDALENA DEL MAR","lat":-12.0901116452254,"lon":-77.0740998163819},
-    {"id":"pos_LUN_07","nombre":"MARTEL JIMENEZ JORGE ALBERTO","direccion":"CL MARIANA ECHEVARRIA 289","distrito":"SAN MIGUEL","lat":-12.084249,"lon":-77.084931},
-    {"id":"pos_LUN_08","nombre":"NEGOCIACIONES CAZU S.A.C.","direccion":"AV DE LOS PATRIOTAS  532 SAN MIGUEL","distrito":"SAN MIGUEL","lat":-12.0756902526649,"lon":-77.1004796773195},
-    {"id":"pos_LUN_09","nombre":"OBRADOVICH RIOFRIO HELEN SOLANGE","direccion":"AV  LA PAZ 1195","distrito":"LA PERLA","lat":-12.0721474046999,"lon":-77.1242219209671},
-    {"id":"pos_LUN_10","nombre":"PETROCENTRO YULIA S.A.C.","direccion":"AV LA MARINA 2789 URB MARANGA","distrito":"SAN MIGUEL","lat":-12.0777026323877,"lon":-77.0932846516371},
-    {"id":"pos_LUN_11","nombre":"TENORIO NUÑEZ JOSE EDWIN","direccion":"MARISCAL CASTILLA MZ F1 LT 1 LA PERLA ALTA CALLAO","distrito":"LA PERLA","lat":-12.0697579394154,"lon":-77.1164233982563},
-    {"id":"pos_LUN_12","nombre":"EMPRESA COMERCIALIZADORA Y DE SERVICIOS JULIA SAC","direccion":"AV UNIVERSITARIA 1789 CERCADO DE LIMA","distrito":"LIMA","lat":-12.0680845141581,"lon":-77.0775223150849},
-    {"id":"pos_LUN_13","nombre":"OPERACIONES Y SERVICIOS GENERALES","direccion":"AV CAMINOS DEL INCA MZ N LT 19 URB SAN JUAN BAUTISTA","distrito":"CHORRILLOS","lat":-12.1041926366876,"lon":-77.0640502497554},
-    {"id":"pos_LUN_14","nombre":"ESTACION DE SERVICIOS LA MARINA S.A.C.","direccion":"AV LA MARINA NRO 405 URB DOIG LOSSIO LA PERLA CALLAO","distrito":"LA PERLA","lat":-12.0672507484182,"lon":-77.1154423803091},
-    {"id":"pos_LUN_15","nombre":"QUISPE QUINTANA MELCHORA","direccion":"AV HIPOLITO UNANUE 114 URB COLONIAL","distrito":"CALLAO","lat":-12.0521864532339,"lon":-77.0929443463683}
+    {"id":"pos_LUN_01","nombre":"BRISAS MARKET E.I.R.L.","direccion":"ALAMEDA EL TRIANGULO MZ E LT 3 URB LAS BRISAS  DE VILLA","distrito":"CHORRILLOS","lat":-12.219034158098,"lon":-76.9939218834043},
+    {"id":"pos_LUN_02","nombre":"BONCALCORP S.A.C.","direccion":"AV DEFENSORES DEL MORRO 1499","distrito":"CHORRILLOS","lat":-12.176290338229045,"lon":-77.01680950820446},
+    {"id":"pos_LUN_03","nombre":"CHRISMARKET EIRL","direccion":"AV MEXICO 372","distrito":"CHORRILLOS","lat":-12.17453892459325,"lon":-77.02195029705763},
+    {"id":"pos_LUN_04","nombre":"CORPORACION DIAS BUENOS SAC","direccion":"AV BERLIN 390","distrito":"MIRAFLORES","lat":-12.120397381446,"lon":-77.0335736498237},
+    {"id":"pos_LUN_05","nombre":"CUBAS MARLO INDALESIO","direccion":"AV ARICA 406","distrito":"MIRAFLORES","lat":-12.1157087834429,"lon":-77.0357368513942},
+    {"id":"pos_LUN_06","nombre":"DETALLES VICTORIANA S.A.C.","direccion":"AV FLORA TRISTAN 637","distrito":"LA MOLINA","lat":-12.068243529350733,"lon":-76.94335386157036},
+    {"id":"pos_LUN_07","nombre":"GOMEZ CAJAS SONIA","direccion":"JR JUAN FANNING 401","distrito":"MIRAFLORES","lat":-12.129014182266204,"lon":-77.03127332031727},
+    {"id":"pos_LUN_08","nombre":"HERRERA IRIGOIN CARLOS ALBERTO","direccion":"CALLE COMANDANTE ARISTIDES ALJOVIN NRO 137","distrito":"MIRAFLORES","lat":-12.130938640655748,"lon":-77.02952485531569},
+    {"id":"pos_LUN_09","nombre":"LAGOS SOTO MARISOL","direccion":"JR PEA RIVERA MZ A LOTE 15","distrito":"SANTIAGO DE SURCO","lat":-12.1422684396729,"lon":-77.0110977441072},
+    {"id":"pos_LUN_10","nombre":"LEYVA ROCHE ISAIAS - ORPAC SAC","direccion":"AV BALTA 283","distrito":"BARRANCO","lat":-12.143073454936896,"lon":-77.01623182743788},
+    {"id":"pos_LUN_11","nombre":"MARKET PERCY E.I.R.L","direccion":"AV 26 DE JULIO 211","distrito":"SAN LUIS","lat":-12.062740237355236,"lon":-76.99835523962975},
+    {"id":"pos_LUN_12","nombre":"MINIMARKET-LICORERIA VICTORIA S.R.L.","direccion":"AV ALMIRANTE MIGUEL GRAU 384","distrito":"BARRANCO","lat":-12.14781860335268,"lon":-77.02122777700424},
+    {"id":"pos_LUN_13","nombre":"NAVEROS VARGAS MARISOL","direccion":"AV GRAU 202A","distrito":"BARRANCO","lat":-12.1503427374274,"lon":-77.0204351842403},
+    {"id":"pos_LUN_14","nombre":"NEGOCIACIONES JIREH & MAJAZ EIRL","direccion":"CALLE BERLIN 375","distrito":"MIRAFLORES","lat":-12.120866466176302,"lon":-77.03335035592316},
+    {"id":"pos_LUN_15","nombre":"PIZARRO BARRIENTOS WALTER","direccion":"AV ENRIQUE PALACIOS 1188","distrito":"MIRAFLORES","lat":-12.1170160789261,"lon":-77.0409279316664},
+    {"id":"pos_LUN_16","nombre":"RB CORPORACION RAMIREZ SAC","direccion":"JOAQUIN COPELLO 384","distrito":"MIRAFLORES","lat":-12.115505214538,"lon":-77.0450012013316},
+    {"id":"pos_LUN_17","nombre":"RODRIGO SOTO BENJAMIN","direccion":"AVENIDA GRAU 1175","distrito":"BARRANCO","lat":-12.1397935,"lon":-77.022401},
+    {"id":"pos_LUN_18","nombre":"VEGA VEGA MARIA LUZ","direccion":"ABRAHAM BALLENA 195","distrito":"CHORRILLOS","lat":-12.1670998762297,"lon":-77.0206182450056}
   ],
   "MARTES": [
-    {"id":"pos_MAR_01","nombre":"COMERCIAL AMECAR  S.A.C","direccion":"JR INCA 640  SURQUILLO","distrito":"SURQUILLO","lat":-12.1146445,"lon":-77.0209908},
-    {"id":"pos_MAR_02","nombre":"MARLO NUNEZ SEGUNDO SIMEON","direccion":"AV PETIT THOUARS 4536","distrito":"MIRAFLORES","lat":-12.1079,"lon":-77.0298},
-    {"id":"pos_MAR_03","nombre":"MINI MARKET DAYLU S.A.C.","direccion":"CALLE FRANCISCO MORENO 1099 SURQUILLO","distrito":"SURQUILLO","lat":-12.1104123355005,"lon":-77.0246656984091},
-    {"id":"pos_MAR_04","nombre":"INVERSIONES & NEGOCIACIONES DAMI S.A.C.","direccion":"JR CENTENARIO 1198","distrito":"BRE¥A","lat":-12.0595224723205,"lon":-77.0566081255674},
-    {"id":"pos_MAR_05","nombre":"TIENDAS AQUINOMAS E.I.R.L.","direccion":"AV JOSE GALVEZ NRO 501","distrito":"LA VICTORIA","lat":-12.064963,"lon":-77.032057},
-    {"id":"pos_MAR_06","nombre":"YARANGA ASCA KATHERINE  MAURA","direccion":"JR MARISCAL DE LAS HERAS 264","distrito":"LINCE","lat":-12.0863247443473,"lon":-77.033405341208},
-    {"id":"pos_MAR_07","nombre":"YARANGA ASCA VALERY DANITZA","direccion":"CALLE MARISCAL LAS HERAS NRO 268","distrito":"LINCE","lat":-12.086339,"lon":-77.0334314927459},
-    {"id":"pos_MAR_08","nombre":"BODEGA ALCAS E. I. R. L","direccion":"JR MARISCAL MILLER 1098,","distrito":"JESUS MARIA","lat":-12.0758633611925,"lon":-77.0383231714368},
-    {"id":"pos_MAR_09","nombre":"BODEGA ALE & JOAO E.I.R.L","direccion":"JR PUMACAHUA 2400 LINCE","distrito":"LINCE","lat":-12.085902808604455,"lon":-77.04314108937979},
-    {"id":"pos_MAR_10","nombre":"HOME MARKET PERUMAS E.I.R.L","direccion":"JR BRIGADIER MATEO PUMACAHUA 1698","distrito":"JESUS MARIA","lat":-12.0789822462323,"lon":-77.04340595752},
-    {"id":"pos_MAR_11","nombre":"INVERSIONES MARK LIZ S. A. C","direccion":"AV. ARENALES 1913","distrito":"LINCE","lat":-12.083930487870504,"lon":-77.03560810536146},
-    {"id":"pos_MAR_12","nombre":"INVERSIONES Y SERVICIOS ROMY E.I.R.L","direccion":"CA GENERAL TRINIDAD MORAN 1123","distrito":"SAN ISIDRO","lat":-12.0903852,"lon":-77.0425894},
-    {"id":"pos_MAR_13","nombre":"MARKET JUANITO S.A.C","direccion":"AV HORACIO URTEAGA 1519","distrito":"JESUS MARIA","lat":-12.0765561220401,"lon":-77.05042161047461},
-    {"id":"pos_MAR_14","nombre":"NOVO MARKET VF SOCIEDAD ANONIMA CERRADA","direccion":"AV JULIO C TELLO 301 LINCE","distrito":"LINCE","lat":-12.08618606623946,"lon":-77.0371389761567},
-    {"id":"pos_MAR_15","nombre":"ROQUE GUTIERREZ EFRAIN","direccion":"AV VENEZUELA 703","distrito":"BRE¥A","lat":-12.054766,"lon":-77.043892},
-    {"id":"pos_MAR_16","nombre":"QUINTANA CARBAJAL DIEGO ENRIQUE","direccion":"AV SERGIO BERNALES 537","distrito":"SURQUILLO","lat":-12.1173704375064,"lon":-77.0139395445585},
-    {"id":"pos_MAR_17","nombre":"TINTOS INDELEBLES E.I.R.L.","direccion":"AV REPUBLICA DE PANAMA 5454","distrito":"SURQUILLO","lat":-12.1183463143464,"lon":-77.0184526965022}
+    {"id":"pos_MAR_01","nombre":"AQUINO PEREZ MARILU","direccion":"AV LIMA 478","distrito":"SAN MIGUEL","lat":-12.0893726939697,"lon":-77.0787742361426},
+    {"id":"pos_MAR_02","nombre":"COMERCIALIZADORA AYKILU SOCIEDAD ANONIMA CERRADA","direccion":"CALLE JOSE OLAYA 163","distrito":"SAN MIGUEL","lat":-12.0798195818304,"lon":-77.1041868254542},
+    {"id":"pos_MAR_03","nombre":"CONSORCIO AQUINO SAC","direccion":"PROLONGACION AYACUCHO 277","distrito":"SAN MIGUEL","lat":-12.0852395780384,"lon":-77.075503282249},
+    {"id":"pos_MAR_04","nombre":"CONSORCIO BRISOL S.A.C.","direccion":"AV BRIGIDA SILVA 240","distrito":"SAN MIGUEL","lat":-12.081702429876174,"lon":-77.08856530487537},
+    {"id":"pos_MAR_05","nombre":"DE LA CRUZ ZEVALLOS","direccion":"SERGIO BERNALES 521","distrito":"MIRAFLORES","lat":-12.117326390183573,"lon":-77.01416673327465},
+    {"id":"pos_MAR_06","nombre":"EMPRESA COMERCIALIZADORA Y DE SERVICIOS JULIA SAC","direccion":"AV UNIVERSITARIA 1789 CERCADO DE LIMA","distrito":"LIMA","lat":-12.0680845141581,"lon":-77.0775223150849},
+    {"id":"pos_MAR_07","nombre":"ESTACION DE SERVICIOS LA MARINA S.A.C.","direccion":"AV LA MARINA NRO 405 URB DOIG LOSSIO LA PERLA CALLAO","distrito":"LA PERLA","lat":-12.0672507484182,"lon":-77.1154423803091},
+    {"id":"pos_MAR_08","nombre":"GRIFO JUAN PABLO II EIRL","direccion":"AV LA MARINA 3805 LA PERLA ALTA","distrito":"LA PERLA","lat":-12.0702543256972,"lon":-77.1100628748536},
+    {"id":"pos_MAR_09","nombre":"LIKOW S.A.C.","direccion":"JR JOSE GALVEZ 633","distrito":"MAGDALENA DEL MAR","lat":-12.0901116452254,"lon":-77.0740998163819},
+    {"id":"pos_MAR_10","nombre":"MARTEL JIMENEZ JORGE ALBERTO","direccion":"CL MARIANA ECHEVARRIA 289","distrito":"SAN MIGUEL","lat":-12.084249,"lon":-77.084931},
+    {"id":"pos_MAR_11","nombre":"NEGOCIACIONES CAZU S.A.C.","direccion":"AV DE LOS PATRIOTAS 532 SAN MIGUEL","distrito":"SAN MIGUEL","lat":-12.0756902526649,"lon":-77.1004796773195},
+    {"id":"pos_MAR_12","nombre":"OBRADOVICH RIOFRIO HELEN SOLANGE","direccion":"AV LA PAZ 1195","distrito":"LA PERLA","lat":-12.0721474046999,"lon":-77.1242219209671},
+    {"id":"pos_MAR_13","nombre":"PETROCENTRO YULIA S.A.C.","direccion":"AV LA MARINA 2789 URB MARANGA","distrito":"SAN MIGUEL","lat":-12.0777026323877,"lon":-77.0932846516371},
+    {"id":"pos_MAR_14","nombre":"QUISPE QUINTANA MELCHORA","direccion":"AV HIPOLITO UNANUE 114 URB COLONIAL","distrito":"CALLAO","lat":-12.0521864532339,"lon":-77.0929443463683}
   ],
   "MIERCOLES": [
-    {"id":"pos_MIE_01","nombre":"ARAKAKI S.A.","direccion":"JR ENRIQUE PALACIOS 915","distrito":"MIRAFLORES","lat":-12.1172075178475,"lon":-77.0384304597974},
-    {"id":"pos_MIE_02","nombre":"BONCALCORP S.A.C.","direccion":"AV DEFENSORES DEL MORRO 1499","distrito":"CHORRILLOS","lat":-12.176290338229045,"lon":-77.01680950820446},
-    {"id":"pos_MIE_03","nombre":"BRISAS MARKET E.I.R.L.","direccion":"ALAMEDA EL TRIANGULO MZ E LT 3 URB LAS BRISAS  DE VILLA","distrito":"CHORRILLOS","lat":-12.219034158098,"lon":-76.9939218834043},
-    {"id":"pos_MIE_04","nombre":"CHRISMARKET EIRL","direccion":"AV MEXICO 372","distrito":"CHORRILLOS","lat":-12.17453892459325,"lon":-77.02195029705763},
-    {"id":"pos_MIE_05","nombre":"CORPORACION DIAS BUENOS SAC","direccion":"AV BERLIN 390","distrito":"MIRAFLORES","lat":-12.120397381446,"lon":-77.0335736498237},
-    {"id":"pos_MIE_06","nombre":"CUBAS MARLO INDALESIO","direccion":"AV ARICA 406","distrito":"MIRAFLORES","lat":-12.1157087834429,"lon":-77.0357368513942},
-    {"id":"pos_MIE_07","nombre":"GOMEZ CAJAS SONIA","direccion":"JR JUAN FANNING 401","distrito":"MIRAFLORES","lat":-12.129014182266204,"lon":-77.03127332031727},
-    {"id":"pos_MIE_08","nombre":"NEGOCIACIONES JIREH & MAJAZ EIRL","direccion":"CALLE BERLIN 375","distrito":"MIRAFLORES","lat":-12.120866466176302,"lon":-77.03335035592316},
-    {"id":"pos_MIE_09","nombre":"PIZARRO BARRIENTOS WALTER","direccion":"AV ENRIQUE PALACIOS 1188","distrito":"MIRAFLORES","lat":-12.1170160789261,"lon":-77.0409279316664},
-    {"id":"pos_MIE_10","nombre":"RB CORPORACION RAMIREZ SAC","direccion":"AV REPUBLICA DE ARGENTINA 3093","distrito":"MIRAFLORES","lat":-12.115505214538,"lon":-77.0450012013316},
-    {"id":"pos_MIE_11","nombre":"VEGA VEGA MARIA LUZ","direccion":"ABRAHAM BALLENA 195","distrito":"CHORRILLOS","lat":-12.1670998762297,"lon":-77.0206182450056},
-    {"id":"pos_MIE_12","nombre":"ARROYO COCHACHI MIGUEL ANGEL","direccion":"AV LA PAZ 472","distrito":"MIRAFLORES","lat":-12.1221239107626,"lon":-77.0269033312798},
-    {"id":"pos_MIE_13","nombre":"DYUSPA MAKIN S.A.C.","direccion":"CALLE PERCY PHILIPS CUBA 328","distrito":"MIRAFLORES","lat":-12.126265962111276,"lon":-77.00750358402729},
-    {"id":"pos_MIE_14","nombre":"DYUSPA MAKIN S.A.C.","direccion":"CALLE SAN FERNANDO 405 URB LEURO MIRAFLORES","distrito":"MIRAFLORES","lat":-12.1324782629215,"lon":-77.0266069471836},
-    {"id":"pos_MIE_15","nombre":"HERRERA IRIGOIN CARLOS ALBERTO","direccion":"CALLE COMANDANTE ARISTIDES ALJOVIN NRO 137","distrito":"MIRAFLORES","lat":-12.130938640655748,"lon":-77.02952485531569},
-    {"id":"pos_MIE_16","nombre":"IRRIZABAL HUAMAN DIANA FLOR","direccion":"AV LA PAZ NRO 1101 URB ALMENDARIZ","distrito":"MIRAFLORES","lat":-12.129109897438614,"lon":-77.02638264745474},
-    {"id":"pos_MIE_17","nombre":"LAGOS SOTO MARISOL","direccion":"JR PEA RIVERA MZ A LOTE 15","distrito":"SANTIAGO DE SURCO","lat":-12.1422684396729,"lon":-77.0110977441072},
-    {"id":"pos_MIE_18","nombre":"MINIMARKET-LICORERIA VICTORIA S.R.L.","direccion":"AV ALMIRANTE MIGUEL GRAU 384","distrito":"BARRANCO","lat":-12.14781860335268,"lon":-77.02122777700424},
-    {"id":"pos_MIE_19","nombre":"NAVEROS VARGAS MARISOL","direccion":"AV GRAU 202A","distrito":"BARRANCO","lat":-12.1503427374274,"lon":-77.0204351842403},
-    {"id":"pos_MIE_20","nombre":"ORCAP SAC","direccion":"AV BALTA 281A","distrito":"BARRANCO","lat":-12.143073454936896,"lon":-77.01623182743788},
-    {"id":"pos_MIE_21","nombre":"RODRIGO SOTO BENJAMIN","direccion":"AVENIDA GRAU 1175","distrito":"BARRANCO","lat":-12.1397935,"lon":-77.022401},
-    {"id":"pos_MIE_22","nombre":"SIRIUS IMPORT S.A.C.","direccion":"A V ALFREDO BENAVIDES 540","distrito":"MIRAFLORES","lat":-12.12511375976216,"lon":-77.02751185745002}
+    {"id":"pos_MIE_01","nombre":"BODEGA ALCAS E. I. R. L","direccion":"JR MARISCAL MILLER 1098","distrito":"JESUS MARIA","lat":-12.0758633611925,"lon":-77.0383231714368},
+    {"id":"pos_MIE_02","nombre":"BODEGA ALE & JOAO E.I.R.L","direccion":"JR PUMACAHUA 2400 LINCE","distrito":"LINCE","lat":-12.085902808604455,"lon":-77.04314108937979},
+    {"id":"pos_MIE_03","nombre":"COMERCIAL AMECAR S.A.C","direccion":"JR INCA 640 SURQUILLO","distrito":"SURQUILLO","lat":-12.1146445,"lon":-77.0209908},
+    {"id":"pos_MIE_04","nombre":"HOME MARKET PERUMAS E.I.R.L","direccion":"JR BRIGADIER MATEO PUMACAHUA 1698","distrito":"JESUS MARIA","lat":-12.0789822462323,"lon":-77.04340595752},
+    {"id":"pos_MIE_05","nombre":"INVERSIONES & NEGOCIACIONES DAMI S.A.C.","direccion":"JR CENTENARIO 1198","distrito":"BRENA","lat":-12.0595224723205,"lon":-77.0566081255674},
+    {"id":"pos_MIE_06","nombre":"INVERSIONES MARK LIZ S. A. C","direccion":"AV. ARENALES 1913","distrito":"LINCE","lat":-12.083930487870504,"lon":-77.03560810536146},
+    {"id":"pos_MIE_07","nombre":"INVERSIONES Y SERVICIOS ROMY E.I.R.L","direccion":"CA GENERAL TRINIDAD MORAN 1123","distrito":"SAN ISIDRO","lat":-12.0903852,"lon":-77.0425894},
+    {"id":"pos_MIE_08","nombre":"MARKET JUANITO S.A.C","direccion":"AV HORACIO URTEAGA 1519","distrito":"JESUS MARIA","lat":-12.0765561220401,"lon":-77.05042161047461},
+    {"id":"pos_MIE_09","nombre":"MARLO NUNEZ SEGUNDO SIMEON","direccion":"AV PETIT THOUARS 4536","distrito":"MIRAFLORES","lat":-12.1079,"lon":-77.0298},
+    {"id":"pos_MIE_10","nombre":"NOVO MARKET VF SOCIEDAD ANONIMA CERRADA","direccion":"AV JULIO C TELLO 301 LINCE","distrito":"LINCE","lat":-12.08618606623946,"lon":-77.0371389761567},
+    {"id":"pos_MIE_11","nombre":"QUINTANA CARBAJAL DIEGO ENRIQUE","direccion":"AV SERGIO BERNALES 537","distrito":"SURQUILLO","lat":-12.1173704375064,"lon":-77.0139395445585},
+    {"id":"pos_MIE_12","nombre":"ROQUE GUTIERREZ EFRAIN","direccion":"AV VENEZUELA 703","distrito":"BRENA","lat":-12.054766,"lon":-77.043892},
+    {"id":"pos_MIE_13","nombre":"TIENDAS AQUINOMAS E.I.R.L.","direccion":"AV JOSE GALVEZ NRO 501","distrito":"LA VICTORIA","lat":-12.064963,"lon":-77.032057},
+    {"id":"pos_MIE_14","nombre":"TINTOS INDELEBLES E.I.R.L.","direccion":"AV REPUBLICA DE PANAMA 5454","distrito":"SURQUILLO","lat":-12.1183463143464,"lon":-77.0184526965022},
+    {"id":"pos_MIE_15","nombre":"YARANGA ASCA VALERY DANITZA","direccion":"CALLE MARISCAL LAS HERAS NRO 268","distrito":"LINCE","lat":-12.086339,"lon":-77.0334314927459}
   ],
   "JUEVES": [
-    {"id":"pos_JUE_01","nombre":"BELISARIO PACOMPIA FAUSTINA","direccion":"CA BEETHOVEN 303","distrito":"SAN BORJA","lat":-12.0987876,"lon":-76.9967696},
-    {"id":"pos_JUE_02","nombre":"ELIAS REJAS VICTOR EDUARDO","direccion":"AV PASEO EL BOSQUE MZA B LTE 16","distrito":"SAN BORJA","lat":-12.10643755390606,"lon":-76.99103951454163},
-    {"id":"pos_JUE_03","nombre":"ESTACION SERVICIO AVIACION","direccion":"AV AVIACION 2680","distrito":"SAN BORJA","lat":-12.0940342160888,"lon":-77.0030658692122},
-    {"id":"pos_JUE_04","nombre":"GPO. ABJ CEMAR S.A.C.","direccion":"CALLE MONTE GRANDE 187 URB CHACARILLA DEL ESTANQUE","distrito":"SANTIAGO DE SURCO","lat":-12.1126181908264,"lon":-76.9905661046504},
-    {"id":"pos_JUE_05","nombre":"HUAYTAN VASQUEZ TEODORO W.","direccion":"CL ENGELS 190 LA CALERA","distrito":"SURQUILLO","lat":-12.1157995862699,"lon":-77.0028033480048},
-    {"id":"pos_JUE_06","nombre":"HYM OJEDA MARKET S.A.C","direccion":"CALLE 24 160 SAN BORJA MARISCAL CASTILLA","distrito":"SAN BORJA","lat":-12.095390136939011,"lon":-76.98217783123255},
-    {"id":"pos_JUE_07","nombre":"JLF ASOCIADOS S.A.C","direccion":"AV SAN BORJA NORTE 1415","distrito":"SAN BORJA","lat":-12.096089,"lon":-76.988326},
-    {"id":"pos_JUE_08","nombre":"LUZMER S.A.C.","direccion":"AV SAN BORJA NORTE 1361","distrito":"SAN BORJA","lat":-12.095737,"lon":-76.989412},
-    {"id":"pos_JUE_09","nombre":"MARKET NORMITA E. I. R. L.","direccion":"CALLE 24 NRO 194","distrito":"SAN BORJA","lat":-12.0950029658502,"lon":-76.9822961837053},
-    {"id":"pos_JUE_10","nombre":"MERLUZ SAC","direccion":"AV CAMINOS DEL INCA 1337","distrito":"SANTIAGO DE SURCO","lat":-12.1233378,"lon":-76.9850605},
-    {"id":"pos_JUE_11","nombre":"OJEDA BAUTISTA OSCAR JAVIER","direccion":"AV LAS ARTES 1540","distrito":"SAN BORJA","lat":-12.090662415019812,"lon":-76.98744334280491},
-    {"id":"pos_JUE_12","nombre":"OJEDA BAUTISTA OSCAR JAVIER","direccion":"AV LAS ARTES NRO 1540","distrito":"SAN BORJA","lat":-12.0907532263592,"lon":-76.9873213022947},
-    {"id":"pos_JUE_13","nombre":"OJEDA CANO LILIANA","direccion":"AV DE LAS ARTES NORTE NRO 1570","distrito":"SAN BORJA","lat":-12.0908994423859,"lon":-76.9870822504163},
-    {"id":"pos_JUE_14","nombre":"OJEDA CANO RAMON NICANOR","direccion":"CALLE 24 NRO 224 - URB MARISCAL CASTILLA","distrito":"SAN BORJA","lat":-12.0947711874619,"lon":-76.9823675975204},
-    {"id":"pos_JUE_15","nombre":"OJEDA CANO RUBEN OSCAR","direccion":"JR POUSSIN NRO 199 URB JACARANDA","distrito":"SAN BORJA","lat":-12.0879337985556,"lon":-76.9858048483729},
-    {"id":"pos_JUE_16","nombre":"OJEDA CANO RUBEN OSCAR","direccion":"JR POUSSIN 199 URB JACARANDA - SAN BORJA","distrito":"SAN BORJA","lat":-12.087983,"lon":-76.985706},
-    {"id":"pos_JUE_17","nombre":"OJEDA MARKET L & F E.I.R.L.","direccion":"JR LOMA REDONDA 184","distrito":"SANTIAGO DE SURCO","lat":-12.1367315993892,"lon":-76.9882309064269},
-    {"id":"pos_JUE_18","nombre":"OJEDA MARKET QHATU S.A.C","direccion":"MZE1 LT 43 AV ALEJANDRO VELASCO ASTETE SANTIAGO DE SURCO","distrito":"SANTIAGO DE SURCO","lat":-12.12896403012448,"lon":-76.98790334165095},
-    {"id":"pos_JUE_19","nombre":"PASTOR RUA RAQUEL","direccion":"CL LUIS MONTERO 194","distrito":"SAN BORJA","lat":-12.1088335,"lon":-77.0013042},
-    {"id":"pos_JUE_20","nombre":"REYES FLORES MIGUEL ANGEL","direccion":"AV AVIACION N 3459","distrito":"SAN BORJA","lat":-12.10642870278,"lon":-77.0007363706827},
-    {"id":"pos_JUE_21","nombre":"RIOS OJEDA SEBASTIAN","direccion":"AV ALEJANDRO VELASCO ASTETE 2083","distrito":"SANTIAGO DE SURCO","lat":-12.12747060647,"lon":-76.9872120022774},
-    {"id":"pos_JUE_22","nombre":"ADAN ARANDA MIRIAN","direccion":"JR  JUAN SOTO BERMEO 120 URB LA VIRREYNA","distrito":"SANTIAGO DE SURCO","lat":-12.1421606015313,"lon":-76.9921318441629},
-    {"id":"pos_JUE_23","nombre":"NUÑEZ BENITES MONICA LAURA","direccion":"AV  JUAN SOTO BERMEO 302 URB LA VIRREYNA SURCO","distrito":"SANTIAGO DE SURCO","lat":-12.144006627158536,"lon":-76.99329257011415},
-    {"id":"pos_JUE_24","nombre":"OJEDA YARANGA PERCY","direccion":"AV SURCO 650","distrito":"SANTIAGO DE SURCO","lat":-12.1408219627277,"lon":-76.9947071000934}
+    {"id":"pos_JUE_01","nombre":"ADAN ARANDA MIRIAN","direccion":"JR JUAN SOTO BERMEO 120 URB LA VIRREYNA","distrito":"SANTIAGO DE SURCO","lat":-12.1421606015313,"lon":-76.9921318441629},
+    {"id":"pos_JUE_02","nombre":"ANGEL MANUEL LUNAZCO","direccion":"ENRIQUE PALACIOS 1180","distrito":"MIRAFLORES","lat":-12.116705693711463,"lon":-77.04091517745537},
+    {"id":"pos_JUE_03","nombre":"ARAKAKI S.A.","direccion":"JR ENRIQUE PALACIOS 915","distrito":"MIRAFLORES","lat":-12.1172075178475,"lon":-77.0384304597974},
+    {"id":"pos_JUE_04","nombre":"BELISARIO PACOMPIA FAUSTINA","direccion":"CA BEETHOVEN 303","distrito":"SAN BORJA","lat":-12.0987876,"lon":-76.9967696},
+    {"id":"pos_JUE_05","nombre":"BODEGA JENNY","direccion":"BERLIN 999","distrito":"MIRAFLORES","lat":-12.1183,"lon":-77.0368},
+    {"id":"pos_JUE_06","nombre":"ELIAS REJAS VICTOR EDUARDO","direccion":"AV PASEO EL BOSQUE MZA B LTE 16","distrito":"SAN BORJA","lat":-12.10643755390606,"lon":-76.99103951454163},
+    {"id":"pos_JUE_07","nombre":"ESTACION SERVICIO AVIACION","direccion":"AV AVIACION 2680","distrito":"SAN BORJA","lat":-12.0940342160888,"lon":-77.0030658692122},
+    {"id":"pos_JUE_08","nombre":"GPO. ABJ CEMAR S.A.C.","direccion":"CALLE MONTE GRANDE 187 URB CHACARILLA DEL ESTANQUE","distrito":"SANTIAGO DE SURCO","lat":-12.1126181908264,"lon":-76.9905661046504},
+    {"id":"pos_JUE_09","nombre":"HUAYTAN VASQUEZ TEODORO W.","direccion":"CL ENGELS 190 LA CALERA","distrito":"SURQUILLO","lat":-12.1157995862699,"lon":-77.0028033480048},
+    {"id":"pos_JUE_10","nombre":"HYM OJEDA MARKET S.A.C","direccion":"CALLE 24 160 SAN BORJA MARISCAL CASTILLA","distrito":"SAN BORJA","lat":-12.095390136939011,"lon":-76.98217783123255},
+    {"id":"pos_JUE_11","nombre":"JLF ASOCIADOS S.A.C","direccion":"AV SAN BORJA NORTE 1415","distrito":"SAN BORJA","lat":-12.096089,"lon":-76.988326},
+    {"id":"pos_JUE_12","nombre":"LUZMER S.A.C.","direccion":"AV SAN BORJA NORTE 1361","distrito":"SAN BORJA","lat":-12.095737,"lon":-76.989412},
+    {"id":"pos_JUE_13","nombre":"MARKET NORMITA E. I. R. L.","direccion":"CALLE 24 NRO 194","distrito":"SAN BORJA","lat":-12.0950029658502,"lon":-76.9822961837053},
+    {"id":"pos_JUE_14","nombre":"MAX MARKET OJEDA EIRL","direccion":"AV PIO XXII 385 URB HUERTOS DE SANTA ROSA","distrito":"SANTIAGO DE SURCO","lat":-12.098231778541,"lon":-76.9652185589075},
+    {"id":"pos_JUE_15","nombre":"MERLUZ SAC","direccion":"AV CAMINOS DEL INCA 1337","distrito":"SANTIAGO DE SURCO","lat":-12.1233378,"lon":-76.9850605},
+    {"id":"pos_JUE_16","nombre":"NUÑEZ BENITES MONICA LAURA","direccion":"AV JUAN SOTO BERMEO 302 URB LA VIRREYNA SURCO","distrito":"SANTIAGO DE SURCO","lat":-12.144006627158536,"lon":-76.99329257011415},
+    {"id":"pos_JUE_17","nombre":"OJEDA BAUTISTA OSCAR JAVIER","direccion":"AV LAS ARTES NRO 1540","distrito":"SAN BORJA","lat":-12.0907532263592,"lon":-76.9873213022947},
+    {"id":"pos_JUE_18","nombre":"OJEDA CANO LILIANA","direccion":"AV DE LAS ARTES NORTE NRO 1570","distrito":"SAN BORJA","lat":-12.0908994423859,"lon":-76.9870822504163},
+    {"id":"pos_JUE_19","nombre":"OJEDA CANO RAMON NICANOR","direccion":"CALLE 24 NRO 224 - URB MARISCAL CASTILLA","distrito":"SAN BORJA","lat":-12.0947711874619,"lon":-76.9823675975204},
+    {"id":"pos_JUE_20","nombre":"OJEDA MARKET QHATU S.A.C","direccion":"MZE1 LT 43 AV ALEJANDRO VELASCO ASTETE SANTIAGO DE SURCO","distrito":"SANTIAGO DE SURCO","lat":-12.12896403012448,"lon":-76.98790334165095},
+    {"id":"pos_JUE_21","nombre":"OJEDA YARANGA PERCY","direccion":"AV SURCO 650","distrito":"SANTIAGO DE SURCO","lat":-12.1408219627277,"lon":-76.9947071000934},
+    {"id":"pos_JUE_22","nombre":"REYES FLORES MIGUEL ANGEL","direccion":"AV AVIACION N 3459","distrito":"SAN BORJA","lat":-12.10642870278,"lon":-77.0007363706827},
+    {"id":"pos_JUE_23","nombre":"RIOS OJEDA SEBASTIAN","direccion":"AV ALEJANDRO VELASCO ASTETE 2083","distrito":"SANTIAGO DE SURCO","lat":-12.12747060647,"lon":-76.9872120022774},
+    {"id":"pos_JUE_24","nombre":"SIRIUS IMPORT S.A.C.","direccion":"AV ALFREDO BENAVIDES 540","distrito":"MIRAFLORES","lat":-12.12511375976216,"lon":-77.02751185745002}
   ],
   "VIERNES": [
-    {"id":"pos_VIE_01","nombre":"BARATUS SAC","direccion":"AV LAS LOMAS MZ A1 LOTE 2","distrito":"LA MOLINA","lat":-12.1011678038228,"lon":-76.93842597305769},
-    {"id":"pos_VIE_02","nombre":"CORPORACION MILLA E  HIJOS E.I.R.L.","direccion":"JR EL POLO 493 URBANIZACION MONTERRICO","distrito":"SANTIAGO DE SURCO","lat":-12.1036350104875,"lon":-76.9726740941405},
-    {"id":"pos_VIE_03","nombre":"DETALLES VICTORIANA S.A.C.","direccion":"AV FLORA TRISTAN 637","distrito":"LA MOLINA","lat":-12.068243529350733,"lon":-76.94335386157036},
-    {"id":"pos_VIE_04","nombre":"DIAZ EVELYN MILAGROS","direccion":"AV JR LOS CONQUISTADORES LAS LOMAS 196","distrito":"LA MOLINA","lat":-12.0995312916996,"lon":-76.9393811747432},
-    {"id":"pos_VIE_05","nombre":"GAMARRA HUAMAN DE LOPEZ ANA ISABEL","direccion":"CALLE BUGANVILLAS MZ 2 LT 16 2DA ETAPA URB MUSA","distrito":"LA MOLINA","lat":-12.086362774265,"lon":-76.8881157785654},
-    {"id":"pos_VIE_06","nombre":"MAX MARKET OJEDA E.I.R.L.","direccion":"JR  PIO XII NRO 277","distrito":"SANTIAGO DE SURCO","lat":-12.096421825493916,"lon":-76.96541838347912},
-    {"id":"pos_VIE_07","nombre":"MAX MARKET OJEDA EIRL","direccion":"AV PIO XXII 385 URB HUERTOS DE SANTA ROSA","distrito":"SANTIAGO DE SURCO","lat":-12.098231778541,"lon":-76.9652185589075},
-    {"id":"pos_VIE_08","nombre":"OJEDA MARKET INVERSIONES E.I.R.L.","direccion":"AVENIDA CENTRAL 987 SURCO","distrito":"SANTIAGO DE SURCO","lat":-12.106697514625631,"lon":-76.95824950933456},
-    {"id":"pos_VIE_09","nombre":"MARKET PERCY E.I.R.L","direccion":"AV 26 DE JULIO 211","distrito":"SAN LUIS","lat":-12.062740237355236,"lon":-76.99835523962975},
-    {"id":"pos_VIE_10","nombre":"ASTORAYME MANSILLA GUIDO DARIO","direccion":"AVENIDA CANADA 3678 URB VILLA JARDIN","distrito":"SAN LUIS","lat":-12.080444139371206,"lon":-76.9923323392868},
-    {"id":"pos_VIE_11","nombre":"BODEBAZAR ANITAHS EIRL","direccion":"JR MANUEL BEINGOLEA 301","distrito":"SAN LUIS","lat":-12.071575613629625,"lon":-76.99613370001317},
-    {"id":"pos_VIE_12","nombre":"FAMLAI SAC","direccion":"AV BENJAMIN FRANKLIN 331","distrito":"ATE","lat":-12.065659602747605,"lon":-76.97621595114468}
+    {"id":"pos_VIE_01","nombre":"TENORIO NUÑEZ JOSE EDWIN","direccion":"MARISCAL CASTILLA MZ F1 LT 1 LA PERLA ALTA CALLAO","distrito":"LA PERLA","lat":-12.0697579394154,"lon":-77.1164233982563},
+    {"id":"pos_VIE_02","nombre":"ASTORAYME MANSILLA GUIDO DARIO","direccion":"AVENIDA CANADA 3678 URB VILLA JARDIN","distrito":"SAN LUIS","lat":-12.080444139371206,"lon":-76.9923323392868},
+    {"id":"pos_VIE_03","nombre":"BARATUS SAC","direccion":"AV LAS LOMAS MZ A1 LOTE 2","distrito":"LA MOLINA","lat":-12.1011678038228,"lon":-76.93842597305769},
+    {"id":"pos_VIE_04","nombre":"BODEBAZAR ANITAHS EIRL","direccion":"JR MANUEL BEINGOLEA 301","distrito":"SAN LUIS","lat":-12.071575613629625,"lon":-76.99613370001317},
+    {"id":"pos_VIE_05","nombre":"CORPORACION MILLA E HIJOS E.I.R.L.","direccion":"JR EL POLO 493 URBANIZACION MONTERRICO","distrito":"SANTIAGO DE SURCO","lat":-12.1036350104875,"lon":-76.9726740941405},
+    {"id":"pos_VIE_06","nombre":"DIAZ EVELYN MILAGROS","direccion":"AV JR LOS CONQUISTADORES LAS LOMAS 196","distrito":"LA MOLINA","lat":-12.0995312916996,"lon":-76.9393811747432},
+    {"id":"pos_VIE_07","nombre":"FAMLAI SAC","direccion":"AV BENJAMIN FRANKLIN 331","distrito":"ATE","lat":-12.065659602747605,"lon":-76.97621595114468},
+    {"id":"pos_VIE_08","nombre":"GAMARRA HUAMAN DE LOPEZ ANA ISABEL","direccion":"CALLE BUGANVILLAS MZ 2 LT 16 2DA ETAPA URB MUSA","distrito":"LA MOLINA","lat":-12.086362774265,"lon":-76.8881157785654},
+    {"id":"pos_VIE_09","nombre":"OJEDA CANO RUBEN OSCAR","direccion":"JR POUSSIN NRO 199 URB JACARANDA","distrito":"SAN BORJA","lat":-12.0879337985556,"lon":-76.9858048483729},
+    {"id":"pos_VIE_10","nombre":"OJEDA MARKET L & F E.I.R.L.","direccion":"JR LOMA REDONDA 184","distrito":"SANTIAGO DE SURCO","lat":-12.1367315993892,"lon":-76.9882309064269},
+    {"id":"pos_VIE_11","nombre":"OJEDA YARANGA MARIZA AIDE","direccion":"JR PIO XII NRO 279","distrito":"SANTIAGO DE SURCO","lat":-12.096421825493916,"lon":-76.96541838347912},
+    {"id":"pos_VIE_12","nombre":"PASTOR RUA RAQUEL","direccion":"CL LUIS MONTERO 194","distrito":"SAN BORJA","lat":-12.1088335,"lon":-77.0013042}
   ]
 };
 let POS_DATA = FALLBACK_POS_DATA; // actualizado dinámicamente desde Google Sheets
@@ -1028,95 +1025,224 @@ function updateHeader(){
 function openDash(){ document.getElementById('dash-overlay').classList.add('active'); renderDash(); }
 function closeDash(){ document.getElementById('dash-overlay').classList.remove('active'); }
 
-let _charts=[];
+let _charts=[], _dashTab='general', _allDashRecords=[];
+
+function getSemanaLabelFromKey(key){
+  if(!key||key==='ALL') return 'Todas las semanas';
+  const m=key.match(/^S(\d+)_([A-Z]+)(\d+)$/);
+  if(!m) return key;
+  const mx={ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
+  return `Semana ${m[1]} · ${mx[m[2]]||m[2]} 20${m[3]}`;
+}
+
+function switchDashTab(tab,btn){
+  _dashTab=tab;
+  document.querySelectorAll('.dash-tab-btn').forEach(b=>{b.style.color='rgba(255,255,255,.6)';b.style.borderBottomColor='transparent';b.style.background='transparent';});
+  btn.style.color='#F5A123'; btn.style.borderBottomColor='#F5A123'; btn.style.background='rgba(255,255,255,.05)';
+  const sf=document.getElementById('dash-sem-filter');
+  if(sf) sf.style.display=(tab==='general')?'none':'block';
+  renderDashContent();
+}
+
 async function renderDash(){
   _charts.forEach(c=>c.destroy()); _charts=[];
-  const body=document.getElementById('dash-body');
-  body.innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando...</p>';
-  let allRecords=[...currentWeekVisits()];
-  if(APPS_SCRIPT_URL!=='TU_APPS_SCRIPT_URL_AQUI'){
+  document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando...</p>';
+  _allDashRecords=[...currentWeekVisits()];
+  if(APPS_SCRIPT_URL&&!APPS_SCRIPT_URL.includes('TU_APPS')){
     try{
-      const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll&semana='+encodeURIComponent(currentSemana),{mode:'cors'});
+      const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll',{mode:'cors'});
       const r=await resp.json();
-      if(r.ok&&r.data){ const ids=new Set(allRecords.map(x=>x.id+'_'+x.semana)); r.data.forEach(rec=>{if(!ids.has(rec.id+'_'+rec.semana)) allRecords.push(rec);}) }
-    } catch(e){ console.log('Remote dash error',e); }
+      if(r.ok&&r.data){
+        const ids=new Set(_allDashRecords.map(x=>x.id+'_'+(x.semana||'')));
+        r.data.forEach(rec=>{if(!ids.has(rec.id+'_'+(rec.semana||''))) _allDashRecords.push(rec);});
+      }
+    }catch(e){console.log('Remote dash error',e);}
   }
-  const df=document.getElementById('dash-day-filter').value;
-  const records=df==='ALL'?allRecords:allRecords.filter(r=>r.dia===df);
-  const total=getAllPos().length;
-  const dayTotal=df==='ALL'?total:(POS_DATA[df]||[]).length;
-  const visitados=records.filter(r=>r.estado==='visitado').length;
-  const noEf=records.filter(r=>r.estado==='nogo').length;
-  const pend=Math.max(0,dayTotal-records.length);
-  const pct=dayTotal>0?Math.round((visitados+noEf)/dayTotal*100):0;
-  const cigSi=records.filter(r=>r.cigarrera==='Si').length;
-  const dispSi=records.filter(r=>r.dispenser==='Si').length;
-  const contSi=records.filter(r=>r.contrabando==='Si').length;
+  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
+  const sf=document.getElementById('dash-sem-filter');
+  if(sf){
+    while(sf.options.length>1) sf.remove(1);
+    semanas.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=getSemanaLabelFromKey(s);sf.appendChild(o);});
+    sf.style.display=_dashTab==='general'?'none':'block';
+    if(semanas.length&&sf.value==='ALL') sf.value=semanas[semanas.length-1];
+  }
+  renderDashContent();
+}
 
-  // Vuse counts
-  const vuse1k=k=>records.filter(r=>r.vuse&&r.vuse[k]).length;
-  const v1uv=vuse1k('vuse1k-uva'),v1sd=vuse1k('vuse1k-sd'),v1ma=vuse1k('vuse1k-ma'),v1me=vuse1k('vuse1k-me');
-  const v3uv=vuse1k('vuse3k-uva'),v3ar=vuse1k('vuse3k-ar');
-  const v5k=records.filter(r=>r.vuse5k==='Si').length;
-  const v8k=records.filter(r=>r.vuse8k==='Si').length;
+function renderDashContent(){
+  _charts.forEach(c=>c.destroy()); _charts=[];
+  if(_dashTab==='general') renderVistaGeneral();
+  else if(_dashTab==='materiales') renderMateriales();
+  else renderStockVuse();
+}
 
-  // Velo stock helpers — only for visited PDVs
-  const vis=records.filter(r=>r.estado==='visitado');
-  const hasStk=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!=='').length;
-  const qbr=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
-  const conStk=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])>0).length;
-  const lsCon=conStk('stockLS'), lsQbr=qbr('stockLS');
-
-  body.innerHTML=`
-  <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:right;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">${getSemanaLabel()}</div>
+function renderVistaGeneral(){
+  const allPos=getAllPos();
+  const total=allPos.length;
+  const porDia={};
+  DAYS_ORDER.forEach(d=>porDia[d]=(POS_DATA[d]||[]).length);
+  const conCig=allPos.filter(p=>p.cigarreraFijo&&/si/i.test(p.cigarreraFijo)).length;
+  const conDisp=allPos.filter(p=>p.dispenserVeloFijo&&/si/i.test(p.dispenserVeloFijo)).length;
+  const distritos={};
+  allPos.forEach(p=>{distritos[p.distrito]=(distritos[p.distrito]||0)+1;});
+  const dl=Object.keys(distritos).sort((a,b)=>distritos[b]-distritos[a]);
+  document.getElementById('dash-body').innerHTML=`
   <div class="dash-grid">
-    <div class="kpi-card"><div class="kpi-val ok">${visitados}</div><div class="kpi-label">✅ Visitados</div></div>
-    <div class="kpi-card"><div class="kpi-val ng">${noEf}</div><div class="kpi-label">❌ No Efectivos</div></div>
-    <div class="kpi-card"><div class="kpi-val warn">${pend}</div><div class="kpi-label">⏳ Pendientes</div></div>
-    <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${pct}%</div><div class="kpi-label">📊 Avance</div></div>
-    <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${cigSi}</div><div class="kpi-label">🗄️ Con Cigarrera</div></div>
-    <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${dispSi}</div><div class="kpi-label">📦 Con Dispenser</div></div>
-    <div class="kpi-card"><div class="kpi-val warn">${contSi}</div><div class="kpi-label">⚠️ Contrabando</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disp.</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disp.</div></div>
-    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':'ok'}">${lsQbr}</div><div class="kpi-label">⚡ Quiebre LS Eclipse</div></div>
+    <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-label">📍 Total PDVs</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${conCig}</div><div class="kpi-label">🗄️ Con Cigarrera</div></div>
+    <div class="kpi-card"><div class="kpi-val ng">${total-conCig}</div><div class="kpi-label">Sin Cigarrera</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${conDisp}</div><div class="kpi-label">📦 Dispenser Velo</div></div>
   </div>
   <div class="dash-row">
-    <div class="chart-card"><h3>Estado de Visitas</h3><canvas id="ch-est"></canvas></div>
-    <div class="chart-card"><h3>Materiales POP Encontrados</h3><canvas id="ch-pop"></canvas></div>
-    <div class="chart-card"><h3>Cigarrera y Dispenser</h3><canvas id="ch-act"></canvas></div>
-    <div class="chart-card"><h3>Quiebre Stock Velo 4mg</h3><canvas id="ch-velo4"></canvas></div>
-    <div class="chart-card"><h3>Quiebre Stock Velo 6mg</h3><canvas id="ch-velo6"></canvas></div>
-    <div class="chart-card"><h3>Stock Lucky Strike Eclipse</h3><canvas id="ch-ls"></canvas></div>
-    <div class="chart-card"><h3>Disponibilidad Vuse 1K por sabor</h3><canvas id="ch-v1k"></canvas></div>
-    <div class="chart-card"><h3>Disponibilidad Vuse 3K por sabor</h3><canvas id="ch-v3k"></canvas></div>
-    <div class="chart-card"><h3>Vuse 5K y 8K disponibilidad</h3><canvas id="ch-v58k"></canvas></div>
+    <div class="chart-card"><h3>PDVs por día de visita</h3><canvas id="ch-dias" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>PDVs por distrito</h3><canvas id="ch-distr" style="max-height:160px"></canvas></div>
   </div>
   <div class="chart-card" style="margin-bottom:14px">
-    <h3>Galería de Fotos por Pregunta</h3>
-    <div class="gallery-tabs" id="gal-tabs"></div>
-    <div class="gallery-grid" id="gal-grid"></div>
+    <h3>Listado completo de PDVs del padrón</h3>
+    <div style="overflow-x:auto;max-height:400px">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead style="position:sticky;top:0"><tr style="background:#1C2B4A;color:#fff">
+          <th style="padding:7px 10px;text-align:left;white-space:nowrap">PDV</th>
+          <th style="padding:7px 8px;white-space:nowrap">Distrito</th>
+          <th style="padding:7px 8px;white-space:nowrap">Día</th>
+          <th style="padding:7px 8px;text-align:center;white-space:nowrap">Cigarrera</th>
+          <th style="padding:7px 8px;text-align:center;white-space:nowrap">Dispenser</th>
+          <th style="padding:7px 8px;text-align:left;white-space:nowrap">Com. Cigarrera</th>
+        </tr></thead>
+        <tbody>${DAYS_ORDER.flatMap(dia=>(POS_DATA[dia]||[]).map((p,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}">
+          <td style="padding:5px 10px;font-weight:600;font-size:11px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis">${p.nombre}</td>
+          <td style="padding:5px 8px;font-size:11px">${p.distrito}</td>
+          <td style="padding:5px 8px;font-size:11px;white-space:nowrap">${dia}</td>
+          <td style="padding:5px 8px;text-align:center">${p.cigarreraFijo?'<span style="color:#22c55e;font-weight:700;font-size:12px">'+p.cigarreraFijo+'</span>':'<span style="color:#94a3b8">—</span>'}</td>
+          <td style="padding:5px 8px;text-align:center">${p.dispenserVeloFijo?'<span style="color:#1A2E6A;font-weight:700;font-size:12px">'+p.dispenserVeloFijo+'</span>':'<span style="color:#94a3b8">—</span>'}</td>
+          <td style="padding:5px 8px;font-size:10px;color:#64748b">${p.comCigarreraFijo||'—'}</td>
+        </tr>`)).join('')}
+        </tbody>
+      </table>
+    </div>
   </div>`;
+  const opt={animation:{duration:300},plugins:{legend:{display:false}}};
+  _charts.push(new Chart(document.getElementById('ch-dias'),{type:'bar',data:{labels:DAYS_ORDER.map(d=>DAY_LABELS[d]),datasets:[{data:DAYS_ORDER.map(d=>porDia[d]),backgroundColor:'#1A2E6A',borderRadius:4}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:5}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-distr'),{type:'bar',data:{labels:dl,datasets:[{data:dl.map(d=>distritos[d]),backgroundColor:'#F5A123',borderRadius:4}]},options:{...opt,scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:2}}}}}));
+}
 
+function renderMateriales(){
+  const df=document.getElementById('dash-sem-filter')?.value||'ALL';
+  if(df==='ALL'){ renderMaterialesComparativo(); return; }
+  const records=_allDashRecords.filter(r=>r.semana===df);
+  const vis=records.filter(r=>r.estado==='visitado');
+  const total=getAllPos().length;
+  const semLabel=getSemanaLabelFromKey(df);
+  const jv=vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc).length;
+  const jl=vis.filter(r=>r.pop&&r.pop.lucky&&r.pop.lucky.enc).length;
+  const jve=vis.filter(r=>r.pop&&r.pop.velo&&r.pop.velo.enc).length;
+  const todos3=vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc&&r.pop.lucky&&r.pop.lucky.enc&&r.pop.velo&&r.pop.velo.enc);
+  document.getElementById('dash-body').innerHTML=`
+  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel}</div>
+  <div class="dash-grid">
+    <div class="kpi-card"><div class="kpi-val ok">${vis.length}</div><div class="kpi-label">✅ Visitados</div></div>
+    <div class="kpi-card"><div class="kpi-val warn">${Math.max(0,total-records.length)}</div><div class="kpi-label">⏳ Pendientes</div></div>
+    <div class="kpi-card"><div class="kpi-val">${jv}</div><div class="kpi-label">📌 JS Vuse</div></div>
+    <div class="kpi-card"><div class="kpi-val">${jl}</div><div class="kpi-label">📌 JS Lucky Strike</div></div>
+    <div class="kpi-card"><div class="kpi-val">${jve}</div><div class="kpi-label">📌 JS Velo</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${todos3.length}</div><div class="kpi-label">🏆 Con los 3 materiales</div></div>
+  </div>
+  <div class="dash-row">
+    <div class="chart-card"><h3>Materiales POP encontrados</h3><canvas id="ch-pop" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>JS por tipo</h3><canvas id="ch-js" style="max-height:160px"></canvas></div>
+  </div>
+  <div class="chart-card" style="margin-bottom:14px">
+    <h3>🏆 PDVs con los 3 materiales — ${semLabel}</h3>
+    ${todos3.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left">PDV</th><th style="padding:7px 8px">Distrito</th><th style="padding:7px 8px;text-align:center">JS Vuse</th><th style="padding:7px 8px;text-align:center">JS Lucky</th><th style="padding:7px 8px;text-align:center">JS Velo</th></tr></thead>
+      <tbody>${todos3.map((r,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:6px 10px;font-weight:600">${r.nombre}</td><td style="padding:6px 8px">${r.distrito}</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td></tr>`).join('')}</tbody>
+    </table></div>`:'<p style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Sin PDVs con los 3 materiales en esta semana</p>'}
+  </div>`;
   const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  _charts.push(new Chart(document.getElementById('ch-est'),{type:'doughnut',data:{labels:['Visitados','No Efectivos','Pendientes'],datasets:[{data:[visitados,noEf,pend],backgroundColor:['#22c55e','#ef4444','#d1d5db'],borderWidth:2}]},options:opt}));
-  const pk=['placa','vuse','lucky','velo'], pl=['Placa','Vuse','Lucky','Velo'];
-  _charts.push(new Chart(document.getElementById('ch-pop'),{type:'bar',data:{labels:pl,datasets:[{label:'Encontrado',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].enc).length),backgroundColor:'#1A2E6A'},{label:'Óptimo',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].opt).length),backgroundColor:'#F5A123'}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-act'),{type:'bar',data:{labels:['Cigarrera','Dispenser'],datasets:[{label:'Sí',data:[cigSi,dispSi],backgroundColor:'#22c55e'},{label:'No',data:[records.filter(r=>r.cigarrera==='No').length,records.filter(r=>r.dispenser==='No').length],backgroundColor:'#ef4444'}]},options:{...opt,scales:{y:{beginAtZero:true,stacked:true},x:{stacked:true}}}}));
-  const sabVelo=['Menta Fresca','Uva','Sandía'];
-  const f4=['veloMf4','veloUv4','veloSd4'], f6=['veloMf6','veloUv6','veloSd6'];
-  _charts.push(new Chart(document.getElementById('ch-velo4'),{type:'bar',data:{labels:sabVelo,datasets:[{label:'Con stock',data:f4.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f4.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-velo6'),{type:'bar',data:{labels:sabVelo,datasets:[{label:'Con stock',data:f6.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f6.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre (0 uds)','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt}}));
-  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{label:'PDVs con disp.',data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#5b3fa0','#ef4444','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v3k'),{type:'bar',data:{labels:['Uva fresca','Arándanos'],datasets:[{label:'PDVs con disp.',data:[v3uv,v3ar],backgroundColor:['#5b3fa0','#1A2E6A'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v58k'),{type:'bar',data:{labels:['Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v5k,v8k],backgroundColor:'#22c55e',borderRadius:3},{label:'No disponible',data:[vis.length-v5k,vis.length-v8k],backgroundColor:'#e2e8f0',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  const pk=['placa','vuse','lucky','velo'],pl=['Placa','Vuse','Lucky','Velo'];
+  _charts.push(new Chart(document.getElementById('ch-pop'),{type:'bar',data:{labels:pl,datasets:[{label:'Encontrado',data:pk.map(k=>vis.filter(r=>r.pop&&r.pop[k]&&r.pop[k].enc).length),backgroundColor:'#1A2E6A'},{label:'Óptimo',data:pk.map(k=>vis.filter(r=>r.pop&&r.pop[k]&&r.pop[k].opt).length),backgroundColor:'#F5A123'}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-js'),{type:'bar',data:{labels:['JS Vuse','JS Lucky Strike','JS Velo'],datasets:[{data:[jv,jl,jve],backgroundColor:['#1A2E6A','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
+}
 
-  const GK=['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'];
-  const GL={fachada:'Fachada',placa:'Placa',vuse:'Vuse',lucky:'Lucky',velo:'Velo',cigarrera:'Cigarrera',dispenser:'Dispenser',contrabando:'Contrabando',panoramica:'Panorámica'};
-  window._gRec=records; window._gL=GL;
-  document.getElementById('gal-tabs').innerHTML=GK.map(k=>`<button class="gal-tab${k==='fachada'?' active':''}" onclick="switchGal('${k}','${GL[k].replace(/'/g,'\x27')}')">${GL[k]}</button>`).join('');
-  switchGal('fachada','Fachada');
+function renderMaterialesComparativo(){
+  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
+  const data=semanas.map(s=>{
+    const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
+    return{sem:getSemanaLabelFromKey(s),jv:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc).length,jl:vis.filter(r=>r.pop&&r.pop.lucky&&r.pop.lucky.enc).length,jve:vis.filter(r=>r.pop&&r.pop.velo&&r.pop.velo.enc).length,t3:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc&&r.pop.lucky&&r.pop.lucky.enc&&r.pop.velo&&r.pop.velo.enc).length,total:vis.length};
+  });
+  if(!data.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún</p>';return;}
+  document.getElementById('dash-body').innerHTML=`
+  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo de todas las semanas — Materiales de Convivencia</div>
+  <div class="chart-card" style="margin-bottom:12px"><h3>Evolución JS Vuse, JS Lucky Strike y JS Velo por semana</h3><canvas id="ch-comp-mat" style="max-height:220px"></canvas></div>
+  <div class="chart-card" style="margin-bottom:14px">
+    <h3>Resumen por semana</h3>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left">Semana</th><th style="padding:7px 8px;text-align:center">Visitados</th><th style="padding:7px 8px;text-align:center">JS Vuse</th><th style="padding:7px 8px;text-align:center">JS Lucky</th><th style="padding:7px 8px;text-align:center">JS Velo</th><th style="padding:7px 8px;text-align:center">Con 3 materiales</th></tr></thead>
+      <tbody>${data.map((d,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:6px 10px;font-weight:700">${d.sem}</td><td style="padding:6px 8px;text-align:center">${d.total}</td><td style="padding:6px 8px;text-align:center">${d.jv}</td><td style="padding:6px 8px;text-align:center">${d.jl}</td><td style="padding:6px 8px;text-align:center">${d.jve}</td><td style="padding:6px 8px;text-align:center;font-weight:700;color:#22c55e">${d.t3}</td></tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
+  _charts.push(new Chart(document.getElementById('ch-comp-mat'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'JS Vuse',data:data.map(d=>d.jv),backgroundColor:'#1A2E6A',borderRadius:3},{label:'JS Lucky Strike',data:data.map(d=>d.jl),backgroundColor:'#22c55e',borderRadius:3},{label:'JS Velo',data:data.map(d=>d.jve),backgroundColor:'#F5A123',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:5}}}}}));
+}
+
+function renderStockVuse(){
+  const df=document.getElementById('dash-sem-filter')?.value||'ALL';
+  if(df==='ALL'){ renderStockVuseComparativo(); return; }
+  const records=_allDashRecords.filter(r=>r.semana===df);
+  const vis=records.filter(r=>r.estado==='visitado');
+  const semLabel=getSemanaLabelFromKey(df);
+  const conStk=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])>0).length;
+  const qbr=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
+  const vk=k=>vis.filter(r=>r.vuse&&r.vuse[k]).length;
+  const v1uv=vk('vuse1k-uva'),v1sd=vk('vuse1k-sd'),v1ma=vk('vuse1k-ma'),v1me=vk('vuse1k-me');
+  const v3uv=vk('vuse3k-uva'),v3ar=vk('vuse3k-ar');
+  const v5k=vis.filter(r=>r.vuse5k==='Si').length;
+  const v8k=vis.filter(r=>r.vuse8k==='Si').length;
+  const lsCon=conStk('stockLS'),lsQbr=qbr('stockLS');
+  const compList=vis.filter(r=>r.competencia&&r.competencia.trim()).map(r=>`<li style="margin-bottom:6px;font-size:12px"><b>${r.nombre}</b> (${r.distrito}): ${r.competencia}</li>`).join('');
+  document.getElementById('dash-body').innerHTML=`
+  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel}</div>
+  <div class="dash-grid">
+    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':''}">${lsQbr}</div><div class="kpi-label">⚡ Quiebre LS Eclipse</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${lsCon}</div><div class="kpi-label">Con stock LS</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disp.</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disp.</div></div>
+  </div>
+  <div class="dash-row">
+    <div class="chart-card"><h3>Quiebre Stock Velo 4mg</h3><canvas id="ch-v4" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>Quiebre Stock Velo 6mg</h3><canvas id="ch-v6" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>Stock Lucky Strike Eclipse</h3><canvas id="ch-ls" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>Disponibilidad Vuse 1K</h3><canvas id="ch-v1k" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>Disponibilidad Vuse 3K</h3><canvas id="ch-v3k" style="max-height:160px"></canvas></div>
+    <div class="chart-card"><h3>Vuse 5K y 8K</h3><canvas id="ch-v58k" style="max-height:160px"></canvas></div>
+  </div>
+  ${compList?`<div class="chart-card" style="margin-bottom:14px"><h3>📋 Levantamiento de Competencia — ${semLabel}</h3><ul style="padding:10px 16px;color:var(--text);list-style:disc">${compList}</ul></div>`:''}`;
+  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
+  const sabs=['Menta Fresca','Uva','Sandía'];
+  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
+  _charts.push(new Chart(document.getElementById('ch-v4'),{type:'bar',data:{labels:sabs,datasets:[{label:'Con stock',data:f4.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f4.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v6'),{type:'bar',data:{labels:sabs,datasets:[{label:'Con stock',data:f6.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f6.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt}}));
+  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#5b3fa0','#ef4444','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v3k'),{type:'bar',data:{labels:['Uva fresca','Arándanos'],datasets:[{data:[v3uv,v3ar],backgroundColor:['#5b3fa0','#1A2E6A'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v58k'),{type:'bar',data:{labels:['Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v5k,v8k],backgroundColor:'#22c55e',borderRadius:3},{label:'No disponible',data:[vis.length-v5k,vis.length-v8k],backgroundColor:'#e2e8f0',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+}
+
+function renderStockVuseComparativo(){
+  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
+  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
+  const data=semanas.map(s=>{
+    const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
+    return{sem:getSemanaLabelFromKey(s),qbr4:f4.reduce((a,f)=>a+vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length,0),qbr6:f6.reduce((a,f)=>a+vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length,0),v5k:vis.filter(r=>r.vuse5k==='Si').length,v8k:vis.filter(r=>r.vuse8k==='Si').length};
+  });
+  if(!data.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún</p>';return;}
+  document.getElementById('dash-body').innerHTML=`
+  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo de todas las semanas — Stock & Disponibilidad</div>
+  <div class="chart-card" style="margin-bottom:12px"><h3>Quiebre Stock Velo (total eventos) por semana</h3><canvas id="ch-comp-velo" style="max-height:200px"></canvas></div>
+  <div class="chart-card" style="margin-bottom:14px"><h3>Disponibilidad Vuse 5K y 8K por semana</h3><canvas id="ch-comp-vuse" style="max-height:200px"></canvas></div>`;
+  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
+  _charts.push(new Chart(document.getElementById('ch-comp-velo'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'Quiebres Velo 4mg',data:data.map(d=>d.qbr4),backgroundColor:'#ef4444',borderRadius:3},{label:'Quiebres Velo 6mg',data:data.map(d=>d.qbr6),backgroundColor:'#F5A123',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-comp-vuse'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'Vuse 5K disp.',data:data.map(d=>d.v5k),backgroundColor:'#1A2E6A',borderRadius:3},{label:'Vuse 8K disp.',data:data.map(d=>d.v8k),backgroundColor:'#4A8FD4',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
 }
 
 // Convierte URL de Drive viewer a URL directa embebible en <img>
