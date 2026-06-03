@@ -249,6 +249,8 @@ textarea{resize:vertical;min-height:52px}
       <button class="btn-icon" onclick="syncPending()">⬆ Sync</button>
       <button class="btn-icon accent" id="btn-dash" style="display:none" onclick="openDash()">📊 Dashboard</button>
       <button class="btn-icon" id="btn-padron" style="display:none" onclick="refreshPadron()" title="Recargar POS desde Google Sheets">🔄 Padrón</button>
+      <span id="semana-badge" style="font-size:10px;background:rgba(245,161,35,.18);color:#F5A123;border:1px solid rgba(245,161,35,.4);border-radius:6px;padding:3px 8px;font-weight:700;white-space:nowrap"></span>
+      <button class="btn-icon" id="btn-nueva-sem" style="display:none" onclick="nuevaSemana()" title="Iniciar nueva semana">📅 Nueva semana</button>
       <button class="btn-icon" onclick="doLogout()">↩</button>
     </div>
   </header>
@@ -401,16 +403,58 @@ textarea{resize:vertical;min-height:52px}
         <hr class="section-divider">
         <div class="section-title">▸ Stock Velo</div>
         <div class="field-group">
-          <label class="field-label">¿La tienda tiene stock de Velo Menta Fresca? Detalla las cantidades.</label>
-          <textarea id="m-stock-menta" rows="2" placeholder="Ej: 2 unidades, media caja, sin stock..."></textarea>
+          <label class="field-label" style="color:var(--navy);font-size:9px">PRESENTACIÓN 4MG — unidades en stock (0 = quiebre)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <div><div class="field-label">Menta Fresca</div><input type="number" id="m-velo-mf4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+            <div><div class="field-label">Uva</div><input type="number" id="m-velo-uv4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+            <div><div class="field-label">Sandía</div><input type="number" id="m-velo-sd4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+          </div>
         </div>
         <div class="field-group">
-          <label class="field-label">¿La tienda tiene stock de Velo Uva? Detalla las cantidades.</label>
-          <textarea id="m-stock-uva" rows="2" placeholder="Ej: 3 unidades, stock completo..."></textarea>
+          <label class="field-label" style="color:var(--navy);font-size:9px">PRESENTACIÓN 6MG — unidades en stock (0 = quiebre)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <div><div class="field-label">Menta Fresca</div><input type="number" id="m-velo-mf6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+            <div><div class="field-label">Uva</div><input type="number" id="m-velo-uv6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+            <div><div class="field-label">Sandía</div><input type="number" id="m-velo-sd6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
+          </div>
+        </div>
+        <hr class="section-divider">
+        <div class="section-title">▸ Stock Lucky Strike Eclipse</div>
+        <div class="field-group">
+          <label class="field-label">Unidades en stock (0 = quiebre)</label>
+          <input type="number" id="m-stock-ls" min="0" placeholder="0" style="width:140px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none">
+        </div>
+        <hr class="section-divider">
+        <div class="section-title">▸ Disponibilidad Vuse</div>
+        <div class="field-group">
+          <label class="field-label">Vuse 1K — Sabores disponibles (selecciona los que tienen stock)</label>
+          <div class="radio-group" style="flex-wrap:wrap;gap:5px">
+            <button class="rbtn" id="rb-vuse1k-uva" onclick="togVuse('vuse1k-uva','rb-vuse1k-uva')">Uva fresca</button>
+            <button class="rbtn" id="rb-vuse1k-sd" onclick="togVuse('vuse1k-sd','rb-vuse1k-sd')">Sandía fresca</button>
+            <button class="rbtn" id="rb-vuse1k-ma" onclick="togVuse('vuse1k-ma','rb-vuse1k-ma')">Manzana</button>
+            <button class="rbtn" id="rb-vuse1k-me" onclick="togVuse('vuse1k-me','rb-vuse1k-me')">Menta</button>
+          </div>
         </div>
         <div class="field-group">
-          <label class="field-label">¿La tienda tiene stock de Velo Sandía? Detalla las cantidades.</label>
-          <textarea id="m-stock-sandia" rows="2" placeholder="Ej: sin stock, 1 caja..."></textarea>
+          <label class="field-label">Vuse 3K — Sabores disponibles</label>
+          <div class="radio-group" style="flex-wrap:wrap;gap:5px">
+            <button class="rbtn" id="rb-vuse3k-uva" onclick="togVuse('vuse3k-uva','rb-vuse3k-uva')">Uva fresca</button>
+            <button class="rbtn" id="rb-vuse3k-ar" onclick="togVuse('vuse3k-ar','rb-vuse3k-ar')">Arándanos</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Vuse 5K</label>
+          <div class="radio-group"><button class="rbtn" id="rb-vuse5k-si" onclick="selYN('vuse5k','Si')">Sí</button><button class="rbtn" id="rb-vuse5k-no" onclick="selYN('vuse5k','No')">No</button></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Vuse 8K</label>
+          <div class="radio-group"><button class="rbtn" id="rb-vuse8k-si" onclick="selYN('vuse8k','Si')">Sí</button><button class="rbtn" id="rb-vuse8k-no" onclick="selYN('vuse8k','No')">No</button></div>
+        </div>
+        <hr class="section-divider">
+        <div class="section-title">▸ Levantamiento de Competencia</div>
+        <div class="field-group">
+          <label class="field-label">Promociones / Planes de la competencia observados</label>
+          <textarea id="m-competencia" rows="3" placeholder="Ej: Marlboro con promo 2x1, vape marca X con descuento..."></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">¿Se identificaron Productos de Contrabando? <span class="req">*</span></label>
@@ -571,7 +615,25 @@ const USERS = {
 let currentUser=null, currentRole=null, currentDay=null;
 let selectedPosId=null, map=null, markers={}, visits={};
 let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null;
+let mVuse={}, mVuse5k=null, mVuse8k=null;
 let fotosData={}, currentPosId=null;
+
+// ─── SEMANA ───
+function calcSemana(){
+  const now=new Date();
+  const mes=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][now.getMonth()];
+  const day=now.getDate();
+  const sem=Math.ceil(day/7);
+  return `S${sem}_${mes}${String(now.getFullYear()).slice(2)}`;
+}
+let currentSemana=localStorage.getItem('bat_semana')||calcSemana();
+function semKey(posId){ return posId+'_'+currentSemana; }
+function getSemanaLabel(){
+  const m=currentSemana.match(/^S(\d+)_([A-Z]+)(\d+)$/);
+  if(!m) return currentSemana;
+  const meses={ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
+  return `Semana ${m[1]} · ${meses[m[2]]||m[2]} 20${m[3]}`;
+}
 
 // ─── POS DATA LOADER ───
 async function loadPOSData(force){
@@ -636,9 +698,11 @@ async function doLogin(){
   await loadPOSData();
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('app').classList.add('active');
+  document.getElementById('semana-badge').textContent=getSemanaLabel();
   if(currentRole==='admin'){
     document.getElementById('btn-dash').style.display='';
     document.getElementById('btn-padron').style.display='';
+    document.getElementById('btn-nueva-sem').style.display='';
   }
   try{ initApp(); }catch(err){ console.error('initApp error:',err); }
   setTimeout(()=>{ if(map) map.invalidateSize(); },150);
@@ -679,7 +743,7 @@ function renderPosList(){
   const posList=POS_DATA[currentDay]||[];
   let v=0,n=0,p=0;
   document.getElementById('pos-list').innerHTML=posList.map((pos,idx)=>{
-    const visit=visits[pos.id];
+    const visit=visits[semKey(pos.id)];
     let cls='',icon='⬜';
     if(visit){ if(visit.estado==='visitado'){cls='visited';icon='✅';v++;} else{cls='nogo';icon='❌';n++;} } else p++;
     return `<div class="pos-card ${cls}${pos.id===selectedPosId?' selected':''}" onclick="openModal('${pos.id}')" id="card-${pos.id}">
@@ -723,9 +787,21 @@ function renderMapMarkers(){
   });
   if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
 }
+function nuevaSemana(){
+  if(!confirm(`¿Iniciar nueva semana? Los marcadores de visita actuales (${getSemanaLabel()}) se archivarán y comenzará un tracking nuevo.`)) return;
+  const nums=Object.keys(visits).map(k=>{ const m=k.match(/_S(\d+)_/); return m?parseInt(m[1]):0; });
+  const maxN=nums.length?Math.max(...nums):0;
+  const now=new Date();
+  const mes=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][now.getMonth()];
+  currentSemana=`S${maxN+1}_${mes}${String(now.getFullYear()).slice(2)}`;
+  localStorage.setItem('bat_semana',currentSemana);
+  document.getElementById('semana-badge').textContent=getSemanaLabel();
+  renderPosList(); renderMapMarkers(); updateHeader();
+  toast(`✓ ${getSemanaLabel()} iniciada`);
+}
 function updateMarker(posId){
   const pos=getAllPos().find(p=>p.id===posId); if(!pos||!markers[posId]) return;
-  const v=visits[posId]; const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
+  const v=visits[semKey(posId)]; const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
   const idx=(POS_DATA[currentDay]||[]).findIndex(p=>p.id===posId);
   markers[posId].setIcon(makeNumberedIcon(idx+1,status));
 }
@@ -739,7 +815,7 @@ function openModal(posId){
   document.getElementById('m-dir').textContent=`${pos.direccion} · ${pos.distrito}`;
   document.getElementById('btn-nav-maps').href=`https://www.google.com/maps/dir/?api=1&destination=${pos.lat},${pos.lon}`;
   resetModal();
-  const ex=visits[posId];
+  const ex=visits[semKey(posId)];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
     if(ex.staff) document.getElementById('m-staff').value=ex.staff;
@@ -749,10 +825,15 @@ function openModal(posId){
     if(ex.obsVelo) document.getElementById('obs-velo').value=ex.obsVelo;
     if(ex.permiteCambio) document.getElementById('m-permite-cambio').value=ex.permiteCambio;
     if(ex.obsDispenser) document.getElementById('obs-dispenser').value=ex.obsDispenser;
-    if(ex.stockMenta) document.getElementById('m-stock-menta').value=ex.stockMenta;
-    if(ex.stockUva) document.getElementById('m-stock-uva').value=ex.stockUva;
-    if(ex.stockSandia) document.getElementById('m-stock-sandia').value=ex.stockSandia;
     if(ex.marcasContrabando) document.getElementById('m-marcas-contrabando').value=ex.marcasContrabando;
+    const sn=id=>{ const el=document.getElementById(id); if(el&&ex[id]!==undefined) el.value=ex[id]; };
+    sn('m-velo-mf4');sn('m-velo-uv4');sn('m-velo-sd4');
+    sn('m-velo-mf6');sn('m-velo-uv6');sn('m-velo-sd6');
+    sn('m-stock-ls');
+    if(ex.competencia) document.getElementById('m-competencia').value=ex.competencia;
+    if(ex.vuse){ mVuse={...ex.vuse}; Object.keys(mVuse).forEach(k=>{ if(mVuse[k]){ const el=document.getElementById('rb-'+k); if(el) el.className='rbtn sel-si'; } }); }
+    if(ex.vuse5k) selYN('vuse5k',ex.vuse5k);
+    if(ex.vuse8k) selYN('vuse8k',ex.vuse8k);
     if(ex.pop) ['placa','vuse','lucky','velo'].forEach(k=>{if(ex.pop[k]) ['enc','opt','rep'].forEach(s=>{if(ex.pop[k][s]) document.getElementById(`pop-${k}-${s}`).checked=true;});});
     if(ex.cigarrera) selCigarrera(ex.cigarrera,true);
     if(ex.cigCom) selCigCom(ex.cigCom,true);
@@ -766,14 +847,22 @@ function openModal(posId){
 }
 
 function resetModal(){
-  mAbierto=null;mCigarrera=null;mCigCom=null;mDispenser=null;mContrabando=null;fotosData={};
-  ['rb-abierto-si','rb-abierto-no','rb-cig-si','rb-cig-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-cigcom-vigente','rb-cigcom-antigua','rb-cigcom-na']
+  mAbierto=null;mCigarrera=null;mCigCom=null;mDispenser=null;mContrabando=null;mVuse={};mVuse5k=null;mVuse8k=null;fotosData={};
+  ['rb-abierto-si','rb-abierto-no','rb-cig-si','rb-cig-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-cigcom-vigente','rb-cigcom-antigua','rb-cigcom-na','rb-vuse5k-si','rb-vuse5k-no','rb-vuse8k-si','rb-vuse8k-no']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
+  ['rb-vuse1k-uva','rb-vuse1k-sd','rb-vuse1k-ma','rb-vuse1k-me','rb-vuse3k-uva','rb-vuse3k-ar']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
   ['placa','vuse','lucky','velo'].forEach(k=>['enc','opt','rep'].forEach(s=>{ const el=document.getElementById(`pop-${k}-${s}`); if(el) el.checked=false; }));
-  ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-stock-menta','m-stock-uva','m-stock-sandia','m-marcas-contrabando']
+  ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-marcas-contrabando',
+   'm-velo-mf4','m-velo-uv4','m-velo-sd4','m-velo-mf6','m-velo-uv6','m-velo-sd6','m-stock-ls','m-competencia']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   ['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'].forEach(k=>clearFotoSlot(k));
   ['seccion-abierto','seccion-cigarrera','seccion-dispenser','seccion-contrabando'].forEach(id=>document.getElementById(id).style.display='none');
+}
+function togVuse(key,btnId){ mVuse[key]=!mVuse[key]; const el=document.getElementById(btnId); if(el) el.className='rbtn'+(mVuse[key]?' sel-si':''); }
+function selYN(field,v){
+  if(field==='vuse5k'){ mVuse5k=v; document.getElementById('rb-vuse5k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse5k-no').className='rbtn'+(v==='No'?' sel-no':''); }
+  if(field==='vuse8k'){ mVuse8k=v; document.getElementById('rb-vuse8k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse8k-no').className='rbtn'+(v==='No'?' sel-no':''); }
 }
 
 function selAbierto(v){ mAbierto=v; document.getElementById('rb-abierto-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-abierto-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-abierto').style.display=v==='Si'?'block':'none'; }
@@ -846,14 +935,21 @@ async function saveVisit(){
       permiteCambio:gv('m-permite-cambio'),
       dispenser:mAbierto==='Si'?mDispenser:'',
       obsDispenser:gv('obs-dispenser'),
-      stockMenta:gv('m-stock-menta'),
-      stockUva:gv('m-stock-uva'),
-      stockSandia:gv('m-stock-sandia'),
+      'M-velo-mf4':gv('m-velo-mf4'), 'm-velo-uv4':gv('m-velo-uv4'), 'm-velo-sd4':gv('m-velo-sd4'),
+      'M-velo-mf6':gv('m-velo-mf6'), 'm-velo-uv6':gv('m-velo-uv6'), 'm-velo-sd6':gv('m-velo-sd6'),
+      'm-stock-ls':gv('m-stock-ls'),
+      veloMf4:parseInt(gv('m-velo-mf4'))||null, veloUv4:parseInt(gv('m-velo-uv4'))||null, veloSd4:parseInt(gv('m-velo-sd4'))||null,
+      veloMf6:parseInt(gv('m-velo-mf6'))||null, veloUv6:parseInt(gv('m-velo-uv6'))||null, veloSd6:parseInt(gv('m-velo-sd6'))||null,
+      stockLS:parseInt(gv('m-stock-ls'))||null,
+      vuse:{...mVuse},
+      vuse5k:mVuse5k, vuse8k:mVuse8k,
+      competencia:gv('m-competencia'),
       contrabando:mAbierto==='Si'?mContrabando:'',
       marcasContrabando:gv('m-marcas-contrabando'),
+      semana:currentSemana,
       fotos:{...fotosData}, synced:false
     };
-    visits[currentPosId]=record;
+    visits[semKey(currentPosId)]=record;
     const storageResult=setLocalVisits(visits);
     if(storageResult!=='ok') toast('⚠️ Espacio limitado: fotos no guardadas localmente (se sincronizarán igual)');
     updateMarker(currentPosId); renderPosList(); updateHeader();
@@ -914,9 +1010,11 @@ function updateSyncBtn(){
   if(!btn) return;
   btn.disabled=p===0; btn.textContent=p>0?`⬆ Sincronizar (${p} pend.)`:'✓ Todo sincronizado';
 }
+function currentWeekVisits(){ return Object.values(visits).filter(r=>r.semana===currentSemana); }
 function updateHeader(){
-  const v=Object.values(visits).filter(r=>r.estado==='visitado').length;
-  const n=Object.values(visits).filter(r=>r.estado==='nogo').length;
+  const wv=currentWeekVisits();
+  const v=wv.filter(r=>r.estado==='visitado').length;
+  const n=wv.filter(r=>r.estado==='nogo').length;
   const total=getAllPos().length;
   const pct=total>0?Math.round((v+n)/total*100):0;
   const bar=document.getElementById('h-bar');
@@ -935,12 +1033,12 @@ async function renderDash(){
   _charts.forEach(c=>c.destroy()); _charts=[];
   const body=document.getElementById('dash-body');
   body.innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando...</p>';
-  let allRecords=[...Object.values(visits)];
+  let allRecords=[...currentWeekVisits()];
   if(APPS_SCRIPT_URL!=='TU_APPS_SCRIPT_URL_AQUI'){
     try{
-      const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll',{mode:'cors'});
+      const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll&semana='+encodeURIComponent(currentSemana),{mode:'cors'});
       const r=await resp.json();
-      if(r.ok&&r.data){ const ids=new Set(allRecords.map(x=>x.id)); r.data.forEach(rec=>{if(!ids.has(rec.id)) allRecords.push(rec);}) }
+      if(r.ok&&r.data){ const ids=new Set(allRecords.map(x=>x.id+'_'+x.semana)); r.data.forEach(rec=>{if(!ids.has(rec.id+'_'+rec.semana)) allRecords.push(rec);}) }
     } catch(e){ console.log('Remote dash error',e); }
   }
   const df=document.getElementById('dash-day-filter').value;
@@ -954,12 +1052,23 @@ async function renderDash(){
   const cigSi=records.filter(r=>r.cigarrera==='Si').length;
   const dispSi=records.filter(r=>r.dispenser==='Si').length;
   const contSi=records.filter(r=>r.contrabando==='Si').length;
-  const conMenta=records.filter(r=>String(r.stockMenta||'').trim()).length;
-  const conUva=records.filter(r=>String(r.stockUva||'').trim()).length;
-  const conSandia=records.filter(r=>String(r.stockSandia||'').trim()).length;
-  const conVelo=records.filter(r=>String(r.stockMenta||'').trim()||String(r.stockUva||'').trim()||String(r.stockSandia||'').trim()).length;
+
+  // Vuse counts
+  const vuse1k=k=>records.filter(r=>r.vuse&&r.vuse[k]).length;
+  const v1uv=vuse1k('vuse1k-uva'),v1sd=vuse1k('vuse1k-sd'),v1ma=vuse1k('vuse1k-ma'),v1me=vuse1k('vuse1k-me');
+  const v3uv=vuse1k('vuse3k-uva'),v3ar=vuse1k('vuse3k-ar');
+  const v5k=records.filter(r=>r.vuse5k==='Si').length;
+  const v8k=records.filter(r=>r.vuse8k==='Si').length;
+
+  // Velo stock helpers — only for visited PDVs
+  const vis=records.filter(r=>r.estado==='visitado');
+  const hasStk=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!=='').length;
+  const qbr=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
+  const conStk=(f)=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])>0).length;
+  const lsCon=conStk('stockLS'), lsQbr=qbr('stockLS');
 
   body.innerHTML=`
+  <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:right;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">${getSemanaLabel()}</div>
   <div class="dash-grid">
     <div class="kpi-card"><div class="kpi-val ok">${visitados}</div><div class="kpi-label">✅ Visitados</div></div>
     <div class="kpi-card"><div class="kpi-val ng">${noEf}</div><div class="kpi-label">❌ No Efectivos</div></div>
@@ -968,13 +1077,20 @@ async function renderDash(){
     <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${cigSi}</div><div class="kpi-label">🗄️ Con Cigarrera</div></div>
     <div class="kpi-card"><div class="kpi-val" style="font-size:26px">${dispSi}</div><div class="kpi-label">📦 Con Dispenser</div></div>
     <div class="kpi-card"><div class="kpi-val warn">${contSi}</div><div class="kpi-label">⚠️ Contrabando</div></div>
-    <div class="kpi-card"><div class="kpi-val ok" style="font-size:26px">${conVelo}</div><div class="kpi-label">🟢 PDVs con Stock Velo</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disp.</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disp.</div></div>
+    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':'ok'}">${lsQbr}</div><div class="kpi-label">⚡ Quiebre LS Eclipse</div></div>
   </div>
   <div class="dash-row">
     <div class="chart-card"><h3>Estado de Visitas</h3><canvas id="ch-est"></canvas></div>
     <div class="chart-card"><h3>Materiales POP Encontrados</h3><canvas id="ch-pop"></canvas></div>
     <div class="chart-card"><h3>Cigarrera y Dispenser</h3><canvas id="ch-act"></canvas></div>
-    <div class="chart-card"><h3>Stock Velo por Variedad</h3><canvas id="ch-stk"></canvas></div>
+    <div class="chart-card"><h3>Quiebre Stock Velo 4mg</h3><canvas id="ch-velo4"></canvas></div>
+    <div class="chart-card"><h3>Quiebre Stock Velo 6mg</h3><canvas id="ch-velo6"></canvas></div>
+    <div class="chart-card"><h3>Stock Lucky Strike Eclipse</h3><canvas id="ch-ls"></canvas></div>
+    <div class="chart-card"><h3>Disponibilidad Vuse 1K por sabor</h3><canvas id="ch-v1k"></canvas></div>
+    <div class="chart-card"><h3>Disponibilidad Vuse 3K por sabor</h3><canvas id="ch-v3k"></canvas></div>
+    <div class="chart-card"><h3>Vuse 5K y 8K disponibilidad</h3><canvas id="ch-v58k"></canvas></div>
   </div>
   <div class="chart-card" style="margin-bottom:14px">
     <h3>Galería de Fotos por Pregunta</h3>
@@ -987,7 +1103,14 @@ async function renderDash(){
   const pk=['placa','vuse','lucky','velo'], pl=['Placa','Vuse','Lucky','Velo'];
   _charts.push(new Chart(document.getElementById('ch-pop'),{type:'bar',data:{labels:pl,datasets:[{label:'Encontrado',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].enc).length),backgroundColor:'#1A2E6A'},{label:'Óptimo',data:pk.map(k=>records.filter(r=>r.pop&&r.pop[k]&&r.pop[k].opt).length),backgroundColor:'#F5A123'}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
   _charts.push(new Chart(document.getElementById('ch-act'),{type:'bar',data:{labels:['Cigarrera','Dispenser'],datasets:[{label:'Sí',data:[cigSi,dispSi],backgroundColor:'#22c55e'},{label:'No',data:[records.filter(r=>r.cigarrera==='No').length,records.filter(r=>r.dispenser==='No').length],backgroundColor:'#ef4444'}]},options:{...opt,scales:{y:{beginAtZero:true,stacked:true},x:{stacked:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-stk'),{type:'bar',data:{labels:['Menta Fresca','Uva','Sandía'],datasets:[{label:'PDVs con stock',data:[conMenta,conUva,conSandia],backgroundColor:['#22c55e','#a855f7','#f97316']}]},options:{...opt,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
+  const sabVelo=['Menta Fresca','Uva','Sandía'];
+  const f4=['veloMf4','veloUv4','veloSd4'], f6=['veloMf6','veloUv6','veloSd6'];
+  _charts.push(new Chart(document.getElementById('ch-velo4'),{type:'bar',data:{labels:sabVelo,datasets:[{label:'Con stock',data:f4.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f4.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-velo6'),{type:'bar',data:{labels:sabVelo,datasets:[{label:'Con stock',data:f6.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f6.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre (0 uds)','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt}}));
+  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{label:'PDVs con disp.',data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#5b3fa0','#ef4444','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v3k'),{type:'bar',data:{labels:['Uva fresca','Arándanos'],datasets:[{label:'PDVs con disp.',data:[v3uv,v3ar],backgroundColor:['#5b3fa0','#1A2E6A'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v58k'),{type:'bar',data:{labels:['Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v5k,v8k],backgroundColor:'#22c55e',borderRadius:3},{label:'No disponible',data:[vis.length-v5k,vis.length-v8k],backgroundColor:'#e2e8f0',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
 
   const GK=['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'];
   const GL={fachada:'Fachada',placa:'Placa',vuse:'Vuse',lucky:'Lucky',velo:'Velo',cigarrera:'Cigarrera',dispenser:'Dispenser',contrabando:'Contrabando',panoramica:'Panorámica'};
