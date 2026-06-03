@@ -1164,8 +1164,11 @@ function renderMateriales(){
   _charts.push(new Chart(document.getElementById('ch-js'),{type:'bar',data:{labels:['JS Vuse','JS Lucky Strike','JS Velo'],datasets:[{data:[jv,jl,jve],backgroundColor:['#1A2E6A','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
 }
 
+const VALID_SEM=/^S\d+_[A-Z]{3}\d{2}$/;
+function validSemanas(recs){ return [...new Set(recs.map(r=>r.semana).filter(s=>s&&VALID_SEM.test(s)))].sort(); }
+
 function renderMaterialesComparativo(){
-  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
+  const semanas=validSemanas(_allDashRecords);
   const data=semanas.map(s=>{
     const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
     return{sem:getSemanaLabelFromKey(s),jv:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc).length,jl:vis.filter(r=>r.pop&&r.pop.lucky&&r.pop.lucky.enc).length,jve:vis.filter(r=>r.pop&&r.pop.velo&&r.pop.velo.enc).length,t3:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc&&r.pop.lucky&&r.pop.lucky.enc&&r.pop.velo&&r.pop.velo.enc).length,total:vis.length};
@@ -1190,59 +1193,142 @@ function renderStockVuse(){
   if(df==='ALL'){ renderStockVuseComparativo(); return; }
   const records=_allDashRecords.filter(r=>r.semana===df);
   const vis=records.filter(r=>r.estado==='visitado');
+  const N=vis.length||1;
   const semLabel=getSemanaLabelFromKey(df);
+  const hasStk=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!=='').length;
   const conStk=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])>0).length;
   const qbr=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
   const vk=k=>vis.filter(r=>r.vuse&&r.vuse[k]).length;
+  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
+  const skuLabels=['Velo MF 4mg','Velo Uva 4mg','Velo Sandía 4mg','Velo MF 6mg','Velo Uva 6mg','Velo Sandía 6mg'];
+  const skuQbr=[...f4,...f6].map(f=>qbr(f));
+  const skuCon=[...f4,...f6].map(f=>conStk(f));
+  const sortIdx=[...skuQbr.keys()].sort((a,b)=>skuQbr[b]-skuQbr[a]);
   const v1uv=vk('vuse1k-uva'),v1sd=vk('vuse1k-sd'),v1ma=vk('vuse1k-ma'),v1me=vk('vuse1k-me');
   const v3uv=vk('vuse3k-uva'),v3ar=vk('vuse3k-ar');
   const v5k=vis.filter(r=>r.vuse5k==='Si').length;
   const v8k=vis.filter(r=>r.vuse8k==='Si').length;
-  const lsCon=conStk('stockLS'),lsQbr=qbr('stockLS');
-  const compList=vis.filter(r=>r.competencia&&r.competencia.trim()).map(r=>`<li style="margin-bottom:6px;font-size:12px"><b>${r.nombre}</b> (${r.distrito}): ${r.competencia}</li>`).join('');
+  const lsCon=conStk('stockLS'),lsQbr=qbr('stockLS'),lsTot=hasStk('stockLS');
+  const pct=v=>lsTot>0?Math.round(v/lsTot*100):0;
+  const compList=vis.filter(r=>r.competencia&&r.competencia.trim()).map(r=>`<tr><td style="padding:6px 10px;font-weight:600;font-size:11px">${r.nombre}</td><td style="padding:6px 8px;font-size:11px;color:var(--muted)">${r.distrito}</td><td style="padding:6px 10px;font-size:11px">${r.competencia}</td></tr>`).join('');
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel}</div>
+  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel} · ${vis.length} PDVs visitados</div>
   <div class="dash-grid">
-    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':''}">${lsQbr}</div><div class="kpi-label">⚡ Quiebre LS Eclipse</div></div>
+    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':'ok'}">${lsQbr}</div><div class="kpi-label">Quiebre LS Eclipse</div></div>
     <div class="kpi-card"><div class="kpi-val ok">${lsCon}</div><div class="kpi-label">Con stock LS</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disp.</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disp.</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disponible</div></div>
+    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disponible</div></div>
+    <div class="kpi-card"><div class="kpi-val warn">${skuQbr.reduce((a,b)=>a+b,0)}</div><div class="kpi-label">Total quiebres Velo</div></div>
   </div>
   <div class="dash-row">
-    <div class="chart-card"><h3>Quiebre Stock Velo 4mg</h3><canvas id="ch-v4" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>Quiebre Stock Velo 6mg</h3><canvas id="ch-v6" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>Stock Lucky Strike Eclipse</h3><canvas id="ch-ls" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>Disponibilidad Vuse 1K</h3><canvas id="ch-v1k" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>Disponibilidad Vuse 3K</h3><canvas id="ch-v3k" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>Vuse 5K y 8K</h3><canvas id="ch-v58k" style="max-height:160px"></canvas></div>
+    <div class="chart-card">
+      <h3>● Top sabores con quiebre Velo</h3>
+      <canvas id="ch-top-qbr" style="max-height:200px"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>● Stock Lucky Strike Eclipse</h3>
+      <canvas id="ch-ls" style="max-height:200px"></canvas>
+      <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:11px">
+        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#1A2E6A">${lsCon}</div><div style="color:var(--muted)">Con stock</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#ef4444">${lsQbr}</div><div style="color:var(--muted)">Quiebre</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#94a3b8">${vis.length-lsCon-lsQbr}</div><div style="color:var(--muted)">Sin datos</div></div>
+      </div>
+    </div>
   </div>
-  ${compList?`<div class="chart-card" style="margin-bottom:14px"><h3>📋 Levantamiento de Competencia — ${semLabel}</h3><ul style="padding:10px 16px;color:var(--text);list-style:disc">${compList}</ul></div>`:''}`;
+  <div class="dash-row">
+    <div class="chart-card">
+      <h3>● Disponibilidad Vuse 1K por sabor</h3>
+      <canvas id="ch-v1k" style="max-height:180px"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>● Disponibilidad Vuse 3K · 5K · 8K</h3>
+      <canvas id="ch-v3k58" style="max-height:180px"></canvas>
+    </div>
+  </div>
+  ${compList?`<div class="chart-card" style="margin-bottom:14px">
+    <h3>📋 Levantamiento de Competencia — ${semLabel}</h3>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left;font-size:11px">PDV</th><th style="padding:7px 8px;font-size:11px">Distrito</th><th style="padding:7px 10px;text-align:left;font-size:11px">Observación</th></tr></thead>
+      <tbody>${compList}</tbody>
+    </table></div>
+  </div>`:''}`;
   const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  const sabs=['Menta Fresca','Uva','Sandía'];
-  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
-  _charts.push(new Chart(document.getElementById('ch-v4'),{type:'bar',data:{labels:sabs,datasets:[{label:'Con stock',data:f4.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f4.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v6'),{type:'bar',data:{labels:sabs,datasets:[{label:'Con stock',data:f6.map(f=>conStk(f)),backgroundColor:'#22c55e',borderRadius:3},{label:'Quiebre',data:f6.map(f=>qbr(f)),backgroundColor:'#ef4444',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt}}));
-  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#5b3fa0','#ef4444','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v3k'),{type:'bar',data:{labels:['Uva fresca','Arándanos'],datasets:[{data:[v3uv,v3ar],backgroundColor:['#5b3fa0','#1A2E6A'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v58k'),{type:'bar',data:{labels:['Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v5k,v8k],backgroundColor:'#22c55e',borderRadius:3},{label:'No disponible',data:[vis.length-v5k,vis.length-v8k],backgroundColor:'#e2e8f0',borderRadius:3}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  // Ranking horizontal quiebre
+  const srtL=sortIdx.map(i=>skuLabels[i]);
+  const srtQ=sortIdx.map(i=>skuQbr[i]);
+  const srtC=sortIdx.map(i=>skuCon[i]);
+  _charts.push(new Chart(document.getElementById('ch-top-qbr'),{type:'bar',data:{labels:srtL,datasets:[{label:'Quiebre (stock 0)',data:srtQ,backgroundColor:'#ef4444',borderRadius:3},{label:'Con stock',data:srtC,backgroundColor:'#e2f4eb',borderRadius:3}]},options:{...opt,indexAxis:'y',scales:{x:{stacked:true,beginAtZero:true,grid:{display:false}},y:{stacked:true,ticks:{font:{size:10}}}},plugins:{...opt.plugins,tooltip:{callbacks:{label:c=>{const tot=srtQ[c.dataIndex]+srtC[c.dataIndex];const pct2=tot>0?Math.round(c.raw/tot*100):0;return ` ${c.dataset.label}: ${c.raw} (${pct2}%)`;}}}}}}}));
+  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt,cutout:'65%'}}));
+  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{label:'Disponible',data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#1A2E6A','#4A8FD4','#22c55e','#F5A123'],borderRadius:4},{label:'No disponible',data:[N-v1uv,N-v1sd,N-v1ma,N-v1me],backgroundColor:'#e2e8f0',borderRadius:4}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+  _charts.push(new Chart(document.getElementById('ch-v3k58'),{type:'bar',data:{labels:['Vuse 3K\nUva','Vuse 3K\nArándanos','Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v3uv,v3ar,v5k,v8k],backgroundColor:['#1A2E6A','#4A8FD4','#22c55e','#F5A123'],borderRadius:4},{label:'No disponible',data:[N-v3uv,N-v3ar,N-v5k,N-v8k],backgroundColor:'#e2e8f0',borderRadius:4}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
 }
 
 function renderStockVuseComparativo(){
   const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
-  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
+  const skuLabels=['Velo MF 4mg','Velo Uva 4mg','Velo Sandía 4mg','Velo MF 6mg','Velo Uva 6mg','Velo Sandía 6mg'];
+  const semanas=validSemanas(_allDashRecords);
+  if(!semanas.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún. Completa visitas primero.</p>';return;}
   const data=semanas.map(s=>{
     const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
-    return{sem:getSemanaLabelFromKey(s),qbr4:f4.reduce((a,f)=>a+vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length,0),qbr6:f6.reduce((a,f)=>a+vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length,0),v5k:vis.filter(r=>r.vuse5k==='Si').length,v8k:vis.filter(r=>r.vuse8k==='Si').length};
+    const N=vis.length||1;
+    const qbr=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
+    const allQbr=[...f4,...f6].map(f=>qbr(f));
+    const totalQbr=allQbr.reduce((a,b)=>a+b,0);
+    const maxPossible=vis.length*6;
+    return{sem:getSemanaLabelFromKey(s),semKey:s,allQbr,totalQbr,pctQbr:maxPossible>0?Math.round(totalQbr/maxPossible*100):0,v5k:vis.filter(r=>r.vuse5k==='Si').length,v8k:vis.filter(r=>r.vuse8k==='Si').length,total:vis.length};
   });
-  if(!data.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún</p>';return;}
+  // Acumulado de quiebres por sabor en todas las semanas
+  const totalQbrSku=skuLabels.map((_,i)=>data.reduce((a,d)=>a+d.allQbr[i],0));
+  const sortIdx=[...totalQbrSku.keys()].sort((a,b)=>totalQbrSku[b]-totalQbrSku[a]);
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo de todas las semanas — Stock & Disponibilidad</div>
-  <div class="chart-card" style="margin-bottom:12px"><h3>Quiebre Stock Velo (total eventos) por semana</h3><canvas id="ch-comp-velo" style="max-height:200px"></canvas></div>
-  <div class="chart-card" style="margin-bottom:14px"><h3>Disponibilidad Vuse 5K y 8K por semana</h3><canvas id="ch-comp-vuse" style="max-height:200px"></canvas></div>`;
+  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo — Stock & Disponibilidad</div>
+  <div class="dash-row">
+    <div class="chart-card">
+      <h3>● Top sabores con quiebre (acumulado)</h3>
+      <canvas id="ch-top-acc" style="max-height:200px"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>● % Quiebre Velo por Semana</h3>
+      <canvas id="ch-pct-sem" style="max-height:200px"></canvas>
+    </div>
+  </div>
+  <div class="chart-card" style="margin-bottom:12px">
+    <h3>● Disponibilidad Vuse 5K y 8K por semana</h3>
+    <canvas id="ch-vuse-sem" style="max-height:180px"></canvas>
+  </div>
+  <div class="chart-card" style="margin-bottom:14px">
+    <h3>Resumen por semana</h3>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="background:#1C2B4A;color:#fff">
+        <th style="padding:8px 12px;text-align:left">Semana</th>
+        <th style="padding:8px 8px;text-align:center">Visitados</th>
+        <th style="padding:8px 8px;text-align:center">Total quiebres Velo</th>
+        <th style="padding:8px 8px;text-align:center">% Quiebre</th>
+        <th style="padding:8px 8px;text-align:center">Vuse 5K</th>
+        <th style="padding:8px 8px;text-align:center">Vuse 8K</th>
+      </tr></thead>
+      <tbody>${data.map((d,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}">
+        <td style="padding:6px 12px;font-weight:700">${d.sem}</td>
+        <td style="padding:6px 8px;text-align:center">${d.total}</td>
+        <td style="padding:6px 8px;text-align:center;color:#ef4444;font-weight:700">${d.totalQbr}</td>
+        <td style="padding:6px 8px;text-align:center">
+          <span style="background:${d.pctQbr>=50?'#fde8e8':d.pctQbr>=30?'#fef0d6':'#d6f0e2'};color:${d.pctQbr>=50?'#b91c1c':d.pctQbr>=30?'#92400e':'#15803d'};padding:2px 8px;border-radius:99px;font-weight:700">${d.pctQbr}%</span>
+        </td>
+        <td style="padding:6px 8px;text-align:center;color:#22c55e;font-weight:700">${d.v5k}</td>
+        <td style="padding:6px 8px;text-align:center;color:#22c55e;font-weight:700">${d.v8k}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
   const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  _charts.push(new Chart(document.getElementById('ch-comp-velo'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'Quiebres Velo 4mg',data:data.map(d=>d.qbr4),backgroundColor:'#ef4444',borderRadius:3},{label:'Quiebres Velo 6mg',data:data.map(d=>d.qbr6),backgroundColor:'#F5A123',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-comp-vuse'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'Vuse 5K disp.',data:data.map(d=>d.v5k),backgroundColor:'#1A2E6A',borderRadius:3},{label:'Vuse 8K disp.',data:data.map(d=>d.v8k),backgroundColor:'#4A8FD4',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
+  // Top sabores ranking horizontal acumulado
+  const srtL=sortIdx.map(i=>skuLabels[i]);
+  const srtQ=sortIdx.map(i=>totalQbrSku[i]);
+  _charts.push(new Chart(document.getElementById('ch-top-acc'),{type:'bar',data:{labels:srtL,datasets:[{label:'Quiebres acumulados',data:srtQ,backgroundColor:['#1A2E6A','#243d8a','#4A8FD4','#b03030','#ef4444','#f97316'],borderRadius:3}]},options:{...opt,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{display:false}},y:{ticks:{font:{size:10}}}}}}));
+  // % quiebre por semana
+  _charts.push(new Chart(document.getElementById('ch-pct-sem'),{type:'bar',data:{labels:data.map(d=>d.sem.replace('Semana ','Sem ')),datasets:[{label:'% Quiebre Velo',data:data.map(d=>d.pctQbr),backgroundColor:data.map(d=>d.pctQbr>=50?'#ef4444':d.pctQbr>=30?'#F5A123':'#22c55e'),borderRadius:4}]},options:{...opt,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw}% de quiebre · ${data[c.dataIndex].totalQbr} eventos`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}}));
+  // Vuse 5K y 8K por semana
+  _charts.push(new Chart(document.getElementById('ch-vuse-sem'),{type:'bar',data:{labels:data.map(d=>d.sem.replace('Semana ','Sem ')),datasets:[{label:'Vuse 5K disponible',data:data.map(d=>d.v5k),backgroundColor:'#1A2E6A',borderRadius:3},{label:'Vuse 8K disponible',data:data.map(d=>d.v8k),backgroundColor:'#4A8FD4',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
 }
 
 // Convierte URL de Drive viewer a URL directa embebible en <img>
