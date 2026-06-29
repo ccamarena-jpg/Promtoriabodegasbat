@@ -147,6 +147,9 @@ textarea{resize:vertical;min-height:52px}
 .btn-save{flex:2;padding:10px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
 .btn-save:hover{background:var(--navy2)}
 .btn-save:disabled{background:#94a3b8;cursor:not-allowed}
+.visit-locked-banner{background:#fef9c3;border:1.5px solid #eab308;border-radius:8px;padding:8px 12px;margin:0 14px 10px;font-size:12px;color:#713f12;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.visit-locked-banner .lock-icon{font-size:16px}
+.btn-unlock{padding:4px 10px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0}
 
 /* DASHBOARD */
 #dash-overlay{position:fixed;inset:0;background:var(--bg);z-index:600;display:none;flex-direction:column;overflow:hidden}
@@ -473,8 +476,13 @@ textarea{resize:vertical;min-height:52px}
         </div>
       </div><!-- /seccion-abierto -->
     </div><!-- /modal-body -->
+    <div id="visit-lock-banner" style="display:none" class="visit-locked-banner">
+      <span class="lock-icon">🔒</span>
+      <span id="lock-banner-text"></span>
+      <button class="btn-unlock" id="btn-unlock" onclick="adminUnlock()" style="display:none">✏️ Editar</button>
+    </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-cancel" id="btn-cancel-modal" onclick="closeModal()">Cancelar</button>
       <button class="btn-save" id="btn-save" onclick="saveVisit()">💾 Guardar visita</button>
     </div>
   </div>
@@ -611,6 +619,7 @@ const USERS = {
 let currentUser=null, currentRole=null, currentDay=null;
 let selectedPosId=null, map=null, markers={}, visits={};
 let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null;
+let _modalLocked=false;
 let mVuse={}, mVuse5k=null, mVuse8k=null;
 let fotosData={}, currentPosId=null;
 
@@ -823,6 +832,7 @@ function openModal(posId){
   document.getElementById('m-dir').textContent=`${pos.direccion} · ${pos.distrito}`;
   document.getElementById('btn-nav-maps').href=`https://www.google.com/maps/dir/?api=1&destination=${pos.lat},${pos.lon}`;
   resetModal();
+  unlockModal();
   const ex=visits[semKey(posId)];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
@@ -848,6 +858,7 @@ function openModal(posId){
     if(ex.dispenser) selDispenser(ex.dispenser,true);
     if(ex.contrabando) selContrabando(ex.contrabando,true);
     if(ex.fotos){ fotosData={...ex.fotos}; Object.keys(fotosData).forEach(k=>refreshFotoSlot(k)); }
+    lockModal(ex);
   }
   document.getElementById('modal-bg').classList.add('active');
   if(markers[posId]){ map.setView([pos.lat,pos.lon],16,{animate:true}); markers[posId].openPopup(); }
@@ -867,17 +878,56 @@ function resetModal(){
   ['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'].forEach(k=>clearFotoSlot(k));
   ['seccion-abierto','seccion-cigarrera','seccion-dispenser','seccion-contrabando'].forEach(id=>document.getElementById(id).style.display='none');
 }
-function togVuse(key,btnId){ mVuse[key]=!mVuse[key]; const el=document.getElementById(btnId); if(el) el.className='rbtn'+(mVuse[key]?' sel-si':''); }
+function lockModal(visit){
+  _modalLocked=true;
+  const banner=document.getElementById('visit-lock-banner');
+  const bannerText=document.getElementById('lock-banner-text');
+  const btnUnlock=document.getElementById('btn-unlock');
+  const btnSave=document.getElementById('btn-save');
+  const btnCancel=document.getElementById('btn-cancel-modal');
+  const estado=visit.estado==='visitado'?'✅ Visitado':'❌ No Go';
+  const hora=visit.hora||'';
+  bannerText.textContent=`Visita registrada esta semana${hora?' a las '+hora:''} — ${estado}`;
+  banner.style.display='flex';
+  btnSave.style.display='none';
+  btnCancel.textContent='Cerrar';
+  if(currentRole==='admin') btnUnlock.style.display='';
+  else btnUnlock.style.display='none';
+  document.querySelectorAll('#modal input:not([type="file"]), #modal textarea, #modal select').forEach(el=>{ el.readOnly=true; el.style.pointerEvents='none'; });
+  document.querySelectorAll('#modal input[type="checkbox"], #modal input[type="radio"]').forEach(el=>{ el.disabled=true; });
+  document.querySelectorAll('#modal input[type="file"]').forEach(el=>{ el.disabled=true; });
+  document.querySelectorAll('.fn-del').forEach(el=>{ el.style.display='none'; });
+}
+function unlockModal(){
+  _modalLocked=false;
+  const banner=document.getElementById('visit-lock-banner');
+  if(banner) banner.style.display='none';
+  const btnSave=document.getElementById('btn-save');
+  const btnCancel=document.getElementById('btn-cancel-modal');
+  if(btnSave) btnSave.style.display='';
+  if(btnCancel) btnCancel.textContent='Cancelar';
+  document.querySelectorAll('#modal input:not([type="file"]), #modal textarea, #modal select').forEach(el=>{ el.readOnly=false; el.style.pointerEvents=''; });
+  document.querySelectorAll('#modal input[type="checkbox"], #modal input[type="radio"]').forEach(el=>{ el.disabled=false; });
+  document.querySelectorAll('#modal input[type="file"]').forEach(el=>{ el.disabled=false; });
+}
+function adminUnlock(){
+  if(currentRole!=='admin') return;
+  unlockModal();
+  toast('✏️ Modo edición — admin');
+}
+
+function togVuse(key,btnId){ if(_modalLocked) return; mVuse[key]=!mVuse[key]; const el=document.getElementById(btnId); if(el) el.className='rbtn'+(mVuse[key]?' sel-si':''); }
 function selYN(field,v){
+  if(_modalLocked) return;
   if(field==='vuse5k'){ mVuse5k=v; document.getElementById('rb-vuse5k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse5k-no').className='rbtn'+(v==='No'?' sel-no':''); }
   if(field==='vuse8k'){ mVuse8k=v; document.getElementById('rb-vuse8k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse8k-no').className='rbtn'+(v==='No'?' sel-no':''); }
 }
 
-function selAbierto(v){ mAbierto=v; document.getElementById('rb-abierto-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-abierto-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-abierto').style.display=v==='Si'?'block':'none'; }
-function selCigarrera(v){ mCigarrera=v; document.getElementById('rb-cig-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cig-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-cigarrera').style.display=v==='Si'?'block':'none'; }
-function selCigCom(v){ mCigCom=v; const m={'Sí, comunicación vigente':'rb-cigcom-vigente','No, tiene comunicación antigua':'rb-cigcom-antigua','No aplica':'rb-cigcom-na'}; Object.keys(m).forEach(k=>document.getElementById(m[k]).className='rbtn'+(k===v?' sel':'')); }
-function selDispenser(v){ mDispenser=v; document.getElementById('rb-disp-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-disp-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-dispenser').style.display=v==='Si'?'block':'none'; }
-function selContrabando(v){ mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }
+function selAbierto(v){ if(_modalLocked) return; mAbierto=v; document.getElementById('rb-abierto-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-abierto-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-abierto').style.display=v==='Si'?'block':'none'; }
+function selCigarrera(v){ if(_modalLocked) return; mCigarrera=v; document.getElementById('rb-cig-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cig-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-cigarrera').style.display=v==='Si'?'block':'none'; }
+function selCigCom(v){ if(_modalLocked) return; mCigCom=v; const m={'Sí, comunicación vigente':'rb-cigcom-vigente','No, tiene comunicación antigua':'rb-cigcom-antigua','No aplica':'rb-cigcom-na'}; Object.keys(m).forEach(k=>document.getElementById(m[k]).className='rbtn'+(k===v?' sel':'')); }
+function selDispenser(v){ if(_modalLocked) return; mDispenser=v; document.getElementById('rb-disp-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-disp-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-dispenser').style.display=v==='Si'?'block':'none'; }
+function selContrabando(v){ if(_modalLocked) return; mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }
 
 function setFoto(key,input){ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,800,.72,b64=>{ fotosData[key]=b64; refreshFotoSlot(key); }); r.readAsDataURL(file); }
 function refreshFotoSlot(key){ const p=document.getElementById(`fp-${key}`); if(!p) return; p.querySelectorAll('img,.fn-del').forEach(el=>el.remove()); if(fotosData[key]){ const img=document.createElement('img'); img.src=fotosData[key]; const del=document.createElement('button'); del.className='fn-del'; del.textContent='×'; del.onclick=e=>{ e.stopPropagation(); fotosData[key]=null; clearFotoSlot(key); }; p.appendChild(img); p.appendChild(del); } }
@@ -911,6 +961,7 @@ function handleBgClick(e){ if(e.target===document.getElementById('modal-bg')) cl
 
 // ─── SAVE ───
 async function saveVisit(){
+  if(_modalLocked){ toast('🔒 Visita ya registrada esta semana'); return; }
   if(!mAbierto){ toast('⚠️ Indica si el local está abierto'); return; }
   if(!currentPosId){ toast('⚠️ Error: sin POS seleccionado'); return; }
   const btn=document.getElementById('btn-save');
