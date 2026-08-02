@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -306,16 +306,25 @@ textarea{resize:vertical;min-height:52px}
 </svg></div>
     <h1>Dashboard — Promotoría Bodegas Audit</h1>
     <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-      <select id="dash-sem-filter" onchange="renderDashContent()" style="width:auto;padding:6px 10px;font-size:11px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:none">
-        <option value="ALL">Todas las semanas</option>
-      </select>
-      <button class="btn-icon" onclick="closeDash()" style="margin-left:6px">✕ Cerrar</button>
+      <button class="btn-icon" onclick="renderDash()" title="Recargar datos">🔄 Actualizar</button>
+      <button class="btn-icon" onclick="closeDash()">✕ Cerrar</button>
     </div>
   </div>
-  <div style="display:flex;gap:0;background:rgba(0,0,0,.15);flex-shrink:0">
-    <button class="dash-tab-btn active" onclick="switchDashTab('general',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📋 Vista General</button>
-    <button class="dash-tab-btn" onclick="switchDashTab('materiales',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📌 Materiales</button>
-    <button class="dash-tab-btn" onclick="switchDashTab('stock',this)" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.5px">📦 Stock &amp; Vuse</button>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 14px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0">
+    <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Filtros</span>
+    <select id="fMes" onchange="applyFilter()" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--text);cursor:pointer;outline:none;font-family:inherit"><option value="">Todos los meses</option></select>
+    <select id="fSemana" onchange="applyFilter()" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--text);cursor:pointer;outline:none;font-family:inherit"><option value="">Todas las semanas</option></select>
+    <select id="fDist" onchange="applyFilter()" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--text);cursor:pointer;outline:none;font-family:inherit"><option value="">Todos los distritos</option></select>
+    <select id="fDia" onchange="applyFilter()" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--text);cursor:pointer;outline:none;font-family:inherit"><option value="">Todos los días</option><option>LUNES</option><option>MARTES</option><option>MIERCOLES</option><option>JUEVES</option><option>VIERNES</option></select>
+    <span id="fInfo" style="font-size:11px;color:var(--muted);margin-left:auto;font-weight:600"></span>
+  </div>
+  <div style="display:flex;gap:0;background:rgba(0,0,0,.15);flex-shrink:0;overflow-x:auto">
+    <button class="dash-tab-btn active" onclick="switchDashTab('cobertura',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">📊 Cobertura</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('activos',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">🏪 Activos BAT</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('materiales',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">📋 Materiales</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('stock',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">📦 Stock Velo</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('padron',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">📁 Padrón Total</button>
+    <button class="dash-tab-btn" onclick="switchDashTab('evolutivo',this)" style="flex:1;min-width:108px;padding:10px 6px;border:none;background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">📈 Evolutivo</button>
   </div>
   <div class="dash-body" id="dash-body"></div>
 </div>
@@ -348,54 +357,34 @@ textarea{resize:vertical;min-height:52px}
       </div>
       <div id="seccion-abierto" style="display:none">
         <div class="field-group">
+          <label class="field-label">¿Permitió tomar información? <span class="req">*</span></label>
+          <div class="radio-group">
+            <button class="rbtn" id="rb-permite-si" onclick="selPermite('Si')">✅ Sí, permitió</button>
+            <button class="rbtn" id="rb-permite-no" onclick="selPermite('No')">🚫 No permitió</button>
+          </div>
+          <p id="permite-hint" style="font-size:10px;color:#b45309;margin-top:6px;display:none">🚫 No permitió: la auditoría se cierra con este registro. Puedes guardar directamente.</p>
+        </div>
+        <div id="seccion-permite" style="display:none">
+        <div class="field-group">
           <label class="field-label">Nombres y Apellidos del Staff <span class="req">*</span></label>
           <input type="text" id="m-staff" placeholder="Ej: Juan Pérez García"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">¿Se realizó capacitación al staff? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-cap-si" onclick="selCapacitado('Si')">Sí</button><button class="rbtn" id="rb-cap-no" onclick="selCapacitado('No')">No</button></div>
         </div>
         <hr class="section-divider">
         <div class="section-title">▸ Materiales POP Instalados</div>
         <div class="field-group">
-          <label class="field-label">Revisión de Materiales de Convivencia <span class="req">*</span></label>
-          <table class="pop-table">
-            <thead><tr><th>Material</th><th>Encontrado</th><th>Óptimo</th><th>Requiere Reemplazo</th></tr></thead>
-            <tbody>
-              <tr><td>Placa</td><td><input type="checkbox" class="pop-cb" id="pop-placa-enc"></td><td><input type="checkbox" class="pop-cb" id="pop-placa-opt"></td><td><input type="checkbox" class="pop-cb" id="pop-placa-rep"></td></tr>
-              <tr><td>Jalavista Vuse</td><td><input type="checkbox" class="pop-cb" id="pop-vuse-enc"></td><td><input type="checkbox" class="pop-cb" id="pop-vuse-opt"></td><td><input type="checkbox" class="pop-cb" id="pop-vuse-rep"></td></tr>
-              <tr><td>Jalavista Lucky Strike</td><td><input type="checkbox" class="pop-cb" id="pop-lucky-enc"></td><td><input type="checkbox" class="pop-cb" id="pop-lucky-opt"></td><td><input type="checkbox" class="pop-cb" id="pop-lucky-rep"></td></tr>
-              <tr><td>Jalavista Velo</td><td><input type="checkbox" class="pop-cb" id="pop-velo-enc"></td><td><input type="checkbox" class="pop-cb" id="pop-velo-opt"></td><td><input type="checkbox" class="pop-cb" id="pop-velo-rep"></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Fotos de Materiales POP</label>
+          <label class="field-label">Fotos de Materiales (sube foto = material instalado)</label>
           <div class="fotos-grid-named">
             <div class="foto-named"><div class="fn-label">📌 Placa</div><div class="fn-preview" id="fp-placa"><span style="font-size:16px">📌</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('placa',this)"></div></div>
             <div class="foto-named"><div class="fn-label">🔖 Jalavista Vuse</div><div class="fn-preview" id="fp-vuse"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('vuse',this)"></div></div>
-            <div class="foto-named"><div class="fn-label">🔖 Lucky Strike <span class="req">*</span></div><div class="fn-preview" id="fp-lucky"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('lucky',this)"></div></div>
-            <div class="foto-named"><div class="fn-label">🔖 Jalavista Velo <span class="req">*</span></div><div class="fn-preview" id="fp-velo"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('velo',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">🔖 Lucky Strike</div><div class="fn-preview" id="fp-lucky"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('lucky',this)"></div></div>
+            <div class="foto-named"><div class="fn-label">🔖 Jalavista Velo</div><div class="fn-preview" id="fp-velo"><span style="font-size:16px">🔖</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('velo',this)"></div></div>
           </div>
         </div>
-        <div class="field-group"><label class="field-label">Comentarios – Placa</label><textarea id="obs-placa" rows="2" placeholder="Observaciones..."></textarea></div>
-        <div class="field-group"><label class="field-label">Comentarios – Jalavista Vuse</label><textarea id="obs-vuse" rows="2" placeholder="Observaciones..."></textarea></div>
-        <div class="field-group"><label class="field-label">Comentarios – Jalavista Lucky Strike</label><textarea id="obs-lucky" rows="2" placeholder="Observaciones..."></textarea></div>
-        <div class="field-group"><label class="field-label">Comentarios – Jalavista Velo</label><textarea id="obs-velo" rows="2" placeholder="Observaciones..."></textarea></div>
-        <hr class="section-divider">
-        <div class="section-title">▸ Cigarrera</div>
-        <div class="field-group">
-          <label class="field-label">¿El Local cuenta con Cigarrera? <span class="req">*</span></label>
-          <div class="radio-group"><button class="rbtn" id="rb-cig-si" onclick="selCigarrera('Si')">Sí</button><button class="rbtn" id="rb-cig-no" onclick="selCigarrera('No')">No</button></div>
-        </div>
-        <div id="seccion-cigarrera" style="display:none">
-          <div class="field-group"><label class="field-label">📷 Fotografía de la Cigarrera <span class="req">*</span></label><div class="foto-named" style="max-width:190px"><div class="fn-label">Cigarrera <span class="req">*</span></div><div class="fn-preview" id="fp-cigarrera"><span style="font-size:18px">🗄️</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('cigarrera',this)"></div></div></div>
-          <div class="field-group">
-            <label class="field-label">¿Comunicación en Cigarrera Actualizada? <span class="req">*</span></label>
-            <div class="radio-group" style="flex-direction:column;align-items:flex-start;gap:4px">
-              <button class="rbtn" id="rb-cigcom-vigente" onclick="selCigCom('Sí, comunicación vigente')">Sí, comunicación vigente</button>
-              <button class="rbtn" id="rb-cigcom-antigua" onclick="selCigCom('No, tiene comunicación antigua')">No, tiene comunicación antigua</button>
-              <button class="rbtn" id="rb-cigcom-na" onclick="selCigCom('No aplica')">No aplica</button>
-            </div>
-          </div>
-          <div class="field-group"><label class="field-label">¿El cliente permite el cambio?</label><textarea id="m-permite-cambio" rows="2" placeholder="Ej: Sí, acordamos el jueves..."></textarea></div>
-        </div>
+        <div class="field-group"><label class="field-label">Comentarios sobre materiales</label><textarea id="obs-materiales" rows="3" placeholder="Estado general de placas y jalavistas, reemplazos requeridos, observaciones..."></textarea></div>
         <hr class="section-divider">
         <div class="section-title">▸ Dispenser</div>
         <div class="field-group">
@@ -406,55 +395,34 @@ textarea{resize:vertical;min-height:52px}
           <div class="field-group"><div class="foto-named" style="max-width:190px"><div class="fn-label">📷 Dispenser</div><div class="fn-preview" id="fp-dispenser"><span style="font-size:18px">📦</span><span>Foto</span><input type="file" accept="image/*" onchange="setFoto('dispenser',this)"></div></div></div>
         </div>
         <div class="field-group"><label class="field-label">Comentarios adicionales – Dispenser</label><textarea id="obs-dispenser" rows="2" placeholder="Observaciones..."></textarea></div>
+        <style>
+        .sku-table{width:100%;border-collapse:collapse;font-size:11px}
+        .sku-table th{background:#f1f5f9;padding:5px 6px;font-size:9px;font-weight:700;color:var(--muted);border:1px solid var(--border);text-align:center;text-transform:uppercase;letter-spacing:.3px}
+        .sku-table td{padding:4px 6px;border:1px solid var(--border);vertical-align:middle}
+        .sku-table td.pname{font-size:10px;font-weight:600;color:var(--text)}
+        .sku-table input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 6px;font-size:12px;font-family:inherit;outline:none;background:#fff}
+        .sku-table input:focus{border-color:var(--navy)}
+        .sku-table input.cant{max-width:66px;text-align:center;margin:0 auto;display:block}
+        .sku-grp td{background:#eef1ff;color:var(--navy);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.4px}
+        </style>
         <hr class="section-divider">
-        <div class="section-title">▸ Stock Velo</div>
+        <div class="section-title">▸ Conteo Stock Velo (cantidad + vencimiento)</div>
         <div class="field-group">
-          <label class="field-label" style="color:var(--navy);font-size:9px">PRESENTACIÓN 4MG — unidades en stock (0 = quiebre)</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-            <div><div class="field-label">Menta Fresca</div><input type="number" id="m-velo-mf4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-            <div><div class="field-label">Uva</div><input type="number" id="m-velo-uv4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-            <div><div class="field-label">Sandía</div><input type="number" id="m-velo-sd4" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label" style="color:var(--navy);font-size:9px">PRESENTACIÓN 6MG — unidades en stock (0 = quiebre)</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-            <div><div class="field-label">Menta Fresca</div><input type="number" id="m-velo-mf6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-            <div><div class="field-label">Uva</div><input type="number" id="m-velo-uv6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-            <div><div class="field-label">Sandía</div><input type="number" id="m-velo-sd6" min="0" placeholder="0" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;outline:none"></div>
-          </div>
+          <div style="overflow-x:auto"><table class="sku-table"><thead><tr><th style="text-align:left">Producto</th><th style="width:70px">Cant.</th><th style="width:120px">Vencimiento</th></tr></thead><tbody id="velo-stock-body"></tbody></table></div>
         </div>
         <hr class="section-divider">
         <div class="section-title">▸ Stock Lucky Strike Eclipse</div>
         <div class="field-group">
-          <label class="field-label">Unidades en stock (0 = quiebre)</label>
-          <input type="number" id="m-stock-ls" min="0" placeholder="0" style="width:140px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none">
+          <label class="field-label">¿LS Eclipse tiene quiebre de stock? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-lsq-si" onclick="selLsQuiebre('Si')">Sí, hay quiebre</button><button class="rbtn" id="rb-lsq-no" onclick="selLsQuiebre('No')">No</button></div>
+        </div>
+        <div id="seccion-lsq" style="display:none">
+          <div class="field-group"><label class="field-label">Motivo del quiebre</label><textarea id="m-ls-motivo" rows="2" placeholder="Ej: Falta de despacho, alta rotación, no llegó pedido..."></textarea></div>
         </div>
         <hr class="section-divider">
-        <div class="section-title">▸ Disponibilidad Vuse</div>
+        <div class="section-title">▸ Conteo Stock Vuse (cantidad por SKU · sin 8K)</div>
         <div class="field-group">
-          <label class="field-label">Vuse 1K — Sabores disponibles (selecciona los que tienen stock)</label>
-          <div class="radio-group" style="flex-wrap:wrap;gap:5px">
-            <button class="rbtn" id="rb-vuse1k-uva" onclick="togVuse('vuse1k-uva','rb-vuse1k-uva')">Uva fresca</button>
-            <button class="rbtn" id="rb-vuse1k-sd" onclick="togVuse('vuse1k-sd','rb-vuse1k-sd')">Sandía fresca</button>
-            <button class="rbtn" id="rb-vuse1k-ma" onclick="togVuse('vuse1k-ma','rb-vuse1k-ma')">Manzana</button>
-            <button class="rbtn" id="rb-vuse1k-me" onclick="togVuse('vuse1k-me','rb-vuse1k-me')">Menta</button>
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Vuse 3K — Sabores disponibles</label>
-          <div class="radio-group" style="flex-wrap:wrap;gap:5px">
-            <button class="rbtn" id="rb-vuse3k-uva" onclick="togVuse('vuse3k-uva','rb-vuse3k-uva')">Uva fresca</button>
-            <button class="rbtn" id="rb-vuse3k-ar" onclick="togVuse('vuse3k-ar','rb-vuse3k-ar')">Arándanos</button>
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Vuse 5K</label>
-          <div class="radio-group"><button class="rbtn" id="rb-vuse5k-si" onclick="selYN('vuse5k','Si')">Sí</button><button class="rbtn" id="rb-vuse5k-no" onclick="selYN('vuse5k','No')">No</button></div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Vuse 8K</label>
-          <div class="radio-group"><button class="rbtn" id="rb-vuse8k-si" onclick="selYN('vuse8k','Si')">Sí</button><button class="rbtn" id="rb-vuse8k-no" onclick="selYN('vuse8k','No')">No</button></div>
+          <div style="overflow-x:auto"><table class="sku-table"><thead><tr><th style="text-align:left">Producto</th><th style="width:80px">Cant.</th></tr></thead><tbody id="vuse-stock-body"></tbody></table></div>
         </div>
         <hr class="section-divider">
         <div class="section-title">▸ Levantamiento de Competencia</div>
@@ -474,6 +442,7 @@ textarea{resize:vertical;min-height:52px}
           <label class="field-label">📷 Foto Panorámica Interior</label>
           <div class="foto-named" style="max-width:190px"><div class="fn-label">Vista interior</div><div class="fn-preview" id="fp-panoramica"><span style="font-size:18px">🏬</span><span>Foto panorámica</span><input type="file" accept="image/*" onchange="setFoto('panoramica',this)"></div></div>
         </div>
+        </div><!-- /seccion-permite -->
       </div><!-- /seccion-abierto -->
     </div><!-- /modal-body -->
     <div id="visit-lock-banner" style="display:none" class="visit-locked-banner">
@@ -607,8 +576,9 @@ const DAYS_ORDER = ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES'];
 const DAY_LABELS = {LUNES:'Lunes',MARTES:'Martes',MIERCOLES:'Miércoles',JUEVES:'Jueves',VIERNES:'Viernes'};
 
 // ─── CONFIG ───
-// Reemplaza con la URL de tu Apps Script Web App desplegado
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyirf4PDETKpLKDADfb-SnPRXENNlKvfM_93tK5UFgxLKD03tSWvOyC9u1dKwxFVUru/exec';
+// ⚠️ IMPORTANTE: para empezar de 0 con el NUEVO Sheet, despliega apps-script.gs (v2)
+// como nueva Web App y PEGA AQUÍ esa URL /exec nueva (reemplaza la de abajo).
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjdvzQKO6b0ip5pOScXTJRtjpn06efYBXdTSGbZR94aMwC5yMI9q-61sMNcqvtNJeZSw/exec';
 
 const USERS = {
   'auditor1@ttaudit.com': {pass:'123456', role:'auditor'},
@@ -618,10 +588,87 @@ const USERS = {
 // ─── STATE ───
 let currentUser=null, currentRole=null, currentDay=null;
 let selectedPosId=null, map=null, markers={}, visits={};
-let mAbierto=null, mCigarrera=null, mCigCom=null, mDispenser=null, mContrabando=null;
+let mAbierto=null, mPermite=null, mCapacitado=null, mDispenser=null, mContrabando=null, mLsQuiebre=null;
 let _modalLocked=false;
-let mVuse={}, mVuse5k=null, mVuse8k=null;
 let fotosData={}, currentPosId=null;
+
+// ─── CATÁLOGO DE SKUs (editable) ───
+const VELO_SKUS=[
+  {id:'velo_mf4',n:'Velo Menta Fresca 4mg'},
+  {id:'velo_uv4',n:'Velo Uva Morada 4mg'},
+  {id:'velo_sd4',n:'Velo Sandía Fresca 4mg'},
+  {id:'velo_mf6',n:'Velo Menta Fresca 6mg'},
+  {id:'velo_uv6',n:'Velo Uva Morada 6mg'},
+  {id:'velo_sd6',n:'Velo Sandía Fresca 6mg'},
+  {id:'velo_mg8',n:'Velo Mango Tropical 8mg'},
+  {id:'velo_ms8',n:'Velo Menta Suave 8mg'}
+];
+const VELO_GROUPS=[
+  {lbl:'Presentación 4mg',ids:['velo_mf4','velo_uv4','velo_sd4']},
+  {lbl:'Presentación 6mg',ids:['velo_mf6','velo_uv6','velo_sd6']},
+  {lbl:'Presentación 8mg (nuevos)',ids:['velo_mg8','velo_ms8']}
+];
+const VUSE_SKUS=[
+  {id:'vuse_1k_tab',n:'New Aromatic Tobacco 1K'},
+  {id:'vuse_1k_grp',n:'Grape Ice 1K'},
+  {id:'vuse_1k_wat',n:'Watermelon Ice 1K'},
+  {id:'vuse_1k_pep',n:'Peppermint Ice 1K'},
+  {id:'vuse_1k_grn',n:'Green Apple 1K'},
+  {id:'vuse_1k_bbl',n:'Berry Blend 1K'},
+  {id:'vuse_1k_bwt',n:'Berry Watermelon 1K'},
+  {id:'vuse_1k_str',n:'Strawberry Ice 1K'},
+  {id:'vuse_1k_blu',n:'Blueberry Ice 1K'},
+  {id:'vuse_3k_grp',n:'Grape Ice 3K'},
+  {id:'vuse_3k_pep',n:'Peppermint Ice 3K'},
+  {id:'vuse_3k_blu',n:'Blueberry Ice 3K'},
+  {id:'vuse_3k_grn',n:'Green Apple 3K'},
+  {id:'vuse_5k_grp',n:'Grape Ice 5K'},
+  {id:'vuse_5k_grn',n:'Green Apple 5K'},
+  {id:'vuse_5k_bwt',n:'Berry Watermelon 5K'},
+  {id:'vuse_5k_pep',n:'Peppermint Ice 5K'},
+  {id:'vuse_5k_blu',n:'Blueberry Ice 5K'}
+];
+const VUSE_GROUPS=[{lbl:'1000 puffs',pre:'1k'},{lbl:'3000 puffs',pre:'3k'},{lbl:'5000 puffs',pre:'5k'}];
+
+function buildStockTables(){
+  let vh='';
+  VELO_GROUPS.forEach(g=>{
+    vh+=`<tr class="sku-grp"><td colspan="3">${g.lbl}</td></tr>`;
+    g.ids.forEach(id=>{
+      const s=VELO_SKUS.find(x=>x.id===id); if(!s) return;
+      vh+=`<tr><td class="pname">${s.n}</td>`+
+          `<td><input class="cant" type="number" min="0" placeholder="0" id="stk-${id}-c"></td>`+
+          `<td><input type="date" id="stk-${id}-v"></td></tr>`;
+    });
+  });
+  const vb=document.getElementById('velo-stock-body'); if(vb) vb.innerHTML=vh;
+  let uh='';
+  VUSE_GROUPS.forEach(g=>{
+    uh+=`<tr class="sku-grp"><td colspan="2">${g.lbl}</td></tr>`;
+    VUSE_SKUS.filter(s=>s.id.split('_')[1]===g.pre).forEach(s=>{
+      uh+=`<tr><td class="pname">${s.n}</td><td><input class="cant" type="number" min="0" placeholder="0" id="stk-${s.id}-c"></td></tr>`;
+    });
+  });
+  const ub=document.getElementById('vuse-stock-body'); if(ub) ub.innerHTML=uh;
+}
+function collectVeloStock(){
+  const o={};
+  VELO_SKUS.forEach(s=>{
+    const c=document.getElementById('stk-'+s.id+'-c'), v=document.getElementById('stk-'+s.id+'-v');
+    const cv=(c&&c.value!=='')?parseInt(c.value):null, vv=(v&&v.value)?v.value:'';
+    if(cv!==null||vv) o[s.id]={c:cv,v:vv};
+  });
+  return o;
+}
+function collectVuseStock(){
+  const o={};
+  VUSE_SKUS.forEach(s=>{ const c=document.getElementById('stk-'+s.id+'-c'); if(c&&c.value!=='') o[s.id]=parseInt(c.value); });
+  return o;
+}
+function fillStock(velo,vuse){
+  if(velo) Object.keys(velo).forEach(id=>{ const o=velo[id]||{}; const c=document.getElementById('stk-'+id+'-c'), v=document.getElementById('stk-'+id+'-v'); if(c&&(o.c===0||o.c)) c.value=o.c; if(v&&o.v) v.value=o.v; });
+  if(vuse) Object.keys(vuse).forEach(id=>{ const c=document.getElementById('stk-'+id+'-c'); if(c&&(vuse[id]===0||vuse[id])) c.value=vuse[id]; });
+}
 
 // ─── SEMANA ───
 function calcSemana(){
@@ -795,7 +842,7 @@ function renderMapMarkers(){
   const posList=POS_DATA[currentDay]||[];
   const bounds=[];
   posList.forEach((pos,idx)=>{
-    const v=visits[pos.id];
+    const v=visits[semKey(pos.id)];
     const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
     const m=L.marker([pos.lat,pos.lon],{icon:makeNumberedIcon(idx+1,status)}).addTo(map)
       .bindPopup(`<b>${pos.nombre}</b><br><small>${pos.direccion}</small><br><small>${pos.distrito}</small>`);
@@ -836,25 +883,16 @@ function openModal(posId){
   const ex=visits[semKey(posId)];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
+    if(ex.permite) selPermite(ex.permite,true);
+    if(ex.capacitado) selCapacitado(ex.capacitado,true);
     if(ex.staff) document.getElementById('m-staff').value=ex.staff;
-    if(ex.obsPlaca) document.getElementById('obs-placa').value=ex.obsPlaca;
-    if(ex.obsVuse) document.getElementById('obs-vuse').value=ex.obsVuse;
-    if(ex.obsLucky) document.getElementById('obs-lucky').value=ex.obsLucky;
-    if(ex.obsVelo) document.getElementById('obs-velo').value=ex.obsVelo;
-    if(ex.permiteCambio) document.getElementById('m-permite-cambio').value=ex.permiteCambio;
+    if(ex.obsMateriales) document.getElementById('obs-materiales').value=ex.obsMateriales;
     if(ex.obsDispenser) document.getElementById('obs-dispenser').value=ex.obsDispenser;
     if(ex.marcasContrabando) document.getElementById('m-marcas-contrabando').value=ex.marcasContrabando;
-    const sn=id=>{ const el=document.getElementById(id); if(el&&ex[id]!==undefined) el.value=ex[id]; };
-    sn('m-velo-mf4');sn('m-velo-uv4');sn('m-velo-sd4');
-    sn('m-velo-mf6');sn('m-velo-uv6');sn('m-velo-sd6');
-    sn('m-stock-ls');
     if(ex.competencia) document.getElementById('m-competencia').value=ex.competencia;
-    if(ex.vuse){ mVuse={...ex.vuse}; Object.keys(mVuse).forEach(k=>{ if(mVuse[k]){ const el=document.getElementById('rb-'+k); if(el) el.className='rbtn sel-si'; } }); }
-    if(ex.vuse5k) selYN('vuse5k',ex.vuse5k);
-    if(ex.vuse8k) selYN('vuse8k',ex.vuse8k);
-    if(ex.pop) ['placa','vuse','lucky','velo'].forEach(k=>{if(ex.pop[k]) ['enc','opt','rep'].forEach(s=>{if(ex.pop[k][s]) document.getElementById(`pop-${k}-${s}`).checked=true;});});
-    if(ex.cigarrera) selCigarrera(ex.cigarrera,true);
-    if(ex.cigCom) selCigCom(ex.cigCom,true);
+    if(ex.lsQuiebre) selLsQuiebre(ex.lsQuiebre,true);
+    if(ex.lsMotivo) document.getElementById('m-ls-motivo').value=ex.lsMotivo;
+    fillStock(ex.veloStock,ex.vuseStock);
     if(ex.dispenser) selDispenser(ex.dispenser,true);
     if(ex.contrabando) selContrabando(ex.contrabando,true);
     if(ex.fotos){ fotosData={...ex.fotos}; Object.keys(fotosData).forEach(k=>refreshFotoSlot(k)); }
@@ -866,17 +904,15 @@ function openModal(posId){
 }
 
 function resetModal(){
-  mAbierto=null;mCigarrera=null;mCigCom=null;mDispenser=null;mContrabando=null;mVuse={};mVuse5k=null;mVuse8k=null;fotosData={};
-  ['rb-abierto-si','rb-abierto-no','rb-cig-si','rb-cig-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-cigcom-vigente','rb-cigcom-antigua','rb-cigcom-na','rb-vuse5k-si','rb-vuse5k-no','rb-vuse8k-si','rb-vuse8k-no']
+  mAbierto=null;mPermite=null;mCapacitado=null;mDispenser=null;mContrabando=null;mLsQuiebre=null;fotosData={};
+  buildStockTables();
+  ['rb-abierto-si','rb-abierto-no','rb-permite-si','rb-permite-no','rb-cap-si','rb-cap-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-lsq-si','rb-lsq-no']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
-  ['rb-vuse1k-uva','rb-vuse1k-sd','rb-vuse1k-ma','rb-vuse1k-me','rb-vuse3k-uva','rb-vuse3k-ar']
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
-  ['placa','vuse','lucky','velo'].forEach(k=>['enc','opt','rep'].forEach(s=>{ const el=document.getElementById(`pop-${k}-${s}`); if(el) el.checked=false; }));
-  ['m-staff','obs-placa','obs-vuse','obs-lucky','obs-velo','m-permite-cambio','obs-dispenser','m-marcas-contrabando',
-   'm-velo-mf4','m-velo-uv4','m-velo-sd4','m-velo-mf6','m-velo-uv6','m-velo-sd6','m-stock-ls','m-competencia']
+  ['m-staff','obs-materiales','obs-dispenser','m-marcas-contrabando','m-ls-motivo','m-competencia']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  ['fachada','placa','vuse','lucky','velo','cigarrera','dispenser','contrabando','panoramica'].forEach(k=>clearFotoSlot(k));
-  ['seccion-abierto','seccion-cigarrera','seccion-dispenser','seccion-contrabando'].forEach(id=>document.getElementById(id).style.display='none');
+  ['fachada','placa','vuse','lucky','velo','dispenser','contrabando','panoramica'].forEach(k=>clearFotoSlot(k));
+  ['seccion-abierto','seccion-permite','seccion-dispenser','seccion-contrabando','seccion-lsq'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
+  const ph=document.getElementById('permite-hint'); if(ph) ph.style.display='none';
 }
 function lockModal(visit){
   _modalLocked=true;
@@ -916,16 +952,11 @@ function adminUnlock(){
   toast('✏️ Modo edición — admin');
 }
 
-function togVuse(key,btnId){ if(_modalLocked) return; mVuse[key]=!mVuse[key]; const el=document.getElementById(btnId); if(el) el.className='rbtn'+(mVuse[key]?' sel-si':''); }
-function selYN(field,v){
-  if(_modalLocked) return;
-  if(field==='vuse5k'){ mVuse5k=v; document.getElementById('rb-vuse5k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse5k-no').className='rbtn'+(v==='No'?' sel-no':''); }
-  if(field==='vuse8k'){ mVuse8k=v; document.getElementById('rb-vuse8k-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-vuse8k-no').className='rbtn'+(v==='No'?' sel-no':''); }
-}
+function selPermite(v){ if(_modalLocked) return; mPermite=v; document.getElementById('rb-permite-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-permite-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-permite').style.display=v==='Si'?'block':'none'; document.getElementById('permite-hint').style.display=v==='No'?'block':'none'; }
+function selCapacitado(v){ if(_modalLocked) return; mCapacitado=v; document.getElementById('rb-cap-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cap-no').className='rbtn'+(v==='No'?' sel-no':''); }
+function selLsQuiebre(v){ if(_modalLocked) return; mLsQuiebre=v; document.getElementById('rb-lsq-si').className='rbtn'+(v==='Si'?' sel-no':''); document.getElementById('rb-lsq-no').className='rbtn'+(v==='No'?' sel-si':''); document.getElementById('seccion-lsq').style.display=v==='Si'?'block':'none'; }
 
 function selAbierto(v){ if(_modalLocked) return; mAbierto=v; document.getElementById('rb-abierto-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-abierto-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-abierto').style.display=v==='Si'?'block':'none'; }
-function selCigarrera(v){ if(_modalLocked) return; mCigarrera=v; document.getElementById('rb-cig-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cig-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-cigarrera').style.display=v==='Si'?'block':'none'; }
-function selCigCom(v){ if(_modalLocked) return; mCigCom=v; const m={'Sí, comunicación vigente':'rb-cigcom-vigente','No, tiene comunicación antigua':'rb-cigcom-antigua','No aplica':'rb-cigcom-na'}; Object.keys(m).forEach(k=>document.getElementById(m[k]).className='rbtn'+(k===v?' sel':'')); }
 function selDispenser(v){ if(_modalLocked) return; mDispenser=v; document.getElementById('rb-disp-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-disp-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-dispenser').style.display=v==='Si'?'block':'none'; }
 function selContrabando(v){ if(_modalLocked) return; mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }
 
@@ -963,49 +994,37 @@ function handleBgClick(e){ if(e.target===document.getElementById('modal-bg')) cl
 async function saveVisit(){
   if(_modalLocked){ toast('🔒 Visita ya registrada esta semana'); return; }
   if(!mAbierto){ toast('⚠️ Indica si el local está abierto'); return; }
+  if(mAbierto==='Si' && !mPermite){ toast('⚠️ Indica si permitió tomar información'); return; }
   if(!currentPosId){ toast('⚠️ Error: sin POS seleccionado'); return; }
   const btn=document.getElementById('btn-save');
   btn.disabled=true; btn.textContent='Guardando...';
   try{
     const pos=getAllPos().find(p=>p.id===currentPosId);
     if(!pos) throw new Error('POS no encontrado: '+currentPosId);
-    const popData={};
-    ['placa','vuse','lucky','velo'].forEach(k=>{
-      popData[k]={
-        enc:!!document.getElementById(`pop-${k}-enc`)?.checked,
-        opt:!!document.getElementById(`pop-${k}-opt`)?.checked,
-        rep:!!document.getElementById(`pop-${k}-rep`)?.checked
-      };
-    });
     const gv=id=>document.getElementById(id)?.value?.trim()||'';
+    const efectivo = mAbierto==='Si' && mPermite==='Si';
     const record={
       id:currentPosId, timestamp:new Date().toISOString(),
       fecha:new Date().toLocaleDateString('es-PE'),
       hora:new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
-      auditor:currentUser, dia:currentDay,
+      auditor:currentUser, dia:currentDay, semana:currentSemana,
+      mes:(function(){const m=currentSemana.match(/^S\d+_([A-Z]+)(\d+)$/);return m?m[1]+' 20'+m[2]:'';})(),
       nombre:pos.nombre, direccion:pos.direccion, distrito:pos.distrito,
-      abierto:mAbierto, estado:mAbierto==='Si'?'visitado':'nogo',
+      abierto:mAbierto, permite:mAbierto==='Si'?mPermite:'',
+      estado:mAbierto==='Si'?'visitado':'nogo',
+      efectivo: efectivo?'Si':'No',
+      capacitado: efectivo?(mCapacitado||''):'',
       staff:gv('m-staff'),
-      pop:mAbierto==='Si'?popData:{},
-      obsPlaca:gv('obs-placa'), obsVuse:gv('obs-vuse'),
-      obsLucky:gv('obs-lucky'), obsVelo:gv('obs-velo'),
-      cigarrera:mAbierto==='Si'?mCigarrera:'',
-      cigCom:mAbierto==='Si'&&mCigarrera==='Si'?mCigCom:'',
-      permiteCambio:gv('m-permite-cambio'),
-      dispenser:mAbierto==='Si'?mDispenser:'',
+      obsMateriales:gv('obs-materiales'),
+      dispenser:efectivo?mDispenser:'',
       obsDispenser:gv('obs-dispenser'),
-      'M-velo-mf4':gv('m-velo-mf4'), 'm-velo-uv4':gv('m-velo-uv4'), 'm-velo-sd4':gv('m-velo-sd4'),
-      'M-velo-mf6':gv('m-velo-mf6'), 'm-velo-uv6':gv('m-velo-uv6'), 'm-velo-sd6':gv('m-velo-sd6'),
-      'm-stock-ls':gv('m-stock-ls'),
-      veloMf4:parseInt(gv('m-velo-mf4'))||null, veloUv4:parseInt(gv('m-velo-uv4'))||null, veloSd4:parseInt(gv('m-velo-sd4'))||null,
-      veloMf6:parseInt(gv('m-velo-mf6'))||null, veloUv6:parseInt(gv('m-velo-uv6'))||null, veloSd6:parseInt(gv('m-velo-sd6'))||null,
-      stockLS:parseInt(gv('m-stock-ls'))||null,
-      vuse:{...mVuse},
-      vuse5k:mVuse5k, vuse8k:mVuse8k,
+      veloStock: efectivo?collectVeloStock():{},
+      vuseStock: efectivo?collectVuseStock():{},
+      lsQuiebre: efectivo?(mLsQuiebre||''):'',
+      lsMotivo: (efectivo&&mLsQuiebre==='Si')?gv('m-ls-motivo'):'',
       competencia:gv('m-competencia'),
-      contrabando:mAbierto==='Si'?mContrabando:'',
+      contrabando:efectivo?mContrabando:'',
       marcasContrabando:gv('m-marcas-contrabando'),
-      semana:currentSemana,
       fotos:{...fotosData}, synced:false
     };
     visits[semKey(currentPosId)]=record;
@@ -1083,337 +1102,203 @@ function updateHeader(){
   updateSyncBtn();
 }
 
-// ─── DASHBOARD ───
+// ─── DASHBOARD (v2 · 6 pestañas estilo referencia) ───
+let _charts={}, _dashTab='cobertura', RAW=[], FD=[];
+const mesOrder={ENE:1,FEB:2,MAR:3,ABR:4,MAY:5,JUN:6,JUL:7,AGO:8,SEP:9,OCT:10,NOV:11,DIC:12};
+const _pct=(n,d)=>d?Math.round(n/d*100):0;
+function mkC(id,cfg){ const el=document.getElementById(id); if(el) _charts[id]=new Chart(el,cfg); }
+function kpi(v,l,cls,sub){ return `<div class="kpi-card"><div class="kpi-val ${cls||''}">${v}</div><div class="kpi-label">${l}</div>${sub?`<div style="font-size:9px;color:var(--muted);margin-top:3px">${sub}</div>`:''}</div>`; }
+function semNum(s){ const m=(s||'').match(/^S(\d+)_/); return m?parseInt(m[1]):0; }
+function getSemanaLabelFromKey(key){ if(!key) return ''; const m=key.match(/^S(\d+)_([A-Z]+)(\d+)$/); if(!m) return key; const mx={ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'}; return `S${m[1]} · ${mx[m[2]]||m[2]} 20${m[3]}`; }
+function getLatestPerPDV(data){ const m={}; data.forEach(r=>{ if(!r.NOMBRE) return; if(!m[r.NOMBRE]||(r.VISITA>(m[r.NOMBRE].VISITA||0))) m[r.NOMBRE]=r; }); return Object.values(m); }
+
 function openDash(){ document.getElementById('dash-overlay').classList.add('active'); renderDash(); }
 function closeDash(){ document.getElementById('dash-overlay').classList.remove('active'); }
 
-let _charts=[], _dashTab='general', _allDashRecords=[];
-
-function getSemanaLabelFromKey(key){
-  if(!key||key==='ALL') return 'Todas las semanas';
-  const m=key.match(/^S(\d+)_([A-Z]+)(\d+)$/);
-  if(!m) return key;
-  const mx={ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
-  return `Semana ${m[1]} · ${mx[m[2]]||m[2]} 20${m[3]}`;
-}
-
-function switchDashTab(tab,btn){
-  _dashTab=tab;
-  document.querySelectorAll('.dash-tab-btn').forEach(b=>{b.style.color='rgba(255,255,255,.6)';b.style.borderBottomColor='transparent';b.style.background='transparent';});
-  btn.style.color='#F5A123'; btn.style.borderBottomColor='#F5A123'; btn.style.background='rgba(255,255,255,.05)';
-  const sf=document.getElementById('dash-sem-filter');
-  if(sf) sf.style.display=(tab==='general')?'none':'block';
-  renderDashContent();
+// Normaliza registros (visitas) + atributos del padrón → filas del dashboard
+function buildRaw(records){
+  const padron={}; getAllPos().forEach(p=>{padron[p.id]=p;});
+  return records.map(r=>{
+    const p=padron[r.id]||{};
+    const cig=(p.cigarreraFijo||'').toString().toUpperCase();
+    const dsp=(p.dispenserVeloFijo||'').toString().toUpperCase();
+    const foto=k=>(r.fotos&&r.fotos[k])?'SI':'NO';
+    const sem=(r.semana&&/^S\d+_[A-Z]{3}\d{2}$/.test(r.semana))?r.semana:'';
+    return {
+      NOMBRE:r.nombre, DISTRITO:r.distrito, DIA:r.dia, MES:r.mes||'', SEMANA:sem,
+      VISITA:semNum(sem),
+      VISITADO: r.estado==='visitado'?'SI':'NO',
+      EFECTIVO: (r.efectivo==='Si'||r.efectivo==='SI')?'SI':'NO',
+      CAPACITADO: (r.capacitado==='Si'||r.capacitado==='SI')?'SI':'NO',
+      CIGARRERA: cig.startsWith('SI')?'SI':(cig.startsWith('NO')?'NO':null),
+      DISPENSER: r.dispenser==='Si'?'SI':(r.dispenser==='No'?'NO':(dsp.startsWith('SI')?'SI':(dsp.startsWith('NO')?'NO':null))),
+      JS_VUSE:foto('vuse'), JS_LS:foto('lucky'), JS_VELO:foto('velo'),
+      CONTRABANDO: r.contrabando==='Si'?'SI':(r.contrabando==='No'?'NO':null),
+      COMPETENCIA: r.competencia||'',
+      LSQ: r.lsQuiebre==='Si'?'SI':(r.lsQuiebre==='No'?'NO':null), LSMOT:r.lsMotivo||'',
+      VELO:r.veloStock||{}, VUSE:r.vuseStock||{}
+    };
+  });
 }
 
 async function renderDash(){
-  _charts.forEach(c=>c.destroy()); _charts=[];
-  document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando...</p>';
-  _allDashRecords=[...currentWeekVisits()];
+  Object.values(_charts).forEach(c=>{try{c.destroy();}catch(e){}}); _charts={};
+  const body=document.getElementById('dash-body');
+  body.innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando datos...</p>';
+  let records=[...currentWeekVisits()];
   if(APPS_SCRIPT_URL&&!APPS_SCRIPT_URL.includes('TU_APPS')){
     try{
       const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll',{mode:'cors'});
-      const r=await resp.json();
-      if(r.ok&&r.data){
-        const ids=new Set(_allDashRecords.map(x=>x.id+'_'+(x.semana||'')));
-        r.data.forEach(rec=>{if(!ids.has(rec.id+'_'+(rec.semana||''))) _allDashRecords.push(rec);});
-      }
-    }catch(e){console.log('Remote dash error',e);}
+      const j=await resp.json();
+      if(j.ok&&j.data){ const seen=new Set(records.map(x=>x.id+'_'+(x.semana||''))); j.data.forEach(rec=>{ if(!seen.has(rec.id+'_'+(rec.semana||''))) records.push(rec); }); }
+    }catch(e){ console.log('dash getAll error',e); }
   }
-  const semanas=[...new Set(_allDashRecords.map(r=>r.semana).filter(Boolean))].sort();
-  const sf=document.getElementById('dash-sem-filter');
-  if(sf){
-    while(sf.options.length>1) sf.remove(1);
-    semanas.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=getSemanaLabelFromKey(s);sf.appendChild(o);});
-    sf.style.display=_dashTab==='general'?'none':'block';
-    if(semanas.length&&sf.value==='ALL') sf.value=semanas[semanas.length-1];
-  }
+  RAW=buildRaw(records);
+  buildFilters();
+  applyFilter();
+}
+
+function buildFilters(){
+  const fill=(id,vals)=>{ const sel=document.getElementById(id); if(!sel) return; const cur=sel.value; while(sel.options.length>1) sel.remove(1); vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=(id==='fSemana')?getSemanaLabelFromKey(v):v;sel.appendChild(o);}); if(vals.includes(cur)) sel.value=cur; };
+  const meses=[...new Set(RAW.map(r=>r.MES).filter(Boolean))].sort((a,b)=>{const A=a.split(' '),B=b.split(' ');return A[1]!==B[1]?(+A[1])-(+B[1]):(mesOrder[A[0]]||0)-(mesOrder[B[0]]||0);});
+  fill('fMes',meses);
+  fill('fSemana',[...new Set(RAW.map(r=>r.SEMANA).filter(Boolean))].sort((a,b)=>semNum(a)-semNum(b)));
+  fill('fDist',[...new Set(RAW.map(r=>r.DISTRITO).filter(Boolean))].sort());
+}
+
+function applyFilter(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value:'';};
+  const mes=g('fMes'), sem=g('fSemana'), dist=g('fDist'), dia=g('fDia');
+  FD=RAW.filter(r=>(!mes||r.MES===mes)&&(!sem||r.SEMANA===sem)&&(!dist||r.DISTRITO===dist)&&(!dia||r.DIA===dia));
+  const info=document.getElementById('fInfo');
+  if(info) info.textContent=FD.length+' registros'+(FD.length?` · ${new Set(FD.map(r=>r.NOMBRE)).size} PDVs`:'');
   renderDashContent();
 }
 
+function switchDashTab(tab,btn){ _dashTab=tab; document.querySelectorAll('.dash-tab-btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); renderDashContent(); }
+
 function renderDashContent(){
-  _charts.forEach(c=>c.destroy()); _charts=[];
-  if(_dashTab==='general') renderVistaGeneral();
-  else if(_dashTab==='materiales') renderMateriales();
-  else renderStockVuse();
+  Object.values(_charts).forEach(c=>{try{c.destroy();}catch(e){}}); _charts={};
+  const t=_dashTab;
+  if(t==='cobertura') renderCobertura();
+  else if(t==='activos') renderActivos();
+  else if(t==='materiales') renderMaterialesTab();
+  else if(t==='stock') renderStockTab();
+  else if(t==='padron') renderPadronTab();
+  else renderEvolutivoTab();
 }
 
-function renderVistaGeneral(){
-  const allPos=getAllPos();
-  const total=allPos.length;
-  const porDia={};
-  DAYS_ORDER.forEach(d=>porDia[d]=(POS_DATA[d]||[]).length);
-  const conCig=allPos.filter(p=>p.cigarreraFijo&&/si/i.test(p.cigarreraFijo)).length;
-  const conDisp=allPos.filter(p=>p.dispenserVeloFijo&&/si/i.test(p.dispenserVeloFijo)).length;
-  const distritos={};
-  allPos.forEach(p=>{distritos[p.distrito]=(distritos[p.distrito]||0)+1;});
-  const dl=Object.keys(distritos).sort((a,b)=>distritos[b]-distritos[a]);
+// ── COBERTURA ──
+function renderCobertura(){
+  const total=FD.length, vis=FD.filter(r=>r.VISITADO==='SI').length, ef=FD.filter(r=>r.EFECTIVO==='SI').length, cap=FD.filter(r=>r.CAPACITADO==='SI').length;
+  const pdvs=new Set(FD.map(r=>r.NOMBRE)).size;
   document.getElementById('dash-body').innerHTML=`
-  <div class="dash-grid">
-    <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-label">📍 Total PDVs</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${conCig}</div><div class="kpi-label">🗄️ Con Cigarrera</div></div>
-    <div class="kpi-card"><div class="kpi-val ng">${total-conCig}</div><div class="kpi-label">Sin Cigarrera</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${conDisp}</div><div class="kpi-label">📦 Dispenser Velo</div></div>
-  </div>
-  <div class="dash-row">
-    <div class="chart-card"><h3>PDVs por día de visita</h3><canvas id="ch-dias" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>PDVs por distrito</h3><canvas id="ch-distr" style="max-height:160px"></canvas></div>
-  </div>
-  <div class="chart-card" style="margin-bottom:14px">
-    <h3>Listado completo de PDVs del padrón</h3>
-    <div style="overflow-x:auto;max-height:400px">
-      <table style="width:100%;border-collapse:collapse;font-size:11px">
-        <thead style="position:sticky;top:0"><tr style="background:#1C2B4A;color:#fff">
-          <th style="padding:7px 10px;text-align:left;white-space:nowrap">PDV</th>
-          <th style="padding:7px 8px;white-space:nowrap">Distrito</th>
-          <th style="padding:7px 8px;white-space:nowrap">Día</th>
-          <th style="padding:7px 8px;text-align:center;white-space:nowrap">Cigarrera</th>
-          <th style="padding:7px 8px;text-align:center;white-space:nowrap">Dispenser</th>
-          <th style="padding:7px 8px;text-align:left;white-space:nowrap">Com. Cigarrera</th>
-        </tr></thead>
-        <tbody>${DAYS_ORDER.flatMap(dia=>(POS_DATA[dia]||[]).map((p,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}">
-          <td style="padding:5px 10px;font-weight:600;font-size:11px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis">${p.nombre}</td>
-          <td style="padding:5px 8px;font-size:11px">${p.distrito}</td>
-          <td style="padding:5px 8px;font-size:11px;white-space:nowrap">${dia}</td>
-          <td style="padding:5px 8px;text-align:center">${p.cigarreraFijo?'<span style="color:#22c55e;font-weight:700;font-size:12px">'+p.cigarreraFijo+'</span>':'<span style="color:#94a3b8">—</span>'}</td>
-          <td style="padding:5px 8px;text-align:center">${p.dispenserVeloFijo?'<span style="color:#1A2E6A;font-weight:700;font-size:12px">'+p.dispenserVeloFijo+'</span>':'<span style="color:#94a3b8">—</span>'}</td>
-          <td style="padding:5px 8px;font-size:10px;color:#64748b">${p.comCigarreraFijo||'—'}</td>
-        </tr>`)).join('')}
-        </tbody>
-      </table>
+    <div class="dash-grid">
+      ${kpi(total,'Total registros','',pdvs+' PDVs únicos')}
+      ${kpi(vis,'Visitados','ok',_pct(vis,total)+'% del total')}
+      ${kpi(ef,'Efectividad','warn',_pct(ef,vis)+'% de visitados')}
+      ${kpi(cap,'Capacitados','',_pct(cap,vis)+'% de visitados')}
     </div>
-  </div>`;
-  const opt={animation:{duration:300},plugins:{legend:{display:false}}};
-  _charts.push(new Chart(document.getElementById('ch-dias'),{type:'bar',data:{labels:DAYS_ORDER.map(d=>DAY_LABELS[d]),datasets:[{data:DAYS_ORDER.map(d=>porDia[d]),backgroundColor:'#1A2E6A',borderRadius:4}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:5}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-distr'),{type:'bar',data:{labels:dl,datasets:[{data:dl.map(d=>distritos[d]),backgroundColor:'#F5A123',borderRadius:4}]},options:{...opt,scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:2}}}}}));
+    <div class="dash-row">
+      <div class="chart-card"><h3>Cobertura, efectividad y capacitación</h3><div style="position:relative;height:200px"><canvas id="cobChart"></canvas></div></div>
+      <div class="chart-card"><h3>Registros por distrito</h3><div style="position:relative;height:200px"><canvas id="distChart"></canvas></div></div>
+    </div>`;
+  mkC('cobChart',{type:'bar',data:{labels:['Visitados','Efectivos','Capacitados'],datasets:[{data:[vis,ef,cap],backgroundColor:['#1A2E6A','#22c55e','#F5A123'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} (${_pct(c.raw,total)}%)`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}});
+  const dd={};FD.forEach(r=>{if(r.DISTRITO)dd[r.DISTRITO]=(dd[r.DISTRITO]||0)+1;});
+  const dl=Object.keys(dd).sort((a,b)=>dd[b]-dd[a]).slice(0,14);
+  mkC('distChart',{type:'bar',data:{labels:dl,datasets:[{data:dl.map(k=>dd[k]),backgroundColor:'#4A8FD4',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true}}}});
 }
 
-function renderMateriales(){
-  const df=document.getElementById('dash-sem-filter')?.value||'ALL';
-  if(df==='ALL'){ renderMaterialesComparativo(); return; }
-  const records=_allDashRecords.filter(r=>r.semana===df);
-  const vis=records.filter(r=>r.estado==='visitado');
-  const total=getAllPos().length;
-  const semLabel=getSemanaLabelFromKey(df);
-  const jv=vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc).length;
-  const jl=vis.filter(r=>r.pop&&r.pop.lucky&&r.pop.lucky.enc).length;
-  const jve=vis.filter(r=>r.pop&&r.pop.velo&&r.pop.velo.enc).length;
-  const todos3=vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc&&r.pop.lucky&&r.pop.lucky.enc&&r.pop.velo&&r.pop.velo.enc);
+// ── ACTIVOS BAT ──
+function renderActivos(){
+  const pdvs=getLatestPerPDV(FD), total=pdvs.length;
+  const cig=pdvs.filter(r=>r.CIGARRERA==='SI').length, sinCig=pdvs.filter(r=>r.CIGARRERA==='NO').length;
+  const disp=pdvs.filter(r=>r.DISPENSER==='SI').length, sinDisp=pdvs.filter(r=>r.DISPENSER==='NO').length;
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel}</div>
-  <div class="dash-grid">
-    <div class="kpi-card"><div class="kpi-val ok">${vis.length}</div><div class="kpi-label">✅ Visitados</div></div>
-    <div class="kpi-card"><div class="kpi-val warn">${Math.max(0,total-records.length)}</div><div class="kpi-label">⏳ Pendientes</div></div>
-    <div class="kpi-card"><div class="kpi-val">${jv}</div><div class="kpi-label">📌 JS Vuse</div></div>
-    <div class="kpi-card"><div class="kpi-val">${jl}</div><div class="kpi-label">📌 JS Lucky Strike</div></div>
-    <div class="kpi-card"><div class="kpi-val">${jve}</div><div class="kpi-label">📌 JS Velo</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${todos3.length}</div><div class="kpi-label">🏆 Con los 3 materiales</div></div>
-  </div>
-  <div class="dash-row">
-    <div class="chart-card"><h3>Materiales POP encontrados</h3><canvas id="ch-pop" style="max-height:160px"></canvas></div>
-    <div class="chart-card"><h3>JS por tipo</h3><canvas id="ch-js" style="max-height:160px"></canvas></div>
-  </div>
-  <div class="chart-card" style="margin-bottom:14px">
-    <h3>🏆 PDVs con los 3 materiales — ${semLabel}</h3>
-    ${todos3.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left">PDV</th><th style="padding:7px 8px">Distrito</th><th style="padding:7px 8px;text-align:center">JS Vuse</th><th style="padding:7px 8px;text-align:center">JS Lucky</th><th style="padding:7px 8px;text-align:center">JS Velo</th></tr></thead>
-      <tbody>${todos3.map((r,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:6px 10px;font-weight:600">${r.nombre}</td><td style="padding:6px 8px">${r.distrito}</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td><td style="text-align:center;color:#22c55e;font-weight:700">✓</td></tr>`).join('')}</tbody>
-    </table></div>`:'<p style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Sin PDVs con los 3 materiales en esta semana</p>'}
-  </div>`;
-  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  const pk=['placa','vuse','lucky','velo'],pl=['Placa','Vuse','Lucky','Velo'];
-  _charts.push(new Chart(document.getElementById('ch-pop'),{type:'bar',data:{labels:pl,datasets:[{label:'Encontrado',data:pk.map(k=>vis.filter(r=>r.pop&&r.pop[k]&&r.pop[k].enc).length),backgroundColor:'#1A2E6A'},{label:'Óptimo',data:pk.map(k=>vis.filter(r=>r.pop&&r.pop[k]&&r.pop[k].opt).length),backgroundColor:'#F5A123'}]},options:{...opt,scales:{y:{beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-js'),{type:'bar',data:{labels:['JS Vuse','JS Lucky Strike','JS Velo'],datasets:[{data:[jv,jl,jve],backgroundColor:['#1A2E6A','#22c55e','#F5A123'],borderRadius:4}]},options:{...opt,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
+    <div class="dash-grid">
+      ${kpi(total,'PDVs (única visita)')}
+      ${kpi(cig,'Con Cigarrera','ok')}
+      ${kpi(sinCig,'Sin Cigarrera','ng')}
+      ${kpi(disp,'Con Dispenser Velo','ok')}
+    </div>
+    <div class="dash-row">
+      <div class="chart-card"><h3>Cigarrera — estado</h3><div style="position:relative;height:200px"><canvas id="cigChart"></canvas></div></div>
+      <div class="chart-card"><h3>Dispenser Velo — estado</h3><div style="position:relative;height:200px"><canvas id="dispDona"></canvas></div></div>
+    </div>
+    <div class="chart-card"><h3>Dispenser Velo por distrito</h3><div style="position:relative;height:200px"><canvas id="dispChart"></canvas></div></div>`;
+  mkC('cigChart',{type:'doughnut',data:{labels:['Con cigarrera','Sin cigarrera','Sin dato'],datasets:[{data:[cig,sinCig,total-cig-sinCig],backgroundColor:['#22c55e','#ef4444','#e2e8f0'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  mkC('dispDona',{type:'doughnut',data:{labels:['Con dispenser','Sin dispenser','Sin dato'],datasets:[{data:[disp,sinDisp,total-disp-sinDisp],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  const dd={};pdvs.forEach(r=>{if(r.DISTRITO&&r.DISPENSER==='SI')dd[r.DISTRITO]=(dd[r.DISTRITO]||0)+1;});
+  const dl=Object.keys(dd).sort((a,b)=>dd[b]-dd[a]);
+  mkC('dispChart',{type:'bar',data:{labels:dl,datasets:[{data:dl.map(k=>dd[k]),backgroundColor:'#F5A123',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true}}}});
 }
 
-const VALID_SEM=/^S\d+_[A-Z]{3}\d{2}$/;
-function validSemanas(recs){ return [...new Set(recs.map(r=>r.semana).filter(s=>s&&VALID_SEM.test(s)))].sort(); }
-
-function renderMaterialesComparativo(){
-  const semanas=validSemanas(_allDashRecords);
-  const data=semanas.map(s=>{
-    const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
-    return{sem:getSemanaLabelFromKey(s),jv:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc).length,jl:vis.filter(r=>r.pop&&r.pop.lucky&&r.pop.lucky.enc).length,jve:vis.filter(r=>r.pop&&r.pop.velo&&r.pop.velo.enc).length,t3:vis.filter(r=>r.pop&&r.pop.vuse&&r.pop.vuse.enc&&r.pop.lucky&&r.pop.lucky.enc&&r.pop.velo&&r.pop.velo.enc).length,total:vis.length};
-  });
-  if(!data.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún</p>';return;}
+// ── MATERIALES ──
+function renderMaterialesTab(){
+  const vis=FD.filter(r=>r.EFECTIVO==='SI');
+  const jv=vis.filter(r=>r.JS_VUSE==='SI').length, jl=vis.filter(r=>r.JS_LS==='SI').length, jve=vis.filter(r=>r.JS_VELO==='SI').length;
+  const t3=vis.filter(r=>r.JS_VUSE==='SI'&&r.JS_LS==='SI'&&r.JS_VELO==='SI').length;
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo de todas las semanas — Materiales de Convivencia</div>
-  <div class="chart-card" style="margin-bottom:12px"><h3>Evolución JS Vuse, JS Lucky Strike y JS Velo por semana</h3><canvas id="ch-comp-mat" style="max-height:220px"></canvas></div>
-  <div class="chart-card" style="margin-bottom:14px">
-    <h3>Resumen por semana</h3>
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left">Semana</th><th style="padding:7px 8px;text-align:center">Visitados</th><th style="padding:7px 8px;text-align:center">JS Vuse</th><th style="padding:7px 8px;text-align:center">JS Lucky</th><th style="padding:7px 8px;text-align:center">JS Velo</th><th style="padding:7px 8px;text-align:center">Con 3 materiales</th></tr></thead>
-      <tbody>${data.map((d,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:6px 10px;font-weight:700">${d.sem}</td><td style="padding:6px 8px;text-align:center">${d.total}</td><td style="padding:6px 8px;text-align:center">${d.jv}</td><td style="padding:6px 8px;text-align:center">${d.jl}</td><td style="padding:6px 8px;text-align:center">${d.jve}</td><td style="padding:6px 8px;text-align:center;font-weight:700;color:#22c55e">${d.t3}</td></tr>`).join('')}</tbody>
-    </table></div>
-  </div>`;
-  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  _charts.push(new Chart(document.getElementById('ch-comp-mat'),{type:'bar',data:{labels:data.map(d=>d.sem),datasets:[{label:'JS Vuse',data:data.map(d=>d.jv),backgroundColor:'#1A2E6A',borderRadius:3},{label:'JS Lucky Strike',data:data.map(d=>d.jl),backgroundColor:'#22c55e',borderRadius:3},{label:'JS Velo',data:data.map(d=>d.jve),backgroundColor:'#F5A123',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:5}}}}}));
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Jalavista "instalada" = se subió foto del material.</div>
+    <div class="dash-grid">
+      ${kpi(vis.length,'Efectivos')}
+      ${kpi(jv,'JS Vuse')}
+      ${kpi(jl,'JS Lucky Strike')}
+      ${kpi(jve,'JS Velo')}
+      ${kpi(t3,'Con los 3 materiales','ok')}
+    </div>
+    <div class="chart-card" style="margin-bottom:12px"><h3>Jalavistas encontradas</h3><div style="position:relative;height:190px"><canvas id="jsChart"></canvas></div></div>
+    <div class="chart-card"><h3>Jalavistas por distrito</h3><div style="position:relative;height:230px"><canvas id="jsDistChart"></canvas></div></div>`;
+  mkC('jsChart',{type:'bar',data:{labels:['JS Vuse','JS Lucky Strike','JS Velo','Los 3'],datasets:[{data:[jv,jl,jve,t3],backgroundColor:['#1A2E6A','#22c55e','#F5A123','#4A8FD4'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}});
+  const dists=[...new Set(vis.map(r=>r.DISTRITO).filter(Boolean))].sort();
+  mkC('jsDistChart',{type:'bar',data:{labels:dists,datasets:[
+    {label:'Vuse',data:dists.map(d=>vis.filter(r=>r.DISTRITO===d&&r.JS_VUSE==='SI').length),backgroundColor:'#1A2E6A'},
+    {label:'Lucky',data:dists.map(d=>vis.filter(r=>r.DISTRITO===d&&r.JS_LS==='SI').length),backgroundColor:'#22c55e'},
+    {label:'Velo',data:dists.map(d=>vis.filter(r=>r.DISTRITO===d&&r.JS_VELO==='SI').length),backgroundColor:'#F5A123'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true}}}});
 }
 
-function renderStockVuse(){
-  const df=document.getElementById('dash-sem-filter')?.value||'ALL';
-  if(df==='ALL'){ renderStockVuseComparativo(); return; }
-  const records=_allDashRecords.filter(r=>r.semana===df);
-  const vis=records.filter(r=>r.estado==='visitado');
-  const N=vis.length||1;
-  const semLabel=getSemanaLabelFromKey(df);
-  const hasStk=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!=='').length;
-  const conStk=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])>0).length;
-  const qbr=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
-  const vk=k=>vis.filter(r=>r.vuse&&r.vuse[k]).length;
-  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
-  const skuLabels=['Velo MF 4mg','Velo Uva 4mg','Velo Sandía 4mg','Velo MF 6mg','Velo Uva 6mg','Velo Sandía 6mg'];
-  const skuQbr=[...f4,...f6].map(f=>qbr(f));
-  const skuCon=[...f4,...f6].map(f=>conStk(f));
-  const sortIdx=[...skuQbr.keys()].sort((a,b)=>skuQbr[b]-skuQbr[a]);
-  const v1uv=vk('vuse1k-uva'),v1sd=vk('vuse1k-sd'),v1ma=vk('vuse1k-ma'),v1me=vk('vuse1k-me');
-  const v3uv=vk('vuse3k-uva'),v3ar=vk('vuse3k-ar');
-  const v5k=vis.filter(r=>r.vuse5k==='Si').length;
-  const v8k=vis.filter(r=>r.vuse8k==='Si').length;
-  const lsCon=conStk('stockLS'),lsQbr=qbr('stockLS'),lsTot=hasStk('stockLS');
-  const pct=v=>lsTot>0?Math.round(v/lsTot*100):0;
-  const compList=vis.filter(r=>r.competencia&&r.competencia.trim()).map(r=>`<tr><td style="padding:6px 10px;font-weight:600;font-size:11px">${r.nombre}</td><td style="padding:6px 8px;font-size:11px;color:var(--muted)">${r.distrito}</td><td style="padding:6px 10px;font-size:11px">${r.competencia}</td></tr>`).join('');
+// ── STOCK VELO ──
+function renderStockTab(){
+  const vis=FD.filter(r=>r.EFECTIVO==='SI');
+  const veloQbr=id=>vis.filter(r=>r.VELO&&r.VELO[id]&&r.VELO[id].c===0).length;
+  const veloCon=id=>vis.filter(r=>r.VELO&&r.VELO[id]&&r.VELO[id].c>0).length;
+  const vuseCon=id=>vis.filter(r=>r.VUSE&&r.VUSE[id]>0).length;
+  const totalQbr=VELO_SKUS.reduce((a,s)=>a+veloQbr(s.id),0);
+  const lsq=vis.filter(r=>r.LSQ==='SI').length;
+  const short=n=>n.replace('Velo ','');
+  const detail=vis.map(r=>{ const g=id=>{const o=r.VELO&&r.VELO[id];return o&&(o.c===0||o.c)?o.c:'—';}; return `<tr><td style="padding:5px 8px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td>${VELO_SKUS.map(s=>`<td style="padding:5px 4px;text-align:center;${(r.VELO&&r.VELO[s.id]&&r.VELO[s.id].c===0)?'color:#ef4444;font-weight:700':''}">${g(s.id)}</td>`).join('')}</tr>`; }).join('');
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">${semLabel} · ${vis.length} PDVs visitados</div>
-  <div class="dash-grid">
-    <div class="kpi-card"><div class="kpi-val ${lsQbr>0?'ng':'ok'}">${lsQbr}</div><div class="kpi-label">Quiebre LS Eclipse</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${lsCon}</div><div class="kpi-label">Con stock LS</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v5k}</div><div class="kpi-label">Vuse 5K disponible</div></div>
-    <div class="kpi-card"><div class="kpi-val ok">${v8k}</div><div class="kpi-label">Vuse 8K disponible</div></div>
-    <div class="kpi-card"><div class="kpi-val warn">${skuQbr.reduce((a,b)=>a+b,0)}</div><div class="kpi-label">Total quiebres Velo</div></div>
-  </div>
-  <div class="dash-row">
-    <div class="chart-card">
-      <h3>● Top sabores con quiebre Velo</h3>
-      <canvas id="ch-top-qbr" style="max-height:200px"></canvas>
+    <div class="dash-grid">
+      ${kpi(vis.length,'Efectivos')}
+      ${kpi(totalQbr,'Quiebres Velo (SKU·PDV)','ng')}
+      ${kpi(lsq,'Quiebre LS Eclipse','ng')}
     </div>
-    <div class="chart-card">
-      <h3>● Stock Lucky Strike Eclipse</h3>
-      <canvas id="ch-ls" style="max-height:200px"></canvas>
-      <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:11px">
-        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#1A2E6A">${lsCon}</div><div style="color:var(--muted)">Con stock</div></div>
-        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#ef4444">${lsQbr}</div><div style="color:var(--muted)">Quiebre</div></div>
-        <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#94a3b8">${vis.length-lsCon-lsQbr}</div><div style="color:var(--muted)">Sin datos</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="dash-row">
-    <div class="chart-card">
-      <h3>● Disponibilidad Vuse 1K por sabor</h3>
-      <canvas id="ch-v1k" style="max-height:180px"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>● Disponibilidad Vuse 3K · 5K · 8K</h3>
-      <canvas id="ch-v3k58" style="max-height:180px"></canvas>
-    </div>
-  </div>
-  ${compList?`<div class="chart-card" style="margin-bottom:14px">
-    <h3>📋 Levantamiento de Competencia — ${semLabel}</h3>
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-      <thead><tr style="background:#1C2B4A;color:#fff"><th style="padding:7px 10px;text-align:left;font-size:11px">PDV</th><th style="padding:7px 8px;font-size:11px">Distrito</th><th style="padding:7px 10px;text-align:left;font-size:11px">Observación</th></tr></thead>
-      <tbody>${compList}</tbody>
-    </table></div>
-  </div>`:''}`;
-  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  // Ranking horizontal quiebre
-  const srtL=sortIdx.map(i=>skuLabels[i]);
-  const srtQ=sortIdx.map(i=>skuQbr[i]);
-  const srtC=sortIdx.map(i=>skuCon[i]);
-  _charts.push(new Chart(document.getElementById('ch-top-qbr'),{type:'bar',data:{labels:srtL,datasets:[{label:'Quiebre',data:srtQ,backgroundColor:'#ef4444',borderRadius:3},{label:'Con stock',data:srtC,backgroundColor:'#e2f4eb',borderRadius:3}]},options:{...opt,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{stacked:true,beginAtZero:true,grid:{display:false}},y:{stacked:true,ticks:{font:{size:10}}}}}}));
-  _charts.push(new Chart(document.getElementById('ch-ls'),{type:'doughnut',data:{labels:['Con stock','Quiebre','Sin datos'],datasets:[{data:[lsCon,lsQbr,Math.max(0,vis.length-lsCon-lsQbr)],backgroundColor:['#1A2E6A','#ef4444','#e2e8f0'],borderWidth:2}]},options:{...opt,cutout:'65%'}}));
-  _charts.push(new Chart(document.getElementById('ch-v1k'),{type:'bar',data:{labels:['Uva fresca','Sandía fresca','Manzana','Menta'],datasets:[{label:'Disponible',data:[v1uv,v1sd,v1ma,v1me],backgroundColor:['#1A2E6A','#4A8FD4','#22c55e','#F5A123'],borderRadius:4},{label:'No disponible',data:[N-v1uv,N-v1sd,N-v1ma,N-v1me],backgroundColor:'#e2e8f0',borderRadius:4}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
-  _charts.push(new Chart(document.getElementById('ch-v3k58'),{type:'bar',data:{labels:['Vuse 3K\nUva','Vuse 3K\nArándanos','Vuse 5K','Vuse 8K'],datasets:[{label:'Disponible',data:[v3uv,v3ar,v5k,v8k],backgroundColor:['#1A2E6A','#4A8FD4','#22c55e','#F5A123'],borderRadius:4},{label:'No disponible',data:[N-v3uv,N-v3ar,N-v5k,N-v8k],backgroundColor:'#e2e8f0',borderRadius:4}]},options:{...opt,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}}));
+    <div class="chart-card" style="margin-bottom:12px"><h3>Quiebre vs stock — Velo por SKU</h3><div style="position:relative;height:230px"><canvas id="veloQbrChart"></canvas></div></div>
+    <div class="chart-card" style="margin-bottom:12px"><h3>Disponibilidad Vuse por SKU (PDVs con stock)</h3><div style="position:relative;height:230px"><canvas id="vuseChart"></canvas></div></div>
+    <div class="chart-card"><h3>Detalle de stock Velo por bodega (rojo = quiebre)</h3><div style="overflow-x:auto;max-height:340px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">Sem</th>${VELO_SKUS.map(s=>`<th style="padding:6px 3px;font-size:8px">${short(s.n)}</th>`).join('')}</tr></thead><tbody>${detail||`<tr><td colspan="${VELO_SKUS.length+3}" style="padding:14px;text-align:center;color:var(--muted)">Sin datos</td></tr>`}</tbody></table></div></div>`;
+  mkC('veloQbrChart',{type:'bar',data:{labels:VELO_SKUS.map(s=>short(s.n)),datasets:[{label:'Quiebre',data:VELO_SKUS.map(s=>veloQbr(s.id)),backgroundColor:'#ef4444',borderRadius:3},{label:'Con stock',data:VELO_SKUS.map(s=>veloCon(s.id)),backgroundColor:'#22c55e',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{beginAtZero:true}}}});
+  mkC('vuseChart',{type:'bar',data:{labels:VUSE_SKUS.map(s=>s.n),datasets:[{label:'PDVs con stock',data:VUSE_SKUS.map(s=>vuseCon(s.id)),backgroundColor:'#1A2E6A',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{display:false}},y:{ticks:{font:{size:8}}}}}});
 }
 
-function renderStockVuseComparativo(){
-  const f4=['veloMf4','veloUv4','veloSd4'],f6=['veloMf6','veloUv6','veloSd6'];
-  const skuLabels=['Velo MF 4mg','Velo Uva 4mg','Velo Sandía 4mg','Velo MF 6mg','Velo Uva 6mg','Velo Sandía 6mg'];
-  const semanas=validSemanas(_allDashRecords);
-  if(!semanas.length){document.getElementById('dash-body').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">Sin datos registrados aún. Completa visitas primero.</p>';return;}
-  const data=semanas.map(s=>{
-    const vis=_allDashRecords.filter(r=>r.semana===s&&r.estado==='visitado');
-    const N=vis.length||1;
-    const qbr=f=>vis.filter(r=>r[f]!==null&&r[f]!==undefined&&r[f]!==''&&Number(r[f])===0).length;
-    const allQbr=[...f4,...f6].map(f=>qbr(f));
-    const totalQbr=allQbr.reduce((a,b)=>a+b,0);
-    const maxPossible=vis.length*6;
-    return{sem:getSemanaLabelFromKey(s),semKey:s,allQbr,totalQbr,pctQbr:maxPossible>0?Math.round(totalQbr/maxPossible*100):0,v5k:vis.filter(r=>r.vuse5k==='Si').length,v8k:vis.filter(r=>r.vuse8k==='Si').length,total:vis.length};
-  });
-  // Acumulado de quiebres por sabor en todas las semanas
-  const totalQbrSku=skuLabels.map((_,i)=>data.reduce((a,d)=>a+d.allQbr[i],0));
-  const sortIdx=[...totalQbrSku.keys()].sort((a,b)=>totalQbrSku[b]-totalQbrSku[a]);
+// ── PADRÓN TOTAL ──
+function renderPadronTab(){
+  const pdvs=getLatestPerPDV(FD).sort((a,b)=>(a.NOMBRE||'').localeCompare(b.NOMBRE||''));
+  const bt=v=>v==='SI'?'<span style="color:#15803d;font-weight:700">SÍ</span>':v==='NO'?'<span style="color:#b91c1c;font-weight:700">NO</span>':'<span style="color:#94a3b8">—</span>';
+  const rows=pdvs.map((r,i)=>{ const cum=(r.JS_VUSE==='SI'&&r.JS_LS==='SI'&&r.JS_VELO==='SI')?'SI':'NO'; return `<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:5px 8px;font-weight:600;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px">${r.DIA||'—'}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td><td style="text-align:center">${bt(r.VISITADO)}</td><td style="text-align:center">${bt(r.EFECTIVO)}</td><td style="text-align:center">${bt(r.CAPACITADO)}</td><td style="text-align:center">${bt(r.CIGARRERA)}</td><td style="text-align:center">${bt(r.DISPENSER)}</td><td style="text-align:center">${bt(r.JS_VUSE)}</td><td style="text-align:center">${bt(r.JS_LS)}</td><td style="text-align:center">${bt(r.JS_VELO)}</td><td style="text-align:center">${bt(cum)}</td></tr>`; }).join('');
+  document.getElementById('dash-body').innerHTML=`<div class="chart-card"><h3>Padrón — última visita por PDV (${pdvs.length})</h3><div style="overflow-x:auto;max-height:64vh"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">Día</th><th style="padding:6px 6px">Visita</th><th style="padding:6px 6px">Visit.</th><th style="padding:6px 6px">Efec.</th><th style="padding:6px 6px">Capac.</th><th style="padding:6px 6px">Cigar.</th><th style="padding:6px 6px">Disp.</th><th style="padding:6px 6px">Vuse</th><th style="padding:6px 6px">LS</th><th style="padding:6px 6px">Velo</th><th style="padding:6px 6px">¿Cumplió?</th></tr></thead><tbody>${rows||'<tr><td colspan="13" style="padding:14px;text-align:center;color:var(--muted)">Sin datos en el filtro</td></tr>'}</tbody></table></div></div>`;
+}
+
+// ── EVOLUTIVO ──
+function renderEvolutivoTab(){
+  const sems=[...new Set(RAW.map(r=>r.SEMANA).filter(Boolean))].sort((a,b)=>semNum(a)-semNum(b));
+  const data=sems.map(s=>{ const rs=RAW.filter(r=>r.SEMANA===s); return {label:getSemanaLabelFromKey(s),vis:rs.filter(r=>r.VISITADO==='SI').length,ef:rs.filter(r=>r.EFECTIVO==='SI').length,cap:rs.filter(r=>r.CAPACITADO==='SI').length,qb:rs.filter(r=>r.LSQ==='SI').length}; });
   document.getElementById('dash-body').innerHTML=`
-  <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Comparativo — Stock & Disponibilidad</div>
-  <div class="dash-row">
-    <div class="chart-card">
-      <h3>● Top sabores con quiebre (acumulado)</h3>
-      <canvas id="ch-top-acc" style="max-height:200px"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>● % Quiebre Velo por Semana</h3>
-      <canvas id="ch-pct-sem" style="max-height:200px"></canvas>
-    </div>
-  </div>
-  <div class="chart-card" style="margin-bottom:12px">
-    <h3>● Disponibilidad Vuse 5K y 8K por semana</h3>
-    <canvas id="ch-vuse-sem" style="max-height:180px"></canvas>
-  </div>
-  <div class="chart-card" style="margin-bottom:14px">
-    <h3>Resumen por semana</h3>
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr style="background:#1C2B4A;color:#fff">
-        <th style="padding:8px 12px;text-align:left">Semana</th>
-        <th style="padding:8px 8px;text-align:center">Visitados</th>
-        <th style="padding:8px 8px;text-align:center">Total quiebres Velo</th>
-        <th style="padding:8px 8px;text-align:center">% Quiebre</th>
-        <th style="padding:8px 8px;text-align:center">Vuse 5K</th>
-        <th style="padding:8px 8px;text-align:center">Vuse 8K</th>
-      </tr></thead>
-      <tbody>${data.map((d,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}">
-        <td style="padding:6px 12px;font-weight:700">${d.sem}</td>
-        <td style="padding:6px 8px;text-align:center">${d.total}</td>
-        <td style="padding:6px 8px;text-align:center;color:#ef4444;font-weight:700">${d.totalQbr}</td>
-        <td style="padding:6px 8px;text-align:center">
-          <span style="background:${d.pctQbr>=50?'#fde8e8':d.pctQbr>=30?'#fef0d6':'#d6f0e2'};color:${d.pctQbr>=50?'#b91c1c':d.pctQbr>=30?'#92400e':'#15803d'};padding:2px 8px;border-radius:99px;font-weight:700">${d.pctQbr}%</span>
-        </td>
-        <td style="padding:6px 8px;text-align:center;color:#22c55e;font-weight:700">${d.v5k}</td>
-        <td style="padding:6px 8px;text-align:center;color:#22c55e;font-weight:700">${d.v8k}</td>
-      </tr>`).join('')}
-      </tbody>
-    </table></div>
-  </div>`;
-  const opt={animation:{duration:300},plugins:{legend:{labels:{font:{size:10}}}}};
-  // Top sabores ranking horizontal acumulado
-  const srtL=sortIdx.map(i=>skuLabels[i]);
-  const srtQ=sortIdx.map(i=>totalQbrSku[i]);
-  _charts.push(new Chart(document.getElementById('ch-top-acc'),{type:'bar',data:{labels:srtL,datasets:[{label:'Quiebres acumulados',data:srtQ,backgroundColor:['#1A2E6A','#243d8a','#4A8FD4','#b03030','#ef4444','#f97316'],borderRadius:3}]},options:{...opt,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{display:false}},y:{ticks:{font:{size:10}}}}}}));
-  // % quiebre por semana
-  _charts.push(new Chart(document.getElementById('ch-pct-sem'),{type:'bar',data:{labels:data.map(d=>d.sem.replace('Semana ','Sem ')),datasets:[{label:'% Quiebre Velo',data:data.map(d=>d.pctQbr),backgroundColor:data.map(d=>d.pctQbr>=50?'#ef4444':d.pctQbr>=30?'#F5A123':'#22c55e'),borderRadius:4}]},options:{...opt,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw}% de quiebre · ${data[c.dataIndex].totalQbr} eventos`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}}));
-  // Vuse 5K y 8K por semana
-  _charts.push(new Chart(document.getElementById('ch-vuse-sem'),{type:'bar',data:{labels:data.map(d=>d.sem.replace('Semana ','Sem ')),datasets:[{label:'Vuse 5K disponible',data:data.map(d=>d.v5k),backgroundColor:'#1A2E6A',borderRadius:3},{label:'Vuse 8K disponible',data:data.map(d=>d.v8k),backgroundColor:'#4A8FD4',borderRadius:3}]},options:{...opt,scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}}));
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Evolución de todas las semanas (ignora el filtro de semana).</div>
+    <div class="chart-card" style="margin-bottom:12px"><h3>Evolución semanal — Visitados / Efectivos / Capacitados</h3><div style="position:relative;height:240px"><canvas id="evoChart"></canvas></div></div>
+    <div class="chart-card"><h3>Resumen por semana</h3><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#1A2E6A;color:#fff"><th style="padding:7px 10px;text-align:left">Semana</th><th style="padding:7px 8px">Visitados</th><th style="padding:7px 8px">Efectivos</th><th style="padding:7px 8px">Capacitados</th><th style="padding:7px 8px">Quiebre LS</th></tr></thead><tbody>${data.map((d,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:6px 10px;font-weight:700">${d.label}</td><td style="padding:6px 8px;text-align:center">${d.vis}</td><td style="padding:6px 8px;text-align:center">${d.ef}</td><td style="padding:6px 8px;text-align:center">${d.cap}</td><td style="padding:6px 8px;text-align:center;color:#ef4444;font-weight:700">${d.qb}</td></tr>`).join('')||'<tr><td colspan="5" style="padding:14px;text-align:center;color:var(--muted)">Sin datos</td></tr>'}</tbody></table></div></div>`;
+  mkC('evoChart',{type:'line',data:{labels:data.map(d=>d.label),datasets:[{label:'Visitados',data:data.map(d=>d.vis),borderColor:'#1A2E6A',backgroundColor:'rgba(26,46,106,.1)',tension:.3,fill:true},{label:'Efectivos',data:data.map(d=>d.ef),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.1)',tension:.3,fill:true},{label:'Capacitados',data:data.map(d=>d.cap),borderColor:'#F5A123',backgroundColor:'rgba(245,161,35,.1)',tension:.3,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10}}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}});
 }
-
-// Convierte URL de Drive viewer a URL directa embebible en <img>
-function driveToImg(url){
-  if(!url) return '';
-  if(url.startsWith('data:')) return url; // ya es base64, ok
-  // /file/d/ID/view  →  /uc?export=view&id=ID
-  const m=url.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
-  if(m) return 'https://drive.google.com/uc?export=view&id='+m[1];
-  return url;
-}
-
-window.switchGal=function(key,label){
-  document.querySelectorAll('.gal-tab').forEach(t=>t.classList.toggle('active',t.textContent===label));
-  const grid=document.getElementById('gal-grid');
-  const photos=(window._gRec||[]).filter(r=>r.fotos&&r.fotos[key]);
-  grid.innerHTML=photos.length
-    ? photos.map(r=>{
-        const src=driveToImg(r.fotos[key]);
-        return `<div class="gal-item"><img src="${src}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="gal-err" style="display:none;align-items:center;justify-content:center;position:absolute;inset:0;font-size:10px;color:var(--muted);flex-direction:column;gap:2px"><span style="font-size:20px">🔒</span><span>Sin acceso</span></div><div class="gal-lbl">${r.nombre.substring(0,18)}</div></div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:11px;grid-column:1/-1;padding:10px">Sin fotos para esta pregunta</p>';
-};
 
 function toast(msg,dur=2600){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),dur); }
 
