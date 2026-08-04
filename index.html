@@ -709,6 +709,11 @@ function calcSemana(){
   const sem=Math.ceil(day/7);
   return `S${sem}_${mes}${String(now.getFullYear()).slice(2)}`;
 }
+// Timestamp en hora de Perú (UTC-5) para que el día no salte a UTC en visitas de la tarde/noche.
+function limaTimestamp(){
+  const s=new Date().toLocaleString('sv-SE',{timeZone:'America/Lima'}); // "2026-08-03 19:09:19"
+  return s.replace(' ','T')+'-05:00';                                   // "2026-08-03T19:09:19-05:00"
+}
 let currentSemana=calcSemana();                 // siempre por calendario → los puntos reabren solos cada semana
 function semKey(posId){ return posId+'_'+currentSemana; }
 let weekLocks={};                               // candados desde el servidor: posId -> {estado,hora,auditor,timestamp}
@@ -1052,7 +1057,7 @@ async function saveVisit(){
     const gv=id=>document.getElementById(id)?.value?.trim()||'';
     const efectivo = mAbierto==='Si' && mPermite==='Si';
     const record={
-      id:currentPosId, timestamp:new Date().toISOString(),
+      id:currentPosId, timestamp:limaTimestamp(),
       fecha:new Date().toLocaleDateString('es-PE'),
       hora:new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}),
       auditor:currentUser, dia:currentDay, semana:currentSemana,
