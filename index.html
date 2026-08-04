@@ -404,11 +404,19 @@ textarea{resize:vertical;min-height:52px}
         .sku-table input:focus{border-color:var(--navy)}
         .sku-table input.cant{max-width:66px;text-align:center;margin:0 auto;display:block}
         .sku-grp td{background:#eef1ff;color:var(--navy);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.4px}
+        .lots{display:flex;flex-direction:column;gap:5px}
+        .lot-line{display:flex;align-items:center;gap:6px}
+        .lot-line input.lot-c{width:58px;flex:0 0 auto;text-align:center}
+        .lot-line input.lot-v{flex:1 1 auto;min-width:0}
+        .lot-line .lot-del{flex:0 0 auto;border:none;background:#fef2f2;color:#ef4444;border-radius:6px;width:26px;height:28px;font-size:13px;cursor:pointer;line-height:1}
+        .lot-line .lot-del:hover{background:#fee2e2}
+        .add-lot{margin-top:6px;border:1px dashed var(--navy);background:#fff;color:var(--navy);border-radius:6px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit}
+        .add-lot:hover{background:#eef1ff}
         </style>
         <hr class="section-divider">
-        <div class="section-title">▸ Conteo Stock Velo (cantidad + vencimiento)</div>
+        <div class="section-title">▸ Conteo Stock Velo (cantidad + vencimiento por lote)</div>
         <div class="field-group">
-          <div style="overflow-x:auto"><table class="sku-table"><thead><tr><th style="text-align:left">Producto</th><th style="width:70px">Cant.</th><th style="width:120px">Vencimiento</th></tr></thead><tbody id="velo-stock-body"></tbody></table></div>
+          <div style="overflow-x:auto"><table class="sku-table"><thead><tr><th style="text-align:left">Producto</th><th>Cant. · Vencimiento (agrega un lote por cada fecha distinta)</th></tr></thead><tbody id="velo-stock-body"></tbody></table></div>
         </div>
         <hr class="section-divider">
         <div class="section-title">▸ Stock Lucky Strike Eclipse</div>
@@ -633,15 +641,15 @@ const VUSE_GROUPS=[{lbl:'1000 puffs',pre:'1k'},{lbl:'3000 puffs',pre:'3k'},{lbl:
 function buildStockTables(){
   let vh='';
   VELO_GROUPS.forEach(g=>{
-    vh+=`<tr class="sku-grp"><td colspan="3">${g.lbl}</td></tr>`;
+    vh+=`<tr class="sku-grp"><td colspan="2">${g.lbl}</td></tr>`;
     g.ids.forEach(id=>{
       const s=VELO_SKUS.find(x=>x.id===id); if(!s) return;
       vh+=`<tr><td class="pname">${s.n}</td>`+
-          `<td><input class="cant" type="number" min="0" placeholder="0" id="stk-${id}-c"></td>`+
-          `<td><input type="date" id="stk-${id}-v"></td></tr>`;
+          `<td><div class="lots" id="lots-${id}"></div>`+
+          `<button type="button" class="add-lot" onclick="addVeloLot('${id}')">＋ otro vencimiento</button></td></tr>`;
     });
   });
-  const vb=document.getElementById('velo-stock-body'); if(vb) vb.innerHTML=vh;
+  const vb=document.getElementById('velo-stock-body'); if(vb){ vb.innerHTML=vh; VELO_SKUS.forEach(s=>addVeloLot(s.id)); }
   let uh='';
   VUSE_GROUPS.forEach(g=>{
     uh+=`<tr class="sku-grp"><td colspan="2">${g.lbl}</td></tr>`;
@@ -651,12 +659,29 @@ function buildStockTables(){
   });
   const ub=document.getElementById('vuse-stock-body'); if(ub) ub.innerHTML=uh;
 }
+// Agrega una línea de lote (cantidad + fecha) a un SKU de Velo.
+function addVeloLot(id,c,v){
+  const cont=document.getElementById('lots-'+id); if(!cont) return;
+  const div=document.createElement('div'); div.className='lot-line';
+  div.innerHTML='<input class="cant lot-c" type="number" min="0" placeholder="0">'+
+                '<input class="lot-v" type="date">'+
+                '<button type="button" class="lot-del" title="Quitar este lote">✕</button>';
+  div.querySelector('.lot-del').onclick=()=>{ div.remove(); if(!cont.querySelector('.lot-line')) addVeloLot(id); };
+  if(c===0||c) div.querySelector('.lot-c').value=c;
+  if(v) div.querySelector('.lot-v').value=v;
+  cont.appendChild(div);
+}
 function collectVeloStock(){
   const o={};
   VELO_SKUS.forEach(s=>{
-    const c=document.getElementById('stk-'+s.id+'-c'), v=document.getElementById('stk-'+s.id+'-v');
-    const cv=(c&&c.value!=='')?parseInt(c.value):null, vv=(v&&v.value)?v.value:'';
-    if(cv!==null||vv) o[s.id]={c:cv,v:vv};
+    const cont=document.getElementById('lots-'+s.id); if(!cont) return;
+    const lots=[];
+    cont.querySelectorAll('.lot-line').forEach(line=>{
+      const c=line.querySelector('.lot-c'), v=line.querySelector('.lot-v');
+      const cv=(c&&c.value!=='')?parseInt(c.value):null, vv=(v&&v.value)?v.value:'';
+      if(cv!==null||vv) lots.push({c:cv,v:vv});
+    });
+    if(lots.length) o[s.id]=lots;
   });
   return o;
 }
@@ -666,7 +691,13 @@ function collectVuseStock(){
   return o;
 }
 function fillStock(velo,vuse){
-  if(velo) Object.keys(velo).forEach(id=>{ const o=velo[id]||{}; const c=document.getElementById('stk-'+id+'-c'), v=document.getElementById('stk-'+id+'-v'); if(c&&(o.c===0||o.c)) c.value=o.c; if(v&&o.v) v.value=o.v; });
+  if(velo) Object.keys(velo).forEach(id=>{
+    const cont=document.getElementById('lots-'+id); if(!cont) return;
+    cont.innerHTML='';                                   // limpia la línea sembrada por defecto
+    let lots=velo[id]; if(!Array.isArray(lots)) lots=[lots]; // compat formato viejo {c,v}
+    lots.forEach(o=>{ o=o||{}; addVeloLot(id,o.c,o.v); });
+    if(!cont.querySelector('.lot-line')) addVeloLot(id); // garantiza al menos una línea
+  });
   if(vuse) Object.keys(vuse).forEach(id=>{ const c=document.getElementById('stk-'+id+'-c'); if(c&&(vuse[id]===0||vuse[id])) c.value=vuse[id]; });
 }
 
@@ -1261,20 +1292,33 @@ function renderMaterialesTab(){
 // ── STOCK VELO ──
 function renderStockTab(){
   const vis=FD.filter(r=>r.EFECTIVO==='SI');
-  const veloQbr=id=>vis.filter(r=>r.VELO&&r.VELO[id]&&r.VELO[id].c===0).length;
-  const veloCon=id=>vis.filter(r=>r.VELO&&r.VELO[id]&&r.VELO[id].c>0).length;
+  // Suma de unidades del SKU en un registro (soporta lotes [{c,v}] y formato viejo {c,v}); null si no hay dato.
+  const veloQ=(r,id)=>{ const x=r.VELO&&r.VELO[id]; if(x==null) return null; const lots=Array.isArray(x)?x:[x]; let has=false,tot=0; lots.forEach(l=>{ if(l&&(l.c===0||l.c)){has=true;tot+=(+l.c||0);} }); return has?tot:null; };
+  const veloQbr=id=>vis.filter(r=>veloQ(r,id)===0).length;
+  const veloCon=id=>vis.filter(r=>veloQ(r,id)>0).length;
   const vuseCon=id=>vis.filter(r=>r.VUSE&&r.VUSE[id]>0).length;
   const totalQbr=VELO_SKUS.reduce((a,s)=>a+veloQbr(s.id),0);
   const lsq=vis.filter(r=>r.LSQ==='SI').length;
   const short=n=>n.replace('Velo ','');
-  const detail=vis.map(r=>{ const g=id=>{const o=r.VELO&&r.VELO[id];return o&&(o.c===0||o.c)?o.c:'—';}; return `<tr><td style="padding:5px 8px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td>${VELO_SKUS.map(s=>`<td style="padding:5px 4px;text-align:center;${(r.VELO&&r.VELO[s.id]&&r.VELO[s.id].c===0)?'color:#ef4444;font-weight:700':''}">${g(s.id)}</td>`).join('')}</tr>`; }).join('');
+  const detail=vis.map(r=>{ const g=id=>{const q=veloQ(r,id);return q==null?'—':q;}; return `<tr><td style="padding:5px 8px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td>${VELO_SKUS.map(s=>`<td style="padding:5px 4px;text-align:center;${(veloQ(r,s.id)===0)?'color:#ef4444;font-weight:700':''}">${g(s.id)}</td>`).join('')}</tr>`; }).join('');
+  // Lotes con vencimiento, ordenados del más próximo a vencer.
+  const hoyMs=Date.now();
+  const lotes=[];
+  vis.forEach(r=>VELO_SKUS.forEach(s=>{ const x=r.VELO&&r.VELO[s.id]; if(x==null) return; const arr=Array.isArray(x)?x:[x]; arr.forEach(l=>{ if(l&&l.v){ const dias=Math.round((new Date(l.v).getTime()-hoyMs)/86400000); lotes.push({pdv:r.NOMBRE,dist:r.DISTRITO,sku:short(s.n),c:(l.c===0||l.c)?l.c:'',v:l.v,dias}); } }); }));
+  lotes.sort((a,b)=>a.dias-b.dias);
+  const vencCol=d=> d<0?'#ef4444': d<=30?'#f97316': d<=60?'#eab308':'#16a34a';
+  const vencTxt=d=> d<0?`vencido hace ${-d}d`: d===0?'vence hoy':`en ${d}d`;
+  const vencRows=lotes.map(l=>`<tr><td style="padding:5px 8px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.pdv}</td><td style="padding:5px 8px">${l.dist}</td><td style="padding:5px 8px">${l.sku}</td><td style="padding:5px 8px;text-align:center">${l.c}</td><td style="padding:5px 8px;text-align:center">${l.v}</td><td style="padding:5px 8px;text-align:center;color:${vencCol(l.dias)};font-weight:700">${vencTxt(l.dias)}</td></tr>`).join('');
+  const porVencer=lotes.filter(l=>l.dias<=60).length;
   document.getElementById('dash-body').innerHTML=`
     <div class="dash-grid">
       ${kpi(vis.length,'Efectivos')}
       ${kpi(totalQbr,'Quiebres Velo (SKU·PDV)','ng')}
+      ${kpi(porVencer,'Lotes Velo ≤60d por vencer','ng')}
       ${kpi(lsq,'Quiebre LS Eclipse','ng')}
     </div>
     <div class="chart-card" style="margin-bottom:12px"><h3>Quiebre vs stock — Velo por SKU</h3><div style="position:relative;height:230px"><canvas id="veloQbrChart"></canvas></div></div>
+    <div class="chart-card" style="margin-bottom:12px"><h3>Lotes Velo por vencer (rojo = vencido · naranja ≤30d · amarillo ≤60d)</h3><div style="overflow-x:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">SKU</th><th style="padding:6px 6px">Cant.</th><th style="padding:6px 6px">Vence</th><th style="padding:6px 6px">Estado</th></tr></thead><tbody>${vencRows||`<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--muted)">Sin fechas de vencimiento registradas</td></tr>`}</tbody></table></div></div>
     <div class="chart-card" style="margin-bottom:12px"><h3>Disponibilidad Vuse por SKU (PDVs con stock)</h3><div style="position:relative;height:230px"><canvas id="vuseChart"></canvas></div></div>
     <div class="chart-card"><h3>Detalle de stock Velo por bodega (rojo = quiebre)</h3><div style="overflow-x:auto;max-height:340px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">Sem</th>${VELO_SKUS.map(s=>`<th style="padding:6px 3px;font-size:8px">${short(s.n)}</th>`).join('')}</tr></thead><tbody>${detail||`<tr><td colspan="${VELO_SKUS.length+3}" style="padding:14px;text-align:center;color:var(--muted)">Sin datos</td></tr>`}</tbody></table></div></div>`;
   mkC('veloQbrChart',{type:'bar',data:{labels:VELO_SKUS.map(s=>short(s.n)),datasets:[{label:'Quiebre',data:VELO_SKUS.map(s=>veloQbr(s.id)),backgroundColor:'#ef4444',borderRadius:3},{label:'Con stock',data:VELO_SKUS.map(s=>veloCon(s.id)),backgroundColor:'#22c55e',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{beginAtZero:true}}}});

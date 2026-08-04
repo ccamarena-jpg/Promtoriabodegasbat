@@ -223,6 +223,14 @@ function getAllVisitas(){
   return out;
 }
 
+// Normaliza el stock de un SKU a un array de lotes {c,v}.
+// Acepta el formato nuevo ([{c,v},...]) y el viejo ({c,v}).
+function normLots_(x){
+  if(!x) return [];
+  if(Array.isArray(x)) return x;
+  return [x];
+}
+
 function processVisit(d){
   const ss     = getSS_();
   const sheet  = ensureVisitas_(ss);
@@ -262,9 +270,13 @@ function processVisit(d){
     d.competencia||'', yn(d.contrabando), d.marcasContrabando||''
   ];
   VELO_SKUS.forEach(s=>{
-    const o = st[s.id]||{};
-    row.push(o.c===0||o.c ? o.c : '');
-    row.push(o.v||'');
+    const lots = normLots_(st[s.id]);            // array de {c,v} (soporta lotes o formato viejo)
+    let has = false, tot = 0;
+    lots.forEach(l=>{ if(l && (l.c===0 || l.c)){ has = true; tot += (Number(l.c)||0); } });
+    const detail = lots.filter(l=> l && (l.c===0 || l.c || l.v))
+      .map(l=> ((l.c===0||l.c) ? l.c+'u' : '') + (l.v ? '→'+l.v : '')).join(' · ');
+    row.push(has ? tot : '');                     // columna (cant) = total de unidades
+    row.push(detail);                             // columna (venc) = desglose por lote
   });
   VUSE_SKUS.forEach(s=>{
     const q = vu[s.id];
