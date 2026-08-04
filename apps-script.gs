@@ -77,6 +77,7 @@ function doGet(e){
   try{
     if(action === 'getPOS')  return json({ok:true, data: getPadron()});
     if(action === 'getAll')  return json({ok:true, data: getAllVisitas()});
+    if(action === 'getWeek') return json({ok:true, data: getWeekVisitas(e.parameter.sem || '')});
     return json({ok:true, msg:'API v2 activa'});
   }catch(err){ return json({ok:false, error:String(err)}); }
 }
@@ -229,6 +230,18 @@ function normLots_(x){
   if(!x) return [];
   if(Array.isArray(x)) return x;
   return [x];
+}
+
+// Mapa de PDVs ya registrados en una semana: { posId: {estado,hora,auditor,timestamp} }.
+// Lo usa la app para bloquear puntos ya visitados (candado por servidor, cualquier equipo).
+function getWeekVisitas(sem){
+  const all = getAllVisitas();
+  const out = {};
+  all.forEach(r=>{
+    if(sem && r.semana !== sem) return;
+    out[String(r.id)] = { estado:r.estado||'', hora:r.hora||'', auditor:r.auditor||'', timestamp:r.timestamp||'' };
+  });
+  return out;
 }
 
 function processVisit(d){

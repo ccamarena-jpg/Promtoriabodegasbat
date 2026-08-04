@@ -254,7 +254,7 @@ textarea{resize:vertical;min-height:52px}
       <button class="btn-icon accent" id="btn-dash" style="display:none" onclick="openDash()">📊 Dashboard</button>
       <button class="btn-icon" id="btn-padron" style="display:none" onclick="refreshPadron()" title="Recargar POS desde Google Sheets">🔄 Padrón</button>
       <span id="semana-badge" style="font-size:10px;background:rgba(245,161,35,.18);color:#F5A123;border:1px solid rgba(245,161,35,.4);border-radius:6px;padding:3px 8px;font-weight:700;white-space:nowrap"></span>
-      <button class="btn-icon" id="btn-nueva-sem" style="display:none" onclick="nuevaSemana()" title="Iniciar nueva semana">📅 Nueva semana</button>
+      <button class="btn-icon" id="btn-nueva-sem" style="display:none" onclick="refreshData()" title="Actualizar padrón y candados desde el servidor">🔄 Actualizar</button>
       <button class="btn-icon" onclick="doLogout()">↩</button>
     </div>
   </header>
@@ -709,8 +709,23 @@ function calcSemana(){
   const sem=Math.ceil(day/7);
   return `S${sem}_${mes}${String(now.getFullYear()).slice(2)}`;
 }
-let currentSemana; try{currentSemana=localStorage.getItem('bat_semana')||calcSemana();}catch(e){currentSemana=calcSemana();}
+let currentSemana=calcSemana();                 // siempre por calendario → los puntos reabren solos cada semana
 function semKey(posId){ return posId+'_'+currentSemana; }
+let weekLocks={};                               // candados desde el servidor: posId -> {estado,hora,auditor,timestamp}
+// Un PDV cuenta como "registrado esta semana" si está en este equipo (localStorage) o en el servidor (cualquier equipo).
+function getWeekVisit(posId){
+  const l=visits[semKey(posId)]; if(l) return l;
+  const s=weekLocks[posId]; if(s) return {estado:s.estado||'visitado',hora:s.hora||'',auditor:s.auditor||'',_server:true};
+  return null;
+}
+async function loadWeekLocks(){
+  if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL.includes('TU_APPS')) return;
+  try{
+    const resp=await fetch(APPS_SCRIPT_URL+'?action=getWeek&sem='+encodeURIComponent(currentSemana),{mode:'cors',cache:'no-cache'});
+    const j=await resp.json();
+    if(j&&j.ok&&j.data){ weekLocks=j.data; try{renderPosList();renderMapMarkers();}catch(e){} }
+  }catch(e){}
+}
 function getSemanaLabel(){
   const m=currentSemana.match(/^S(\d+)_([A-Z]+)(\d+)$/);
   if(!m) return currentSemana;
@@ -801,6 +816,7 @@ async function doLogin(){
       toast('✓ Ruta actualizada desde Google Sheets');
     }
   }).catch(()=>{});
+  loadWeekLocks();   // candados por servidor (PDVs ya registrados esta semana, cualquier equipo)
 }
 function doLogout(){
   currentUser=null; currentRole=null;
@@ -838,7 +854,7 @@ function renderPosList(){
   const posList=POS_DATA[currentDay]||[];
   let v=0,n=0,p=0;
   document.getElementById('pos-list').innerHTML=posList.map((pos,idx)=>{
-    const visit=visits[semKey(pos.id)];
+    const visit=getWeekVisit(pos.id);
     let cls='',icon='⬜';
     if(visit){ if(visit.estado==='visitado'){cls='visited';icon='✅';v++;} else{cls='nogo';icon='❌';n++;} } else p++;
     return `<div class="pos-card ${cls}${pos.id===selectedPosId?' selected':''}" onclick="openModal('${pos.id}')" id="card-${pos.id}">
@@ -873,7 +889,7 @@ function renderMapMarkers(){
   const posList=POS_DATA[currentDay]||[];
   const bounds=[];
   posList.forEach((pos,idx)=>{
-    const v=visits[semKey(pos.id)];
+    const v=getWeekVisit(pos.id);
     const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
     const m=L.marker([pos.lat,pos.lon],{icon:makeNumberedIcon(idx+1,status)}).addTo(map)
       .bindPopup(`<b>${pos.nombre}</b><br><small>${pos.direccion}</small><br><small>${pos.distrito}</small>`);
@@ -882,21 +898,18 @@ function renderMapMarkers(){
   });
   if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
 }
-function nuevaSemana(){
-  if(!confirm(`¿Iniciar nueva semana? Los marcadores de visita actuales (${getSemanaLabel()}) se archivarán y comenzará un tracking nuevo.`)) return;
-  const nums=Object.keys(visits).map(k=>{ const m=k.match(/_S(\d+)_/); return m?parseInt(m[1]):0; });
-  const maxN=nums.length?Math.max(...nums):0;
-  const now=new Date();
-  const mes=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][now.getMonth()];
-  currentSemana=`S${maxN+1}_${mes}${String(now.getFullYear()).slice(2)}`;
-  localStorage.setItem('bat_semana',currentSemana);
+// La semana avanza sola por calendario (currentSemana=calcSemana()). Este botón de admin
+// solo re-sincroniza el padrón y los candados desde el servidor (respaldo manual).
+function refreshData(){
+  currentSemana=calcSemana();
   document.getElementById('semana-badge').textContent=getSemanaLabel();
-  renderPosList(); renderMapMarkers(); updateHeader();
-  toast(`✓ ${getSemanaLabel()} iniciada`);
+  toast('🔄 Actualizando…');
+  loadPOSData(true).then(()=>{ try{ buildDayTabs(); if(currentDay) selectDay(currentDay); }catch(e){} }).catch(()=>{});
+  loadWeekLocks();
 }
 function updateMarker(posId){
   const pos=getAllPos().find(p=>p.id===posId); if(!pos||!markers[posId]) return;
-  const v=visits[semKey(posId)]; const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
+  const v=getWeekVisit(posId); const status=v?(v.estado==='visitado'?'visitado':'nogo'):'pending';
   const idx=(POS_DATA[currentDay]||[]).findIndex(p=>p.id===posId);
   markers[posId].setIcon(makeNumberedIcon(idx+1,status));
 }
@@ -912,6 +925,7 @@ function openModal(posId){
   resetModal();
   unlockModal();
   const ex=visits[semKey(posId)];
+  const srv=weekLocks[posId];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
     if(ex.permite) selPermite(ex.permite,true);
@@ -928,6 +942,8 @@ function openModal(posId){
     if(ex.contrabando) selContrabando(ex.contrabando,true);
     if(ex.fotos){ fotosData={...ex.fotos}; Object.keys(fotosData).forEach(k=>refreshFotoSlot(k)); }
     lockModal(ex);
+  } else if(srv){
+    lockModal({estado:srv.estado||'visitado',hora:srv.hora||'',auditor:srv.auditor||'',_server:true});
   }
   document.getElementById('modal-bg').classList.add('active');
   if(markers[posId]){ map.setView([pos.lat,pos.lon],16,{animate:true}); markers[posId].openPopup(); }
@@ -954,7 +970,8 @@ function lockModal(visit){
   const btnCancel=document.getElementById('btn-cancel-modal');
   const estado=visit.estado==='visitado'?'✅ Visitado':'❌ No Go';
   const hora=visit.hora||'';
-  bannerText.textContent=`Visita registrada esta semana${hora?' a las '+hora:''} — ${estado}`;
+  const who=visit._server&&visit.auditor?` · ${visit.auditor}`:'';
+  bannerText.textContent=`Visita registrada esta semana${hora?' a las '+hora:''} — ${estado}${who}`;
   banner.style.display='flex';
   btnSave.style.display='none';
   btnCancel.textContent='Cerrar';
@@ -1095,6 +1112,7 @@ async function trySync(record){
       visits[record.id]=record;
       localStorage.setItem('bat_v2_'+currentUser,JSON.stringify(visits));
       updateSyncBtn(); toast('☁️ Sincronizado con Sheets');
+      loadWeekLocks();   // refresca el candado del servidor con la visita recién guardada
     }
   } catch(e){ console.log('Sync error:',e.message); }
 }
