@@ -1317,13 +1317,17 @@ function renderStockTab(){
   const vis=FD.filter(r=>r.EFECTIVO==='SI');
   // Suma de unidades del SKU en un registro (soporta lotes [{c,v}] y formato viejo {c,v}); null si no hay dato.
   const veloQ=(r,id)=>{ const x=r.VELO&&r.VELO[id]; if(x==null) return null; const lots=Array.isArray(x)?x:[x]; let has=false,tot=0; lots.forEach(l=>{ if(l&&(l.c===0||l.c)){has=true;tot+=(+l.c||0);} }); return has?tot:null; };
-  const veloQbr=id=>vis.filter(r=>veloQ(r,id)===0).length;
+  // Quiebre = cantidad no llenada (—) o en 0, en un PDV efectivo.
+  const veloQbr=id=>vis.filter(r=>{const q=veloQ(r,id);return q==null||q===0;}).length;
   const veloCon=id=>vis.filter(r=>veloQ(r,id)>0).length;
-  const vuseCon=id=>vis.filter(r=>r.VUSE&&r.VUSE[id]>0).length;
+  const vuseVal=(r,id)=>{const v=r.VUSE?r.VUSE[id]:undefined;return (v==null||v==='')?null:(+v||0);};
+  const vuseCon=id=>vis.filter(r=>vuseVal(r,id)>0).length;
+  const vuseQbr=id=>vis.filter(r=>{const v=vuseVal(r,id);return v==null||v===0;}).length;
   const totalQbr=VELO_SKUS.reduce((a,s)=>a+veloQbr(s.id),0);
+  const totalVuseQbr=VUSE_SKUS.reduce((a,s)=>a+vuseQbr(s.id),0);
   const lsq=vis.filter(r=>r.LSQ==='SI').length;
   const short=n=>n.replace('Velo ','');
-  const detail=vis.map(r=>{ const g=id=>{const q=veloQ(r,id);return q==null?'—':q;}; return `<tr><td style="padding:5px 8px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td>${VELO_SKUS.map(s=>`<td style="padding:5px 4px;text-align:center;${(veloQ(r,s.id)===0)?'color:#ef4444;font-weight:700':''}">${g(s.id)}</td>`).join('')}</tr>`; }).join('');
+  const detail=vis.map(r=>{ return `<tr><td style="padding:5px 8px;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.NOMBRE}</td><td style="padding:5px 8px">${r.DISTRITO}</td><td style="padding:5px 8px;text-align:center">S${r.VISITA}</td>${VELO_SKUS.map(s=>{const q=veloQ(r,s.id);const qb=(q==null||q===0);return `<td style="padding:5px 4px;text-align:center;${qb?'color:#ef4444;font-weight:700':''}">${q==null?'—':q}</td>`;}).join('')}</tr>`; }).join('');
   // Lotes con vencimiento, ordenados del más próximo a vencer.
   const hoyMs=Date.now();
   const lotes=[];
@@ -1333,14 +1337,33 @@ function renderStockTab(){
   const vencTxt=d=> d<0?`vencido hace ${-d}d`: d===0?'vence hoy':`en ${d}d`;
   const vencRows=lotes.map(l=>`<tr><td style="padding:5px 8px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.pdv}</td><td style="padding:5px 8px">${l.dist}</td><td style="padding:5px 8px">${l.sku}</td><td style="padding:5px 8px;text-align:center">${l.c}</td><td style="padding:5px 8px;text-align:center">${l.v}</td><td style="padding:5px 8px;text-align:center;color:${vencCol(l.dias)};font-weight:700">${vencTxt(l.dias)}</td></tr>`).join('');
   const porVencer=lotes.filter(l=>l.dias<=60).length;
+  // ── Resumen: unidades Velo por SKU (filas) × mes de vencimiento (columnas) ──
+  const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const mKey=v=>{ const m=String(v).match(/^(\d{4})-(\d{2})/); if(m) return m[1]+'-'+m[2]; const d=new Date(v); return isNaN(d)?null:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+  const mLbl=k=> k==='S/F'?'Sin fecha':(MES[+k.split('-')[1]-1]+' '+k.split('-')[0].slice(2));
+  const vmat={}; VELO_SKUS.forEach(s=>vmat[s.id]={});
+  const colSet=new Set(); let hasSF=false;
+  vis.forEach(r=>VELO_SKUS.forEach(s=>{ const x=r.VELO&&r.VELO[s.id]; if(x==null) return; const arr=Array.isArray(x)?x:[x]; arr.forEach(l=>{ if(!l) return; const u=(l.c===0||l.c)?(+l.c||0):0; if(u<=0) return; const mk=l.v?mKey(l.v):null; const col=mk||'S/F'; if(mk) colSet.add(mk); else hasSF=true; vmat[s.id][col]=(vmat[s.id][col]||0)+u; }); }));
+  const vcols=[...colSet].sort(); if(hasSF) vcols.push('S/F');
+  const colTot=c=>VELO_SKUS.reduce((a,s)=>a+(vmat[s.id][c]||0),0);
+  const rowTot=id=>vcols.reduce((a,c)=>a+(vmat[id][c]||0),0);
+  const grandTot=VELO_SKUS.reduce((a,s)=>a+rowTot(s.id),0);
+  const maxCell=Math.max(1,...VELO_SKUS.flatMap(s=>vcols.map(c=>vmat[s.id][c]||0)));
+  const chip=v=>{ if(!v) return '<span style="color:#cbd5e1">—</span>'; const a=(0.12+0.55*v/maxCell).toFixed(2); return `<span style="display:inline-block;min-width:24px;padding:2px 6px;border-radius:5px;background:rgba(26,46,106,${a});color:${v/maxCell>0.55?'#fff':'#1A2E6A'};font-weight:600">${v}</span>`; };
+  const vmatHead=`<tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">SKU Velo</th>${vcols.map(c=>`<th style="padding:6px 6px">${mLbl(c)}</th>`).join('')}<th style="padding:6px 8px;background:#0f1c46">Total</th></tr>`;
+  const vmatRows=VELO_SKUS.map((s,i)=>`<tr style="background:${i%2?'#f8f9fc':'#fff'}"><td style="padding:5px 8px;font-weight:600">${short(s.n)}</td>${vcols.map(c=>`<td style="padding:5px 6px;text-align:center">${chip(vmat[s.id][c]||0)}</td>`).join('')}<td style="padding:5px 8px;text-align:center;font-weight:700">${rowTot(s.id)||'—'}</td></tr>`).join('');
+  const vmatFoot=`<tr style="background:#eef1f8;font-weight:700"><td style="padding:6px 8px">Total</td>${vcols.map(c=>`<td style="padding:6px 6px;text-align:center">${colTot(c)||'—'}</td>`).join('')}<td style="padding:6px 8px;text-align:center">${grandTot||'—'}</td></tr>`;
+  const vmatTable=`<div class="chart-card" style="margin-bottom:12px"><h3>Conteo de unidades Velo por mes de vencimiento</h3><div style="overflow-x:auto">${vcols.length?`<table style="width:100%;border-collapse:collapse;font-size:10px;min-width:520px"><thead style="position:sticky;top:0">${vmatHead}</thead><tbody>${vmatRows}${vmatFoot}</tbody></table>`:'<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">Sin fechas de vencimiento registradas</div>'}</div></div>`;
   document.getElementById('dash-body').innerHTML=`
     <div class="dash-grid">
       ${kpi(vis.length,'Efectivos')}
       ${kpi(totalQbr,'Quiebres Velo (SKU·PDV)','ng')}
+      ${kpi(totalVuseQbr,'Quiebres Vuse (SKU·PDV)','ng')}
       ${kpi(porVencer,'Lotes Velo ≤60d por vencer','ng')}
       ${kpi(lsq,'Quiebre LS Eclipse','ng')}
     </div>
     <div class="chart-card" style="margin-bottom:12px"><h3>Quiebre vs stock — Velo por SKU</h3><div style="position:relative;height:230px"><canvas id="veloQbrChart"></canvas></div></div>
+    ${vmatTable}
     <div class="chart-card" style="margin-bottom:12px"><h3>Lotes Velo por vencer (rojo = vencido · naranja ≤30d · amarillo ≤60d)</h3><div style="overflow-x:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">SKU</th><th style="padding:6px 6px">Cant.</th><th style="padding:6px 6px">Vence</th><th style="padding:6px 6px">Estado</th></tr></thead><tbody>${vencRows||`<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--muted)">Sin fechas de vencimiento registradas</td></tr>`}</tbody></table></div></div>
     <div class="chart-card" style="margin-bottom:12px"><h3>Disponibilidad Vuse por SKU (PDVs con stock)</h3><div style="position:relative;height:230px"><canvas id="vuseChart"></canvas></div></div>
     <div class="chart-card"><h3>Detalle de stock Velo por bodega (rojo = quiebre)</h3><div style="overflow-x:auto;max-height:340px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead style="position:sticky;top:0"><tr style="background:#1A2E6A;color:#fff"><th style="padding:6px 8px;text-align:left">PDV</th><th style="padding:6px 6px">Distrito</th><th style="padding:6px 6px">Sem</th>${VELO_SKUS.map(s=>`<th style="padding:6px 3px;font-size:8px">${short(s.n)}</th>`).join('')}</tr></thead><tbody>${detail||`<tr><td colspan="${VELO_SKUS.length+3}" style="padding:14px;text-align:center;color:var(--muted)">Sin datos</td></tr>`}</tbody></table></div></div>`;
