@@ -590,7 +590,8 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjdvzQKO6b0ip5
 
 const USERS = {
   'auditor1@ttaudit.com': {pass:'123456', role:'auditor'},
-  'ccamarena@ttaudit.com': {pass:'Audit2026', role:'admin'}
+  'ccamarena@ttaudit.com': {pass:'Audit2026', role:'admin'},
+  'bat@ttaudit.com': {pass:'BAT 2026', role:'client'}   // cliente: solo dashboard
 };
 
 // ─── STATE ───
@@ -803,6 +804,14 @@ async function doLogin(){
   POS_DATA=FALLBACK_POS_DATA;
   try{ const c=sessionStorage.getItem('bat_pos_data'); if(c) POS_DATA=JSON.parse(c); }catch(e){}
 
+  // Cliente (solo dashboard): no ve ruta / formulario / padrón editable
+  if(currentRole==='client'){
+    document.getElementById('login-screen').style.display='none';
+    loadPOSData(true).catch(()=>{});   // refresca padrón (distritos/filtros) en 2.º plano
+    openDash();
+    return;
+  }
+
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').classList.add('active');
   document.getElementById('semana-badge').textContent=getSemanaLabel();
@@ -825,6 +834,7 @@ async function doLogin(){
 }
 function doLogout(){
   currentUser=null; currentRole=null;
+  document.getElementById('dash-overlay').classList.remove('active');
   document.getElementById('app').classList.remove('active');
   document.getElementById('btn-dash').style.display='none';
   document.getElementById('btn-padron').style.display='none';
@@ -1167,7 +1177,7 @@ function getSemanaLabelFromKey(key){ if(!key) return ''; const m=key.match(/^S(\
 function getLatestPerPDV(data){ const m={}; data.forEach(r=>{ if(!r.NOMBRE) return; if(!m[r.NOMBRE]||(r.VISITA>(m[r.NOMBRE].VISITA||0))) m[r.NOMBRE]=r; }); return Object.values(m); }
 
 function openDash(){ document.getElementById('dash-overlay').classList.add('active'); renderDash(); }
-function closeDash(){ document.getElementById('dash-overlay').classList.remove('active'); }
+function closeDash(){ document.getElementById('dash-overlay').classList.remove('active'); if(currentRole==='client') doLogout(); }
 
 // Normaliza registros (visitas) + atributos del padrón → filas del dashboard
 function buildRaw(records){
