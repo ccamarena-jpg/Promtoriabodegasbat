@@ -1211,11 +1211,15 @@ async function renderDash(){
   body.innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando datos...</p>';
   let records=[...currentWeekVisits()];
   if(APPS_SCRIPT_URL&&!APPS_SCRIPT_URL.includes('TU_APPS')){
-    try{
-      const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll',{mode:'cors'});
-      const j=await resp.json();
-      if(j.ok&&j.data){ const seen=new Set(records.map(x=>x.id+'_'+(x.semana||''))); j.data.forEach(rec=>{ if(!seen.has(rec.id+'_'+(rec.semana||''))) records.push(rec); }); }
-    }catch(e){ console.log('dash getAll error',e); }
+    for(let intento=0;intento<3;intento++){
+      try{
+        const resp=await fetch(APPS_SCRIPT_URL+'?action=getAll',{mode:'cors',cache:'no-cache'});
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        const j=await resp.json();
+        if(j.ok&&j.data){ const seen=new Set(records.map(x=>x.id+'_'+(x.semana||''))); j.data.forEach(rec=>{ if(!seen.has(rec.id+'_'+(rec.semana||''))) records.push(rec); }); }
+        break;
+      }catch(e){ console.log('dash getAll intento '+(intento+1)+' falló',e); if(intento<2) await new Promise(r=>setTimeout(r,1200)); }
+    }
   }
   RAW=buildRaw(records);
   buildFilters();
