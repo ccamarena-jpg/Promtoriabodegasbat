@@ -726,11 +726,16 @@ function getWeekVisit(posId){
 }
 async function loadWeekLocks(){
   if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL.includes('TU_APPS')) return;
-  try{
-    const resp=await fetch(APPS_SCRIPT_URL+'?action=getWeek&sem='+encodeURIComponent(currentSemana),{mode:'cors',cache:'no-cache'});
-    const j=await resp.json();
-    if(j&&j.ok&&j.data){ weekLocks=j.data; try{renderPosList();renderMapMarkers();}catch(e){} }
-  }catch(e){}
+  // Reintentos: Apps Script devuelve 404 en el 1er hit tras inactividad (cold start).
+  for(let intento=0;intento<4;intento++){
+    try{
+      const resp=await fetch(APPS_SCRIPT_URL+'?action=getWeek&sem='+encodeURIComponent(currentSemana),{mode:'cors',cache:'no-cache'});
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const j=await resp.json();
+      if(j&&j.ok&&j.data){ weekLocks=j.data; try{renderPosList();renderMapMarkers();}catch(e){} }
+      return;
+    }catch(e){ console.log('getWeek intento '+(intento+1)+' falló:',e.message); if(intento<3) await new Promise(r=>setTimeout(r,1200)); }
+  }
 }
 function getSemanaLabel(){
   const m=currentSemana.match(/^S(\d+)_([A-Z]+)(\d+)$/);
@@ -748,26 +753,32 @@ async function loadPOSData(force){
       if(cached){ POS_DATA=JSON.parse(cached); console.log('POS: desde caché sesión'); return 'cache'; }
     }catch(e){}
   }
-  // 2) Intentar cargar desde Google Sheets (Padrón Rutas) — con timeout de 6s
-  try{
-    console.log('POS: consultando Sheet...');
-    const ctrl=new AbortController();
-    const tId=setTimeout(()=>ctrl.abort(),6000);
-    const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache',signal:ctrl.signal});
-    clearTimeout(tId);
-    const json=await resp.json();
-    console.log('POS Sheet response:', JSON.stringify(json).substring(0,200));
-    if(json.ok&&json.data&&Object.keys(json.data).length>0){
-      POS_DATA=json.data;
-      const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
-      try{sessionStorage.setItem('bat_pos_data',JSON.stringify(POS_DATA));}catch(e){}
-      console.log('POS: '+total+' puntos cargados desde Sheet');
-      return 'sheet';
-    } else {
+  // 2) Intentar cargar desde Google Sheets (Padrón Rutas) — con reintentos.
+  // Apps Script devuelve 404 en el 1er (a veces 2do) hit tras inactividad (cold start);
+  // sin reintento la app caía al padrón viejo embebido (FALLBACK) por error.
+  for(let intento=0;intento<4;intento++){
+    try{
+      console.log('POS: consultando Sheet (intento '+(intento+1)+')...');
+      const ctrl=new AbortController();
+      const tId=setTimeout(()=>ctrl.abort(),9000);
+      const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache',signal:ctrl.signal});
+      clearTimeout(tId);
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const json=await resp.json();
+      if(json.ok&&json.data&&Object.keys(json.data).length>0){
+        POS_DATA=json.data;
+        const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
+        try{sessionStorage.setItem('bat_pos_data',JSON.stringify(POS_DATA));}catch(e){}
+        console.log('POS: '+total+' puntos cargados desde Sheet');
+        return 'sheet';
+      }
       console.log('POS Sheet: respuesta vacía o error:', json);
+    }catch(e){
+      console.warn('POS fetch intento '+(intento+1)+' falló:',e.message);
+      if(intento<3) await new Promise(r=>setTimeout(r,1200));
     }
-  }catch(e){console.warn('POS fetch error:',e.message);}
-  // 3) Fallback: datos hardcodeados en la app
+  }
+  // 3) Fallback: datos hardcodeados en la app (solo tras agotar reintentos)
   POS_DATA=FALLBACK_POS_DATA;
   console.log('POS: usando fallback hardcodeado');
   return 'fallback';
@@ -1107,14 +1118,25 @@ async function saveVisit(){
 
 // ─── SYNC ───
 async function postToSheet(record){
-  // Enviar como text/plain para evitar CORS preflight con Apps Script
-  const r=await fetch(APPS_SCRIPT_URL,{
-    method:'POST',
-    body:JSON.stringify(record),
-    headers:{'Content-Type':'text/plain;charset=UTF-8'}
-  });
-  const j=await r.json();
-  return j;
+  // Enviar como text/plain para evitar CORS preflight con Apps Script.
+  // Reintentos: el 1er POST tras inactividad puede fallar por cold start (404) → sin
+  // reintento la visita quedaba sin subir a la auditora (aparece pendiente/candado local).
+  let lastErr;
+  for(let intento=0;intento<4;intento++){
+    try{
+      const r=await fetch(APPS_SCRIPT_URL,{
+        method:'POST',
+        body:JSON.stringify(record),
+        headers:{'Content-Type':'text/plain;charset=UTF-8'}
+      });
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){
+      lastErr=e; console.log('POST intento '+(intento+1)+' falló:',e.message);
+      if(intento<3) await new Promise(r=>setTimeout(r,1200));
+    }
+  }
+  throw lastErr||new Error('POST falló');
 }
 async function trySync(record){
   if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL.includes('TU_APPS')) return;
