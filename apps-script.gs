@@ -193,7 +193,10 @@ function getPadron(sem){
     const r = rows[i];
     if(!r[cNom]) continue;
     if(sm){
-      const per = cPer>=0 ? String(r[cPer]||'').trim().toUpperCase() : '';
+      // Sheets suele convertir "OCT26" en fecha (1-oct-2026) → se normaliza de vuelta a "OCT26".
+      let pv = cPer>=0 ? r[cPer] : '';
+      if(pv instanceof Date) pv = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][pv.getMonth()] + String(pv.getFullYear()).slice(2);
+      const per = String(pv||'').trim().toUpperCase();
       const sems = cSem>=0 ? String(r[cSem]||'').toUpperCase().match(/\d+/g) : null;
       if(per && per !== sm[2]) continue;
       if(sems && sems.indexOf(sm[1]) < 0) continue;
