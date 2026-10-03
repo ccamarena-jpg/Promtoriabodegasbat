@@ -13,7 +13,7 @@
 // Los IDs quedan guardados en las Propiedades del Script.
 const SS_NAME        = 'Promotoría Bodegas 2026 v2';
 const FOLDER_NAME    = 'Fotos Promotoría Bodegas 2026';
-const PADRON_HEADERS = ['ID','Nombre PDV','Dirección','Distrito','Día','Lat','Lon','Cigarrera','Dispenser Velo','Com. Cigarrera'];
+const PADRON_HEADERS = ['ID','Nombre PDV','Dirección','Distrito','Día','Lat','Lon','Cigarrera','Dispenser Velo','Com. Cigarrera','Semanas','Periodo'];
 
 // ─── CATÁLOGO DE SKUs (debe coincidir con el de index.html) ───
 const VELO_SKUS = [
@@ -75,7 +75,7 @@ function buildHeaders(){
 function doGet(e){
   const action = (e && e.parameter && e.parameter.action) || '';
   try{
-    if(action === 'getPOS')  return json({ok:true, data: getPadron()});
+    if(action === 'getPOS')  return json({ok:true, data: getPadron(e.parameter.sem || '')});
     if(action === 'getAll')  return json({ok:true, data: getAllVisitas()});
     if(action === 'getWeek') return json({ok:true, data: getWeekVisitas(e.parameter.sem || '')});
     return json({ok:true, msg:'API v2 activa'});
@@ -173,7 +173,10 @@ function setup(){
 // Lee la hoja "Padrón Rutas" y la agrupa por día para la app.
 // Columnas esperadas (fila 1 = encabezados):
 //   ID | Nombre PDV | Dirección | Distrito | Día | Lat | Lon | Cigarrera | Dispenser Velo | Com. Cigarrera
-function getPadron(){
+// Columnas opcionales: Semanas (ej "S1,S3") y Periodo (ej "OCT26"). Si vienen vacías la fila aplica siempre.
+// Con ?sem=S1_OCT26 solo devuelve las bodegas cuya Semanas incluya S1 y cuyo Periodo sea OCT26.
+function getPadron(sem){
+  const sm = String(sem||'').toUpperCase().match(/^S(\d+)_([A-Z]+\d+)$/);
   const ss = getSS_();
   const sheet = ensurePadron_(ss);
   const rows = sheet.getDataRange().getValues();
@@ -182,13 +185,19 @@ function getPadron(){
   const col = name => H.findIndex(h => h.indexOf(name) === 0 || h === name);
   const cId=col('id'), cNom=col('nombre'), cDir=col('direcc'), cDis=col('distrito'),
         cDia=col('día')>=0?col('día'):col('dia'), cLat=col('lat'), cLon=col('lon'),
-        cCig=col('cigarrera'), cDsp=col('dispenser'), cCom=col('com');
+        cCig=col('cigarrera'), cDsp=col('dispenser'), cCom=col('com'), cSem=col('semanas'), cPer=col('periodo');
   const norm = s => String(s||'').trim().toUpperCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const data = {LUNES:[],MARTES:[],MIERCOLES:[],JUEVES:[],VIERNES:[]};
   for(let i=1;i<rows.length;i++){
     const r = rows[i];
     if(!r[cNom]) continue;
+    if(sm){
+      const per = cPer>=0 ? String(r[cPer]||'').trim().toUpperCase() : '';
+      const sems = cSem>=0 ? String(r[cSem]||'').toUpperCase().match(/\d+/g) : null;
+      if(per && per !== sm[2]) continue;
+      if(sems && sems.indexOf(sm[1]) < 0) continue;
+    }
     let dia = norm(r[cDia]);
     ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES'].forEach(base=>{ if(dia.indexOf(base.substring(0,3))===0) dia=base; });
     if(!data[dia]) continue;

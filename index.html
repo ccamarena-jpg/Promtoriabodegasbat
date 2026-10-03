@@ -704,11 +704,12 @@ function fillStock(velo,vuse){
 
 // ─── SEMANA ───
 function calcSemana(){
+  // Semana por el LUNES de la semana (LUN–VIE comparten semana): 5–9 oct = S1, 19–23 oct = S3.
   const now=new Date();
-  const mes=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][now.getMonth()];
-  const day=now.getDate();
-  const sem=Math.ceil(day/7);
-  return `S${sem}_${mes}${String(now.getFullYear()).slice(2)}`;
+  const mon=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((now.getDay()+6)%7));
+  const mes=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][mon.getMonth()];
+  const sem=Math.ceil(mon.getDate()/7);
+  return `S${sem}_${mes}${String(mon.getFullYear()).slice(2)}`;
 }
 // Timestamp en hora de Perú (UTC-5) para que el día no salte a UTC en visitas de la tarde/noche.
 function limaTimestamp(){
@@ -749,7 +750,7 @@ async function loadPOSData(force){
   // 1) Caché de sesión (saltar si force=true)
   if(!force){
     try{
-      const cached=sessionStorage.getItem('bat_pos_data');
+      const cached=sessionStorage.getItem('bat_pos_data_'+currentSemana);
       if(cached){ POS_DATA=JSON.parse(cached); console.log('POS: desde caché sesión'); return 'cache'; }
     }catch(e){}
   }
@@ -761,14 +762,14 @@ async function loadPOSData(force){
       console.log('POS: consultando Sheet (intento '+(intento+1)+')...');
       const ctrl=new AbortController();
       const tId=setTimeout(()=>ctrl.abort(),9000);
-      const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS',{mode:'cors',cache:'no-cache',signal:ctrl.signal});
+      const resp=await fetch(APPS_SCRIPT_URL+'?action=getPOS&sem='+encodeURIComponent(currentSemana),{mode:'cors',cache:'no-cache',signal:ctrl.signal});
       clearTimeout(tId);
       if(!resp.ok) throw new Error('HTTP '+resp.status);
       const json=await resp.json();
       if(json.ok&&json.data&&Object.keys(json.data).length>0){
         POS_DATA=json.data;
         const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
-        try{sessionStorage.setItem('bat_pos_data',JSON.stringify(POS_DATA));}catch(e){}
+        try{sessionStorage.setItem('bat_pos_data_'+currentSemana,JSON.stringify(POS_DATA));}catch(e){}
         console.log('POS: '+total+' puntos cargados desde Sheet');
         return 'sheet';
       }
@@ -788,7 +789,7 @@ async function refreshPadron(){
   const btn=document.getElementById('btn-padron');
   btn.disabled=true; btn.textContent='⏳ Cargando...';
   try{
-    sessionStorage.removeItem('bat_pos_data');
+    sessionStorage.removeItem('bat_pos_data_'+currentSemana);
     const src=await loadPOSData(true);
     const total=Object.values(POS_DATA).reduce((s,a)=>s+a.length,0);
     try{ buildDayTabs(); selectDay(currentDay); }catch(err){ console.error('refresh render error:',err); }
@@ -813,7 +814,7 @@ async function doLogin(){
 
   // Mostrar app INMEDIATAMENTE — sin pantalla de carga
   POS_DATA=FALLBACK_POS_DATA;
-  try{ const c=sessionStorage.getItem('bat_pos_data'); if(c) POS_DATA=JSON.parse(c); }catch(e){}
+  try{ const c=sessionStorage.getItem('bat_pos_data_'+currentSemana); if(c) POS_DATA=JSON.parse(c); }catch(e){}
 
   // Cliente (solo dashboard): no ve ruta / formulario / padrón editable
   if(currentRole==='client'){
