@@ -722,8 +722,16 @@ let currentSemana=calcSemana();                 // siempre por calendario → lo
 function semKey(posId){ return posId+'_'+currentSemana; }
 let weekLocks={};                               // candados desde el servidor: posId -> {estado,hora,auditor,timestamp}
 // Un PDV cuenta como "registrado esta semana" si está en este equipo (localStorage) o en el servidor (cualquier equipo).
+// Override temporal: ?reabrir=JUEVES,VIERNES (o =TODOS) ignora los candados del SERVIDOR de esos días
+// para cargar info rezagada. Lo registrado en esta sesión vuelve a bloquear (visits local).
+const REABRIR=(new URLSearchParams(location.search).get('reabrir')||'').toUpperCase().split(',').map(x=>x.trim()).filter(Boolean);
+function posReabierto(posId){
+  if(!REABRIR.length) return false;
+  return DAYS_ORDER.some(d=>(REABRIR.includes(d)||REABRIR.includes('TODOS'))&&(POS_DATA[d]||[]).some(p=>p.id===posId));
+}
 function getWeekVisit(posId){
   const l=visits[semKey(posId)]; if(l) return l;
+  if(posReabierto(posId)) return null;
   const s=weekLocks[posId]; if(s) return {estado:s.estado||'visitado',hora:s.hora||'',auditor:s.auditor||'',_server:true};
   return null;
 }
@@ -954,7 +962,7 @@ function openModal(posId){
   resetModal();
   unlockModal();
   const ex=visits[semKey(posId)];
-  const srv=weekLocks[posId];
+  const srv=posReabierto(posId)?null:weekLocks[posId];
   if(ex){
     if(ex.abierto) selAbierto(ex.abierto,true);
     if(ex.permite) selPermite(ex.permite,true);
