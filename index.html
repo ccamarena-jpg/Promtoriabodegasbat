@@ -374,6 +374,44 @@ textarea{resize:vertical;min-height:52px}
           <div class="radio-group"><button class="rbtn" id="rb-cap-si" onclick="selCapacitado('Si')">Sí</button><button class="rbtn" id="rb-cap-no" onclick="selCapacitado('No')">No</button></div>
         </div>
         <hr class="section-divider">
+        <div class="section-title">▸ Cigarrera y Productos que vende</div>
+        <style>
+        .chk-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+        .chk-grid label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;padding:5px 8px;background:#fff;cursor:pointer}
+        .chk-grid label:has(input:checked){border-color:var(--navy);background:#eef1ff;color:var(--navy)}
+        .chk-grp{width:100%;font-size:9px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+        </style>
+        <div class="field-group">
+          <label class="field-label">¿El Local tiene Cigarrera? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-cigarrera-si" onclick="selYN('cigarrera','Si')">Sí</button><button class="rbtn" id="rb-cigarrera-no" onclick="selYN('cigarrera','No')">No</button></div>
+        </div>
+        <div id="seccion-cigarrera" style="display:none">
+          <div class="field-group">
+            <label class="field-label">¿Necesita cambio de placa o mantenimiento?</label>
+            <div class="radio-group" style="flex-wrap:wrap">
+              <button class="rbtn" id="rb-cignec-ninguno" onclick="selCigNec('Ninguno')">Ninguno</button>
+              <button class="rbtn" id="rb-cignec-placa" onclick="selCigNec('Cambio de placa')">Cambio de placa</button>
+              <button class="rbtn" id="rb-cignec-mant" onclick="selCigNec('Mantenimiento')">Mantenimiento</button>
+              <button class="rbtn" id="rb-cignec-ambos" onclick="selCigNec('Placa y mantenimiento')">Ambos</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">¿La tienda vende Velo? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-vvelo-si" onclick="selYN('vvelo','Si')">Sí</button><button class="rbtn" id="rb-vvelo-no" onclick="selYN('vvelo','No')">No</button></div>
+        </div>
+        <div id="seccion-vvelo" style="display:none"><div class="field-group"><label class="field-label">¿Qué SKUs de Velo vende?</label><div class="chk-grid" id="chk-velo"></div></div></div>
+        <div class="field-group">
+          <label class="field-label">¿La tienda vende Vuse? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-vvuse-si" onclick="selYN('vvuse','Si')">Sí</button><button class="rbtn" id="rb-vvuse-no" onclick="selYN('vvuse','No')">No</button></div>
+        </div>
+        <div id="seccion-vvuse" style="display:none"><div class="field-group"><label class="field-label">¿Qué SKUs de Vuse vende?</label><div class="chk-grid" id="chk-vuse"></div></div></div>
+        <div class="field-group">
+          <label class="field-label">¿La tienda vende Cigarros? <span class="req">*</span></label>
+          <div class="radio-group"><button class="rbtn" id="rb-vcig-si" onclick="selYN('vcig','Si')">Sí</button><button class="rbtn" id="rb-vcig-no" onclick="selYN('vcig','No')">No</button></div>
+        </div>
+        <div id="seccion-vcig" style="display:none"><div class="field-group"><label class="field-label">¿Qué SKUs / marcas de cigarros vende?</label><textarea id="m-skus-cigarros" rows="2" placeholder="Ej: Lucky Strike Click, Lucky Strike Eclipse, Pall Mall, Hamilton..."></textarea></div></div>
+        <hr class="section-divider">
         <div class="section-title">▸ Materiales POP Instalados</div>
         <div class="field-group">
           <label class="field-label">Fotos de Materiales (sube foto = material instalado)</label>
@@ -598,6 +636,7 @@ const USERS = {
 let currentUser=null, currentRole=null, currentDay=null;
 let selectedPosId=null, map=null, markers={}, visits={};
 let mAbierto=null, mPermite=null, mCapacitado=null, mDispenser=null, mContrabando=null, mLsQuiebre=null;
+let mYN={cigarrera:null,vvelo:null,vvuse:null,vcig:null}, mCigNec=null;
 let _modalLocked=false;
 let fotosData={}, currentPosId=null;
 
@@ -975,6 +1014,13 @@ function openModal(posId){
     if(ex.lsQuiebre) selLsQuiebre(ex.lsQuiebre,true);
     if(ex.lsMotivo) document.getElementById('m-ls-motivo').value=ex.lsMotivo;
     fillStock(ex.veloStock,ex.vuseStock);
+    if(ex.tieneCigarrera) selYN('cigarrera',ex.tieneCigarrera);
+    if(ex.cigarreraNecesita) selCigNec(ex.cigarreraNecesita);
+    if(ex.vendeVelo) selYN('vvelo',ex.vendeVelo);
+    if(ex.vendeVuse) selYN('vvuse',ex.vendeVuse);
+    if(ex.vendeCigarros) selYN('vcig',ex.vendeCigarros);
+    fillSkuChecks('chk-velo',ex.skusVelo); fillSkuChecks('chk-vuse',ex.skusVuse);
+    if(ex.skusCigarros) document.getElementById('m-skus-cigarros').value=ex.skusCigarros;
     if(ex.dispenser) selDispenser(ex.dispenser,true);
     if(ex.contrabando) selContrabando(ex.contrabando,true);
     if(ex.fotos){ fotosData={...ex.fotos}; Object.keys(fotosData).forEach(k=>refreshFotoSlot(k)); }
@@ -989,7 +1035,12 @@ function openModal(posId){
 
 function resetModal(){
   mAbierto=null;mPermite=null;mCapacitado=null;mDispenser=null;mContrabando=null;mLsQuiebre=null;fotosData={};
-  buildStockTables();
+  mYN={cigarrera:null,vvelo:null,vvuse:null,vcig:null}; mCigNec=null;
+  buildStockTables(); buildSkuChecks();
+  ['cigarrera','vvelo','vvuse','vcig'].forEach(k=>['si','no'].forEach(s=>{ const el=document.getElementById('rb-'+k+'-'+s); if(el) el.className='rbtn'; }));
+  ['ninguno','placa','mant','ambos'].forEach(s=>{ const el=document.getElementById('rb-cignec-'+s); if(el) el.className='rbtn'; });
+  ['seccion-cigarrera','seccion-vvelo','seccion-vvuse','seccion-vcig'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
+  const sc=document.getElementById('m-skus-cigarros'); if(sc) sc.value='';
   ['rb-abierto-si','rb-abierto-no','rb-permite-si','rb-permite-no','rb-cap-si','rb-cap-no','rb-disp-si','rb-disp-no','rb-cont-si','rb-cont-no','rb-lsq-si','rb-lsq-no']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.className='rbtn'; });
   ['m-staff','obs-materiales','obs-dispenser','m-marcas-contrabando','m-ls-motivo','m-competencia']
@@ -1043,6 +1094,22 @@ function selLsQuiebre(v){ if(_modalLocked) return; mLsQuiebre=v; document.getEle
 
 function selAbierto(v){ if(_modalLocked) return; mAbierto=v; document.getElementById('rb-abierto-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-abierto-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-abierto').style.display=v==='Si'?'block':'none'; }
 function selDispenser(v){ if(_modalLocked) return; mDispenser=v; document.getElementById('rb-disp-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-disp-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-dispenser').style.display=v==='Si'?'block':'none'; }
+// ── Cigarrera / ¿Vende Velo, Vuse, Cigarros? ──
+const YN_SECTION={cigarrera:'seccion-cigarrera',vvelo:'seccion-vvelo',vvuse:'seccion-vvuse',vcig:'seccion-vcig'};
+function selYN(k,v){ if(_modalLocked) return; mYN[k]=v;
+  document.getElementById('rb-'+k+'-si').className='rbtn'+(v==='Si'?' sel-si':'');
+  document.getElementById('rb-'+k+'-no').className='rbtn'+(v==='No'?' sel-no':'');
+  document.getElementById(YN_SECTION[k]).style.display=v==='Si'?'block':'none'; }
+const CIGNEC_IDS={'Ninguno':'ninguno','Cambio de placa':'placa','Mantenimiento':'mant','Placa y mantenimiento':'ambos'};
+function selCigNec(v){ if(_modalLocked) return; mCigNec=v;
+  Object.keys(CIGNEC_IDS).forEach(n=>{ document.getElementById('rb-cignec-'+CIGNEC_IDS[n]).className='rbtn'+(n===v?(v==='Ninguno'?' sel-si':' sel-no'):''); }); }
+function buildSkuChecks(){
+  const mk=(skus,grp)=>skus.map(s=>`<label><input type="checkbox" data-sku="${s.id}"> ${s.n}</label>`).join('');
+  const cv=document.getElementById('chk-velo'); if(cv) cv.innerHTML=mk(VELO_SKUS);
+  const cu=document.getElementById('chk-vuse'); if(cu) cu.innerHTML=mk(VUSE_SKUS);
+}
+function collectSkuChecks(id){ return [...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.dataset.sku); }
+function fillSkuChecks(id,list){ (list||[]).forEach(sku=>{ const i=document.querySelector('#'+id+' input[data-sku="'+sku+'"]'); if(i) i.checked=true; }); }
 function selContrabando(v){ if(_modalLocked) return; mContrabando=v; document.getElementById('rb-cont-si').className='rbtn'+(v==='Si'?' sel-si':''); document.getElementById('rb-cont-no').className='rbtn'+(v==='No'?' sel-no':''); document.getElementById('seccion-contrabando').style.display=v==='Si'?'block':'none'; }
 
 function setFoto(key,input){ const file=input.files[0]; if(!file) return; const r=new FileReader(); r.onload=e=>compressImage(e.target.result,800,.72,b64=>{ fotosData[key]=b64; refreshFotoSlot(key); }); r.readAsDataURL(file); }
@@ -1076,11 +1143,22 @@ function closeModal(){ document.getElementById('modal-bg').classList.remove('act
 function handleBgClick(e){ if(e.target===document.getElementById('modal-bg')) closeModal(); }
 
 // ─── SAVE ───
+const gv0=id=>document.getElementById(id)?.value?.trim()||'';
 async function saveVisit(){
   if(_modalLocked){ toast('🔒 Visita ya registrada esta semana'); return; }
   if(!mAbierto){ toast('⚠️ Indica si el local está abierto'); return; }
   if(mAbierto==='Si' && !mPermite){ toast('⚠️ Indica si permitió tomar información'); return; }
   if(!currentPosId){ toast('⚠️ Error: sin POS seleccionado'); return; }
+  if(mAbierto==='Si' && mPermite==='Si'){
+    if(!mYN.cigarrera){ toast('⚠️ Indica si el local tiene Cigarrera'); return; }
+    if(mYN.cigarrera==='Si' && !mCigNec){ toast('⚠️ Indica si la Cigarrera necesita cambio de placa o mantenimiento'); return; }
+    if(!mYN.vvelo){ toast('⚠️ Indica si la tienda vende Velo'); return; }
+    if(mYN.vvelo==='Si' && !collectSkuChecks('chk-velo').length){ toast('⚠️ Marca qué SKUs de Velo vende'); return; }
+    if(!mYN.vvuse){ toast('⚠️ Indica si la tienda vende Vuse'); return; }
+    if(mYN.vvuse==='Si' && !collectSkuChecks('chk-vuse').length){ toast('⚠️ Marca qué SKUs de Vuse vende'); return; }
+    if(!mYN.vcig){ toast('⚠️ Indica si la tienda vende Cigarros'); return; }
+    if(mYN.vcig==='Si' && !gv0('m-skus-cigarros')){ toast('⚠️ Especifica qué SKUs de cigarros vende'); return; }
+  }
   const btn=document.getElementById('btn-save');
   btn.disabled=true; btn.textContent='Guardando...';
   try{
@@ -1108,6 +1186,14 @@ async function saveVisit(){
       lsQuiebre: efectivo?(mLsQuiebre||''):'',
       lsMotivo: (efectivo&&mLsQuiebre==='Si')?gv('m-ls-motivo'):'',
       competencia:gv('m-competencia'),
+      tieneCigarrera: efectivo?(mYN.cigarrera||''):'',
+      cigarreraNecesita: (efectivo&&mYN.cigarrera==='Si')?(mCigNec||''):'',
+      vendeVelo: efectivo?(mYN.vvelo||''):'',
+      skusVelo: (efectivo&&mYN.vvelo==='Si')?collectSkuChecks('chk-velo'):[],
+      vendeVuse: efectivo?(mYN.vvuse||''):'',
+      skusVuse: (efectivo&&mYN.vvuse==='Si')?collectSkuChecks('chk-vuse'):[],
+      vendeCigarros: efectivo?(mYN.vcig||''):'',
+      skusCigarros: (efectivo&&mYN.vcig==='Si')?gv('m-skus-cigarros'):'',
       contrabando:efectivo?mContrabando:'',
       marcasContrabando:gv('m-marcas-contrabando'),
       fotos:{...fotosData}, synced:false

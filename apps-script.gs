@@ -68,7 +68,34 @@ function buildHeaders(){
          'Foto Jalavista Velo','Foto Dispenser','Foto Contrabando','Foto Panorámica');
   // Blob JSON (para que el dashboard reconstruya el registro completo)
   h.push('_DATA_JSON');
+  // Columnas nuevas (siempre AL FINAL, después de _DATA_JSON)
+  NEW_COLS.forEach(c => h.push(c));
   return h;
+}
+
+// Columnas agregadas al final de la tabla (se añaden solas a un Sheet ya existente).
+const NEW_COLS = [
+  '¿Tiene Cigarrera?','Cigarrera: ¿Necesita cambio de placa / mantenimiento?',
+  '¿Vende Velo?','SKUs Velo que vende',
+  '¿Vende Vuse?','SKUs Vuse que vende',
+  '¿Vende Cigarros?','SKUs / marcas de Cigarros que vende'
+];
+
+// Si la hoja "Visitas" ya existe sin las columnas nuevas, las agrega al final.
+function ensureNewCols_(sheet){
+  const lastCol = sheet.getLastColumn();
+  const hdr = sheet.getRange(1,1,1,lastCol).getValues()[0].map(String);
+  const missing = NEW_COLS.filter(c => hdr.indexOf(c) < 0);
+  if(!missing.length) return;
+  const r = sheet.getRange(1, lastCol+1, 1, missing.length);
+  r.setValues([missing]);
+  r.setBackground('#1A2E6A').setFontColor('#ffffff').setFontWeight('bold').setFontSize(9).setWrap(true);
+}
+
+// Índice (0-based) de la columna _DATA_JSON, buscándola por nombre.
+function jsonColIdx_(headerRow){
+  const i = headerRow.map(String).indexOf('_DATA_JSON');
+  return i >= 0 ? i : headerRow.length - 1;
 }
 
 // ═══════════════════════════════ API ═══════════════════════════════
@@ -155,6 +182,8 @@ function ensureVisitas_(ss){
     sheet.setRowHeight(1, 54);
     sheet.setFrozenRows(1);
     sheet.setFrozenColumns(9);
+  } else {
+    ensureNewCols_(sheet);
   }
   return sheet;
 }
@@ -226,7 +255,7 @@ function getAllVisitas(){
   if(!sheet) return [];
   const rows = sheet.getDataRange().getValues();
   if(rows.length < 2) return [];
-  const jsonCol = rows[0].length - 1; // última columna = _DATA_JSON
+  const jsonCol = jsonColIdx_(rows[0]); // columna _DATA_JSON (ya no es la última)
   const out = [];
   for(let i=1;i<rows.length;i++){
     const raw = rows[i][jsonCol];
@@ -311,6 +340,12 @@ function processVisit(d){
            fotoUrls.lucky||'', fotoUrls.velo||'', fotoUrls.dispenser||'',
            fotoUrls.contrabando||'', fotoUrls.panoramica||'');
   row.push(JSON.stringify(d));
+  // Columnas nuevas al final
+  const skuNames = (ids, cat) => (ids||[]).map(id => { const s = cat.find(x=>x.id===id); return s ? s.n : id; }).join(', ');
+  row.push(yn(d.tieneCigarrera), d.cigarreraNecesita||'',
+           yn(d.vendeVelo),    skuNames(d.skusVelo, VELO_SKUS),
+           yn(d.vendeVuse),    skuNames(d.skusVuse, VUSE_SKUS),
+           yn(d.vendeCigarros), d.skusCigarros||'');
 
   sheet.appendRow(row);
   const lastRow = sheet.getLastRow();
