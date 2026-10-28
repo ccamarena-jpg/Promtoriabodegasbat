@@ -1,6 +1,6 @@
 ﻿// ═══════════════════════════════════════════════════════════════
 // BAT Promotoría Bodegas — Google Apps Script Backend  (v2 · 2026)
-// ───────────────────────────────────────────────────────────────
+//───────────────────────────────────────────────────────────────
 // NUEVO SHEET desde 0. Hojas que usa:
 //   • "Padrón Rutas" → maestro de bodegas (lo lee la app al iniciar)
 //   • "Visitas"      → se crea sola; aquí caen las visitas semana a semana
@@ -102,6 +102,8 @@ function jsonColIdx_(headerRow){
 function doGet(e){
   const action = (e && e.parameter && e.parameter.action) || '';
   try{
+    // Asegura las columnas nuevas apenas alguien abre la app (no espera a la 1ª visita).
+    try{ ensureVisitas_(getSS_()); }catch(_){}
     if(action === 'getPOS')  return json({ok:true, data: getPadron(e.parameter.sem || '')});
     if(action === 'getAll')  return json({ok:true, data: getAllVisitas()});
     if(action === 'getWeek') return json({ok:true, data: getWeekVisitas(e.parameter.sem || '')});
@@ -192,6 +194,7 @@ function ensureVisitas_(ss){
 //   y ver en el Log (Ver → Registro) la URL del Sheet y de la carpeta.
 function setup(){
   const ss = getSS_();
+  ensureVisitas_(ss);   // crea la hoja Visitas o le agrega las columnas nuevas al final
   const folder = getFolder_();
   Logger.log('✅ Sheet:   ' + ss.getUrl());
   Logger.log('✅ Carpeta: ' + folder.getUrl());
