@@ -87,6 +87,8 @@ function ensureNewCols_(sheet){
   const hdr = sheet.getRange(1,1,1,lastCol).getValues()[0].map(String);
   const missing = NEW_COLS.filter(c => hdr.indexOf(c) < 0);
   if(!missing.length) return;
+  const need = lastCol + missing.length - sheet.getMaxColumns();
+  if(need > 0) sheet.insertColumnsAfter(sheet.getMaxColumns(), need);   // la cuadrícula puede no tener sitio
   const r = sheet.getRange(1, lastCol+1, 1, missing.length);
   r.setValues([missing]);
   r.setBackground('#1A2E6A').setFontColor('#ffffff').setFontWeight('bold').setFontSize(9).setWrap(true);
@@ -103,7 +105,9 @@ function doGet(e){
   const action = (e && e.parameter && e.parameter.action) || '';
   try{
     // Asegura las columnas nuevas apenas alguien abre la app (no espera a la 1ª visita).
-    try{ ensureVisitas_(getSS_()); }catch(_){}
+    let colsMsg = 'ok';
+    try{ ensureVisitas_(getSS_()); }catch(err){ colsMsg = 'ERROR: ' + String(err); }
+    if(!action) return json({ok:true, msg:'API v2 activa · columnas nuevas v3', columnas: colsMsg, sheet: getSS_().getUrl()});
     if(action === 'getPOS')  return json({ok:true, data: getPadron(e.parameter.sem || '')});
     if(action === 'getAll')  return json({ok:true, data: getAllVisitas()});
     if(action === 'getWeek') return json({ok:true, data: getWeekVisitas(e.parameter.sem || '')});
